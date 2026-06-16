@@ -1,0 +1,286 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #fdf0f5;
+    color: #3a2a35;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* БОКОВОЕ МЕНЮ */
+.sidebar {
+    width: 70px;
+    background-color: #fff0f5;
+    border-right: 2px solid #f4c2d8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 0;
+    gap: 0px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    z-index: 100;
+}
+
+/* когда наводим — выдвигается */
+.sidebar:hover {
+    width: 180px;
+}
+
+.sidebar-logo {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+    width: 100%;
+    text-align: left;
+}
+
+.nav-btn::after {
+    font-size: 0.85rem;
+    color: #c2678a;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+/* подписи к кнопкам */
+.nav-btn[title="Поиск"]::after { content: "Поиск"; }
+.nav-btn[title="Музыка"]::after { content: "Музыка"; }
+.nav-btn[title="Совместное прослушивание"]::after { content: "Вместе"; }
+.nav-btn[title="Настройки"]::after { content: "Настройки"; }
+
+.sidebar:hover .nav-btn::after {
+    opacity: 1;
+}
+
+.nav-btn:hover {
+    background-color: #f4c2d8;
+}
+
+.nav-btn.active {
+    background-color: #f4c2d8;
+}
+
+/* ОСНОВНОЙ КОНТЕНТ */
+.main-wrapper {
+    margin-left: 70px;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    max-width: 1100px;        /* ← максимальная ширина */
+    margin-right: auto; 
+}
+
+/* ЦЕНТРАЛЬНАЯ КОЛОНКА */
+.center-column {
+    flex: 1;
+    display: flex;
+    max-width: 420px;   
+    flex-direction: column;
+    gap: 20px;
+    padding: 25px;
+    overflow-y: auto;
+}
+
+.tracks-section, .playlists-section, .upload-section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(194, 103, 138, 0.1);
+    border: 1px solid #f4c2d8;
+}
+
+h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #c2678a;
+}
+
+.track-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background-color: #fff5f9;
+    border: 1px solid #f4c2d8;
+}
+
+.track-title {
+    font-weight: 600;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.track-artist {
+    color: #b89aaa;
+    font-size: 0.85rem;
+}
+
+.track-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+button {
+    background-color: #e07090;
+    color: #ffffff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+}
+
+button:hover {
+    background-color: #c2678a;
+}
+
+.create-playlist {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.create-playlist input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.playlist-card {
+    background-color: #fff5f9;
+    border: 1px solid #f4c2d8;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+input[type="text"], input[type="file"] {
+    width: 100%;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #f4c2d8;
+    background-color: #fff5f9;
+    color: #3a2a35;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+}
+
+/* ПРАВАЯ КОЛОНКА — ПЛЕЕР */
+.right-column {
+    width: 50%;
+    min-width: 480px;
+    padding: 25px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+.player-card {
+    width: 100%;
+    background-color: #ffffff;
+    border: 2px solid #f4c2d8;
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 4px 20px rgba(194, 103, 138, 0.15);
+}
+
+#cover-image {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 4px 15px rgba(194, 103, 138, 0.2);
+}
+
+.player-info {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#current-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #3a2a35;
+}
+
+#current-artist {
+    color: #b89aaa;
+    font-size: 0.9rem;
+}
+
+audio {
+    width: 100%;
+    accent-color: #e07090;
+}
+
+.like-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.like-btn, .dislike-btn {
+    background: none;
+    border: 2px solid #f4c2d8;
+    font-size: 1.5rem;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.like-btn:hover {
+    background-color: #fff0f5;
+}
+
+.dislike-btn:hover {
+    background-color: #fff0f5;
+}
