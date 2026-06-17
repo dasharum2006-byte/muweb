@@ -9,24 +9,24 @@ router.get('/', (req, res) => {
 })
 
 //create playlists 
-router.post('/', (request, response) => {
+router.post('/', (req, res) => {
     //достаем из тела запроса поле name
-    const { name } = request.body
+    const { name } = req.body
 //название должно совпадать с ключем! типо во фронтенде name значит в бэкенде тоже name
     if (!name) {
-        return response.status(400).json({ error: 'Укажите название плейлиста'})
+        return res.status(400).json({ error: 'Укажите название плейлиста'})
     }
     //(name) - это значит так пишется колонка, тип Values(?) - вставляем значение
      db.prepare('INSERT INTO playlists (name) VALUES (?)').run(name)
-     response.json({message: 'Плейлист создан'})
+     res.json({message: 'Плейлист создан'})
 })
 
 //add track in playlist 
 
-router.post('/:id/tracks', (request, response) => {
-    const { track_id } = request.body
+router.post('/:id/tracks', (req, res) => {
+    const { track_id } = req.body
     //params - так как мы данные берем из адресной строки
-    const playlist_id = request.params.id
+    const playlist_id = req.params.id
     //две переменные из за того что нам надо знать в какой именно плейлист какой именно трек добавить
     db.prepare('INSERT INTO playlist_tracks (playlist_id,track_id) VALUES (?,?)').run(playlist_id,track_id)
     res.json({ mrssage: 'Трек добавлен в плейлист'})

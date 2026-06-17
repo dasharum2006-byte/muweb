@@ -80,6 +80,7 @@ body {
 /* подписи к кнопкам */
 .nav-btn[title="Поиск"]::after { content: "Поиск"; }
 .nav-btn[title="Музыка"]::after { content: "Музыка"; }
+.nav-btn[title="Плейлисты"]::after { content: "Плейлисты"; }
 .nav-btn[title="Совместное прослушивание"]::after { content: "Вместе"; }
 .nav-btn[title="Настройки"]::after { content: "Настройки"; }
 
@@ -157,6 +158,18 @@ h2 {
 .track-buttons {
     display: flex;
     gap: 8px;
+}
+/*фиксированный размер книопок*/
+.track-buttons button:first-child {
+    width: 90px;
+    text-align: center;
+    padding: 8px 0;
+}
+
+.track-buttons button:last-child {
+    width: 45px;
+    text-align: center;
+    padding: 8px 0;
 }
 
 button {
@@ -274,13 +287,24 @@ audio {
     padding: 10px 20px;
     border-radius: 50px;
     cursor: pointer;
+    filter: grayscale(100%);  /* ← делает эмодзи серым */
     transition: background 0.2s;
 }
-
+.like-btn.liked {
+    filter: grayscale(0%);  /* ← после нажатия становится красным */
+}
 .like-btn:hover {
     background-color: #fff0f5;
 }
 
 .dislike-btn:hover {
     background-color: #fff0f5;
+}
+.page {
+    display: none;
+    width: 100%;
+}
+
+.page.active-page {
+    display: flex;
 }

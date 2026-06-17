@@ -17,7 +17,8 @@ db.exec(`
         artist TEXT NOT null,
         filename TEXT NOT null,
         likes INTEGER DEFAULT 0,
-        dislikes INTEGER DEFAULT 0
+        dislikes INTEGER DEFAULT 0,
+        cover TEXT DEFAULT NULL
     )
 `)
 //создаем таблицу плейлистов

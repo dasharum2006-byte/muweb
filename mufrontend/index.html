@@ -1,74 +1,112 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Моя Музыка</title>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Моя Музыка</title>
+<link rel="icon" type="image/x-icon" href="images/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- БОКОВОЕ МЕНЮ -->
-    <aside class="sidebar">
+<!-- БОКОВОЕ МЕНЮ -->
+<aside class="sidebar">
     <img src="images/penguin-logo.png" alt="логотип" class="sidebar-logo">
     <nav class="sidebar-nav">
-        <button class="nav-btn active" title="Поиск">🔍</button>
-        <button class="nav-btn" title="Музыка">🎵</button>
-        <button class="nav-btn" title="Совместное прослушивание">🎧</button>
-        <button class="nav-btn" title="Настройки">⚙️</button>
+        <button class="nav-btn" title="Поиск" onclick="showPage('search',this)">🔍</button>
+        <button class="nav-btn active" title="Музыка" onclick="showPage('music', this)">🎵</button>
+        <button class="nav-btn" title="Плейлисты" onclick="showPage('playlists', this)">📁</button>
+        <button class="nav-btn" title="Совместное прослушивание" onclick="showPage('together', this)">🎧</button>
+        <button class="nav-btn" title="Настройки" onclick="showPage('settings', this)">⚙️</button>
+
     </nav>
 </aside>
+<!--У тебя в sidebar когда меню выдвигается подписи берутся из ::after в CSS через title. -->
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<div class="main-wrapper">
 
-    <!-- ОСНОВНОЙ КОНТЕНТ -->
-    <div class="main-wrapper">
-
-        <!-- ЦЕНТР — треки и плейлисты -->
+    <!-- ГЛАВНАЯ СТРАНИЦА (по умолчанию) -->
+    <div id="page-home" class="page active-page">
         <div class="center-column">
+            <h2>Добро пожаловать! 🐧</h2>
+            <p>Нажми 🎵 чтобы слушать музыку</p>
+        </div>
+    </div>
 
+    <!-- СТРАНИЦА МУЗЫКИ -->
+    <div id="page-music" class="page">
+        <div class="center-column">
             <section class="tracks-section">
                 <h2>Все треки</h2>
                 <div id="tracks-list"></div>
             </section>
-
-            <section class="playlists-section">
-                <h2>Плейлисты</h2>
-                <div class="create-playlist">
-                    <input type="text" id="playlist-name" placeholder="Название плейлиста">
-                    <button onclick="createPlaylist()">Создать</button>
-                </div>
-                <div id="playlists-list"></div>
-            </section>
-
             <section class="upload-section">
                 <h2>Загрузить трек</h2>
                 <input type="text" id="track-title" placeholder="Название трека">
                 <input type="text" id="track-artist" placeholder="Артист">
+                <!--добавили обложку для трека!!!!!!!!!!!!-->
+                <input type="text" id="track-cover" placeholder="Имя файла обложки (например: rtut.jpg)">
                 <input type="file" id="track-file" accept=".mp3,.wav,.ogg">
                 <button onclick="uploadTrack()">Загрузить</button>
             </section>
-
         </div>
-
-        <!-- ПРАВАЯ КОЛОНКА — плеер -->
-        <div class="right-column">
-            <div class="player-card">
-                <img id="cover-image" src="images/penguin-logo.png" alt="Обложка">
-                <div class="player-info">
-                    <span id="current-title">Выбери трек</span>
-                    <span id="current-artist">—</span>
-                </div>
-                <audio id="audio-player" controls></audio>
-                <div class="like-buttons">
-                    <button class="dislike-btn" onclick="dislikeTrack()">👎</button>
-                    <button class="like-btn" onclick="likeTrack()">❤️</button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <script src="app.js"></script>
+    <!-- СТРАНИЦА ПОИСКА -->
+    <div id="page-search" class="page">
+        <div class="center-column">
+            <h2>Поиск 🔍</h2>
+            <p>Скоро будет!</p>
+        </div>
+    </div>
+   <!-- СТРАНИЦА ПЛЕЙЛИСТОВ -->
+<div id="page-playlists" class="page">
+    <div class="center-column">
+        <section class="playlists-section">
+            <h2>Мои плейлисты 📁</h2>
+            <div class="create-playlist">
+                <input type="text" id="playlist-name" placeholder="Название плейлиста">
+                <button onclick="createPlaylist()">Создать</button>
+            </div>
+            <div id="playlists-list"></div>
+        </section>
+    </div>
+</div>
+    <!-- СТРАНИЦА ВМЕСТЕ -->
+    <div id="page-together" class="page">
+        <div class="center-column">
+            <h2>Слушать вместе 🎧</h2>
+            <p>Скоро будет!</p>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА НАСТРОЕК -->
+    <div id="page-settings" class="page">
+        <div class="center-column">
+            <h2>Настройки ⚙️</h2>
+            <p>Скоро будет!</p>
+        </div>
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА — плеер (всегда виден) -->
+    <div class="right-column">
+        <div class="player-card">
+            <img id="cover-image" src="images/penguin-logo.png" alt="Обложка">
+            <div class="player-info">
+                <span id="current-title">Выбери трек</span>
+                <span id="current-artist">—</span>
+            </div>
+            <audio id="audio-player" controls></audio>
+            <div class="like-buttons">
+                <button class="dislike-btn" onclick="dislikeTrack()">👎</button>
+                <button class="like-btn" onclick="likeTrack(currentTrackId, this)">❤️</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>

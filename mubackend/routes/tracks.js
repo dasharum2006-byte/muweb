@@ -59,7 +59,7 @@ const storage = multer.diskStorage({
 const upload = multer({storage: storage})
 //это типо магазин наших песен
 //get all tracks(сервер идет в бд и запрашивает все треки и сервер потом возвращает json со списком песен)
-router.get('/', (req, response) => {
+router.get('/', (req, res) => {
     // в базе данных для all
     //.all() — вернуть все строки (массив)
     //.get() — вернуть только первую строку (одну запись)
@@ -67,13 +67,13 @@ router.get('/', (req, response) => {
     //
     const tracks = db.prepare('SELECT * FROM tracks').all()
     //получается пользователю отправиться json
-    response.json(tracks)
+    res.json(tracks)
 } )
 
 //download track.Post - - отправить данные(создаит или записать)
- router.post('/upload', upload.single('audio'), (require, res)=> {
-    //мы достаем данные из запроса
-    const {title, artist} = require.body
+ router.post('/upload', upload.single('audio'), (req, res)=> {
+    //мы достаем данные из запроса - добавили cover
+    const {title, artist, cover} = req.body
     //мы используем деструктуризацию а по длинному пути чтобы достать эти данные нам надо прописывать так 
     //const title = req.body.title   // достаю подарок с ярлыком "title"
     //const artist = req.body.artist // достаю подарок с ярлыком "artist"
@@ -81,9 +81,9 @@ router.get('/', (req, response) => {
     if (!title || !artist) {
         return res.status(400).json({ error: 'Укажите название и артиста' })
     }
-//insert into tracks - add new row in table tracks
+//insert into tracks - add new row in table tracks !!!!!!!!!!!!
     db.prepare(
-        'INSERT INTO TRACKS (title, atrist, filename) VALUES (?,?,?)').run(title, artist, require.file.filename)
+        'INSERT INTO TRACKS (title, artist, filename, cover) VALUES (?,?,?,?)').run(title, artist, req.file.filename, cover || null)
 
         res.json({message: 'Трек загружен' })
  })

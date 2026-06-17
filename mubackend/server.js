@@ -25,6 +25,8 @@ muweb.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 //get - когда кто то заходит на главный адрес 3000, req - запрос что хочет посетитель,res - ответ что мы даем посетителю, res.json - отправляем ответ в формате json
 //тестовый роут - взлетно посадочная полоса - router.get('/')
 //add after creating track.js
+//вставляем чтобы у нас фронтенд подключился
+muweb.use(express.static(path.join(__dirname, '../mufrontend')))
 muweb.use('/tracks', tracksRouter)
 muweb.use('/playlists', playlistsRouter)
 muweb.get('/', (req, res) => {
