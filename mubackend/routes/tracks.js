@@ -89,17 +89,15 @@ router.get('/', (req, res) => {
  })
 
  // ставим лайк
- router.post('/:id/like', (req, res) => {
-    //req.params — это просто способ достать ID песни из адресной строки.
-    //const { id } = req.params = "Достань число из адреса, чтобы я знал, какую песню менять"
-    const id = req.params.id
-    //типо обновляем лайки в базе данных.run - выполняет запрос и подставляет id вместо ?
+router.post('/:id/like', (req, res) => {
+    const id = parseInt(req.params.id)  // ← преобразуем в число
     db.prepare('UPDATE tracks SET likes = likes + 1 WHERE id = ?').run(id)
-    //обновленная информация о песне,из за того что нам нужна только одна песня чтобы обновилась то get а не all
-    const track = bd.prepare('SELECT * FROM tracks WHERE id = ?').get(id)
-    //отправляем ответ пользователю
-    res.json({ likes: track.lines})
- })
+    const track = db.prepare('SELECT * FROM tracks WHERE id = ?').get(id)
+    if (!track) {
+        return res.status(404).json({ error: 'Трек не найден' })
+    }
+    res.json({ likes: track.likes })
+})
 
  //ставим dislike - потом добавить функцию что если ты ставишь дизлайк то потом этот трэк переходит в 
  //плейлист дизлайки и ты его больше не встретишь

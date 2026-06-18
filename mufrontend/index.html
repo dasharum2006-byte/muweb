@@ -19,17 +19,17 @@
         <button class="nav-btn" title="Плейлисты" onclick="showPage('playlists', this)">📁</button>
         <button class="nav-btn" title="Совместное прослушивание" onclick="showPage('together', this)">🎧</button>
         <button class="nav-btn" title="Настройки" onclick="showPage('settings', this)">⚙️</button>
-
+        <button class="nav-btn logout-btn" onclick="logout()" title="Выйти">🚪</button>
     </nav>
 </aside>
-<!--У тебя в sidebar когда меню выдвигается подписи берутся из ::after в CSS через title. -->
+<!--  в sidebar когда меню выдвигается подписи берутся из ::after в CSS через title. -->
 <!-- ОСНОВНОЙ КОНТЕНТ -->
 <div class="main-wrapper">
 
     <!-- ГЛАВНАЯ СТРАНИЦА (по умолчанию) -->
     <div id="page-home" class="page active-page">
         <div class="center-column">
-            <h2>Добро пожаловать! 🐧</h2>
+            <h2>Добро пожаловать 🐧</h2>
             <p>Нажми 🎵 чтобы слушать музыку</p>
         </div>
     </div>
@@ -77,17 +77,51 @@
     <div id="page-together" class="page">
         <div class="center-column">
             <h2>Слушать вместе 🎧</h2>
-            <p>Скоро будет!</p>
+            <p>Скоро будетs</p>
         </div>
     </div>
 
-    <!-- СТРАНИЦА НАСТРОЕК -->
-    <div id="page-settings" class="page">
-        <div class="center-column">
-            <h2>Настройки ⚙️</h2>
-            <p>Скоро будет!</p>
+<!-- СТРАНИЦА НАСТРОЕК -->
+<div id="page-settings" class="page">
+    <div class="settings-wrapper">
+        <!-- заголовок и аватарка -->
+        <div class="settings-header">
+            <h2>Настройки</h2>
+            <div class="avatar-block">
+                <div class="avatar-preview" id="avatar-preview">
+                    <span>👤</span>
+                </div>
+                <label class="avatar-label" for="avatar-input">Добавить аватар</label>
+                <input type="file" id="avatar-input" accept="image/*" onchange="uploadAvatar(this)">
+            </div>
         </div>
+
+        <!-- темы -->
+        <div class="themes-block">
+            <h3>Темы</h3>
+            <div class="themes-list">
+                <div class="theme-card" onclick="setTheme('pink')">
+                    <div class="theme-preview pink-theme"></div>
+                    <span>Розовая</span>
+                </div>
+                <div class="theme-card" onclick="setTheme('purple')">
+                    <div class="theme-preview purple-theme"></div>
+                    <span>Сиреневая</span>
+                </div>
+                <div class="theme-card" onclick="setTheme('blue')">
+                    <div class="theme-preview blue-theme"></div>
+                    <span>Голубая</span>
+                </div>
+                <div class="theme-card" onclick="setTheme('dark')">
+                    <div class="theme-preview dark-theme"></div>
+                    <span>Тёмная</span>
+                </div>
+            </div>
+        </div>
+
     </div>
+</div>
+ 
 
     <!-- ПРАВАЯ КОЛОНКА — плеер (всегда виден) -->
     <div class="right-column">

@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 // запоминаем какой трек сейчас играет
 let currentTrackId = null
+//защита
+// проверяем есть ли токен - если нет то на страницу входа
+const token = localStorage.getItem('token')
+if (!token) {
+    window.location.href = 'login.html'
+}
+
+// достаем имя пользователя
+const userName = localStorage.getItem('name')
 ////
 //addEventListener — это часть Web API (Application Programming Interface).
 //Web API — это набор готовых функций, которые браузер даёт разработчикам:
@@ -37,6 +46,10 @@ function loadTracks() {
             //мы получаем ответ от сервера,который мы превратили в массив
             //Для КАЖДОГО трека из списка делаем одно и то же действие
             //!!!!Добавили карточку трека 
+            //Добавила + к треку чобы можно было добавить в плейлист
+            //<div class="playlist-menu" id="playlist-menu-${currentsong.id}" style="display:none"></div> ----
+            //Это контейнер для выпадающего меню с плейлистами.Это контейнер для выпадающего меню с плейлистами.
+//Когда нажимаешь кнопку + — функция togglePlaylistMenu ищет этот контейнер по id и показывает внутри него список плейлистов.
             tracks.forEach(currentsong => {
                 //Для каждой песни создаём карточку в HTML и кидаем её в коробку. += значит "добавь к тому что уже есть", а не замени. ${} — это способ вставить переменную внутрь текста.
                 list.innerHTML += `
@@ -48,7 +61,9 @@ function loadTracks() {
                         <div class="track-buttons">
                             <button onclick="playTrack('${currentsong.filename}', '${currentsong.title}', '${currentsong.artist}', ${currentsong.id}, '${currentsong.cover}')">▶ Играть</button>
                             <button onclick="likeTrack(${currentsong.id}, this)">❤ ${currentsong.likes}</button>
+                                  <button class="add-to-playlist-btn" onclick="togglePlaylistMenu(${currentsong.id}, this)">+</button>
                         </div>
+                               <div class="playlist-menu" id="playlist-menu-${currentsong.id}" style="display:none"></div>
                     </div>`
             })
             //onclick — это значит "когда кликнули на эту кнопку — вызови функцию".
@@ -113,7 +128,7 @@ function uploadTrack() {
     const file = document.getElementById('track-file').files[0]
 
     if (!title || !artist || !file) {
-        alert('Заполни все поля!')
+        alert('Заполните все поля')
         return
     }
 //добавила cover 
@@ -129,7 +144,7 @@ function uploadTrack() {
     })
         .then(res => res.json())
         .then(data => {
-            alert('Трек загружен!')
+            alert('Трек загружен')
             loadTracks()
         })
 }
@@ -145,14 +160,14 @@ function loadPlaylists() {
                 list.innerHTML = '<p>Плейлистов пока нет</p>'
                 return
             }
-
+            //изменила
             playlists.forEach(playlist => {
                 list.innerHTML += `
-                    <div class="playlist-card">
-                        <span>${playlist.name}</span>
+                    <div class="playlist-card" onclick="openPlaylist(${playlist.id}, '${playlist.name}')">
+                        📁 ${playlist.name}
                     </div>
-                `
-            })
+                    `
+                })
         })
 }
 
@@ -160,7 +175,7 @@ function createPlaylist() {
     const name = document.getElementById('playlist-name').value
 
     if (!name) {
-        alert('Введи название плейлиста!')
+        alert('Введи название плейлиста')
         return
     }
 
@@ -186,10 +201,118 @@ function showPage(name, btn) {
     // ставим active на нажатую кнопку
     if (btn) btn.classList.add('active')
     // загружаем данные для нужной страницы
+    // прячем плеер на странице настроек
+    const rightColumn = document.querySelector('.right-column')
+    if (name === 'settings') {
+        rightColumn.style.display = 'none'
+    } else {
+        rightColumn.style.display = 'flex'
+    }
     if (name === 'music') {
         loadTracks()
     }
     if (name === 'playlists') {
         loadPlaylists()
     }
+}
+
+//функция выхода 
+function logout() {
+    localStorage.removeItem('token')
+    localStorage.removeItem('name')
+    window.location.href = 'login.html'
+}
+
+//Добавила новые функции две для трека чтобы можно было загружать их в плейлист
+function togglePlaylistMenu(trackId, btn) {
+    const menu = document.getElementById('playlist-menu-' + trackId)
+    
+    // если меню уже открыто - закрываем
+    if (menu.style.display === 'block') {
+        menu.style.display = 'none'
+        return
+    }
+
+    // загружаем плейлисты и показываем меню
+    fetch('http://localhost:3000/playlists')
+        .then(res => res.json())
+        .then(playlists => {
+            menu.innerHTML = ''
+//добавили время
+            if (playlists.length === 0) {
+                menu.innerHTML = '<p>Сначала создай плейлист</p>'
+                menu.style.display = 'block'
+            // через 2 секунды прячем
+                setTimeout(() => {
+                    menu.style.display = 'none'
+                }, 2000)
+            }else {
+                playlists.forEach(playlist => {
+                    menu.innerHTML += `
+                        <div class="playlist-menu-item" onclick="addToPlaylist(${trackId}, ${playlist.id}, '${playlist.name}')">
+                            📁 ${playlist.name}
+                        </div>
+                    `
+                })
+            }
+            menu.style.display = 'block'
+        })
+}
+
+function addToPlaylist(trackId, playlistId, playlistName) {
+    fetch(`http://localhost:3000/playlists/${playlistId}/tracks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ track_id: trackId })
+    })
+        //изменила - добавила проверку на то что трек уже есть в плейлисте
+        .then(data => {
+            if (data.error) {
+                alert(data.error)  // ← покажет "Трек уже в плейлисте!"
+            } else {
+                alert(`Добавлено в "${playlistName}"!`)
+            }
+            document.getElementById('playlist-menu-' + trackId).style.display = 'none'
+        })
+}
+//функция открытия плейлиста
+function openPlaylist(id, name) {
+    fetch(`http://localhost:3000/playlists/${id}/tracks`)
+        .then(res => res.json())
+        .then(tracks => {
+            // ищем контейнер для треков плейлиста или создаём
+            let container = document.getElementById('open-playlist-' + id)
+            
+            if (container) {
+                // если уже открыт - закрываем
+                container.remove()
+                return
+            }
+
+            container = document.createElement('div')
+            container.id = 'open-playlist-' + id
+            container.className = 'open-playlist'
+            container.innerHTML = `<h3>📁 ${name}</h3>`
+
+            if (tracks.length === 0) {
+                container.innerHTML += '<p>Плейлист пустой</p>'
+            } else {
+                tracks.forEach(track => {
+                    container.innerHTML += `
+                        <div class="track-card">
+                            <div class="track-info">
+                                <span class="track-title">${track.title}</span>
+                                <span class="track-artist">${track.artist}</span>
+                            </div>
+                            <div class="track-buttons">
+                                <button onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶ Играть</button>
+                            </div>
+                        </div>
+                    `
+                })
+            }
+
+            // добавляем после списка плейлистов
+            document.getElementById('playlists-list').after(container)
+        })
 }

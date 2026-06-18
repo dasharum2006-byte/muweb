@@ -27,13 +27,21 @@ router.post('/:id/tracks', (req, res) => {
     const { track_id } = req.body
     //params - так как мы данные берем из адресной строки
     const playlist_id = req.params.id
+    // проверяем что трек ещё не в плейлисте
+    const existing = db.prepare(
+        'SELECT * FROM playlist_tracks WHERE playlist_id = ? AND track_id = ?'
+    ).get(playlist_id, track_id)
+
+    if (existing) {
+        return res.status(400).json({ error: 'Трек уже в плейлисте' })
+    }
     //две переменные из за того что нам надо знать в какой именно плейлист какой именно трек добавить
     db.prepare('INSERT INTO playlist_tracks (playlist_id,track_id) VALUES (?,?)').run(playlist_id,track_id)
-    res.json({ mrssage: 'Трек добавлен в плейлист'})
+    res.json({ message: 'Трек добавлен в плейлист'})
 })
 
 //get all tracks from playlist
-router.get('/', (req, res) => {
+router.get('/:id/tracks', (req, res) => {
     //выбери данные,дай мне все колонки из таблицы с треками
     //склеиваем две таблицы - соединим с таблицей playlist_tracks ON(по какому правилу будем соединять
     //где id песни из таблицы tracks равен track_id из таблицы playlist_tracks
@@ -41,7 +49,8 @@ router.get('/', (req, res) => {
     const tracks = db.prepare(`
         SELECT tracks. * FROM tracks
         JOIN playlist_tracks ON tracks.id = playlist_tracks.track_id
-        WHERE playlist_tracks.playlist_id = ?`)
+        WHERE playlist_tracks.playlist_id = ?`).all(req.params.id)
+        res.json(tracks)
 })
 
 module.exports = router

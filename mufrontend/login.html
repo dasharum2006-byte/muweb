@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — Моя Музыка</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+
+        <!-- логотип -->
+        <div class="auth-logo">
+            <img src="images/penguin-logo.png" alt="логотип">
+            <h1>Моя Музыка</h1>
+        </div>
+
+        <!-- переключатель вкладок -->
+        <div class="auth-tabs">
+            <button class="tab-btn active" onclick="showTab('login')">Войти</button>
+            <button class="tab-btn" onclick="showTab('register')">Регистрация</button>
+        </div>
+
+        <!-- форма входа -->
+        <div id="tab-login" class="auth-form active-tab">
+            <input type="text" id="login-username" placeholder="Логин">
+            <input type="password" id="login-password" placeholder="Пароль">
+            <button class="auth-btn" onclick="login()">Войти</button>
+            <p id="login-error" class="error-msg"></p>
+        </div>
+
+        <!-- форма регистрации -->
+        <div id="tab-register" class="auth-form">
+            <input type="text" id="reg-login" placeholder="Логин">
+            <input type="text" id="reg-name" placeholder="Имя">
+            <input type="password" id="reg-password" placeholder="Пароль">
+            <button class="auth-btn" onclick="register()">Зарегистрироваться</button>
+            <p id="reg-error" class="error-msg"></p>
+        </div>
+
+    </div>
+
+    <script src="auth.js"></script>
+</body>
+</html>

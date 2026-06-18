@@ -2,10 +2,12 @@
 const express = require('express')
 //разрешает другим сайтам обращаться к нашему серваку или браузер нас заблочит
 const cors = require('cors')
+require('dotenv').config()
 //помогает правильно находить папки на компе
 const path = require('path')
 //добавили после создания database.js сюда чтобы мы получили базу данных
 const db = require('./db/database')
+const authRouter = require('./routes/auth')
 //после того как мы написали track.js
 const tracksRouter = require('./routes/tracks')
 //for playlists.js
@@ -18,6 +20,7 @@ const muweb = express()
 muweb.use(cors())
 //учит сервер понимать json формат
 muweb.use(express.json())
+muweb.use('/auth', authRouter)
 
 //отдаем музыкальные файлы по адресу /uploads/имя_файла.mp3
 //сначала идет адрес по которому будут доступны файлы,команда - отдать файл какой он есть,где физически лежат наши файлы на компе

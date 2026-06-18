@@ -8,6 +8,17 @@ const path = require('path')
 //'music.db'	Имя файла, в котором будет храниться база данных
 //path.join(...)	Склеивает путь: текущая_папка + music.db
 const db = new DataBase(path.join(__dirname, 'music.db'))
+
+//table for user - login and password
+//по приколу знать когда пользователь зарегался
+db.exec(`
+    CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    login TEXT NOT null,
+    name TEXT NOT null,
+    password TEXT NOT null,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`)
 //таблица треков
 db.exec(`
     CREATE TABLE IF NOT EXISTS tracks 
