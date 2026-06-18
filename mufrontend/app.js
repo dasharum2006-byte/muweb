@@ -6,13 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHomePage() //добавили после функций топ 5 
 })
 // запоминаем какой трек сейчас играет
-let currentTrackId = null
-//добавляем переменную для обложки
-let currentCover = null
-//для поиска
-let tracksList = []
-//защита
-// проверяем есть ли токен - если нет то на страницу входа
+let currentTrackId = null//добавляем переменную для обложки
+let currentCover = null//для поиска
+let tracksList = []//защита// проверяем есть ли токен - если нет то на страницу входа
 const token = localStorage.getItem('token')
 if (!token) {
     window.location.href = 'login.html'
@@ -52,7 +48,6 @@ function loadTracks() {
                 //Робот сказал "песен нет", вывел сообщение и ушел. Он не будет пытаться показывать песни, которых нет.
                 return
             }
-    
             //мы получаем ответ от сервера,который мы превратили в массив
             //Для КАЖДОГО трека из списка делаем одно и то же действие
             //!!!!Добавили карточку трека 
@@ -88,46 +83,90 @@ function loadTracks() {
         //Вот для этого и нужен this — он говорит функции "вот та самая кнопка которую только что нажали, обнови именно её":
 }
 
-//воспроизвести трек
+
+// Воспроизвести трек (Обновленная версия)
 function playTrack(filename, title, artist, id, cover) {
+    const player = document.getElementById('audio-player')
+    // Если кликнули на тот же самый трек, который уже играет или на паузе
+    if (currentTrackId === id) {
+        if (player.paused) {
+            player.play(); // Если стоял на паузе — запускаем
+        } else {
+            player.pause(); // Если играл — ставим на паузу
+        }
+        return; // Выходим из функции, чтобы не загружать файл заново
+    }
     //обновляем индекс для кастомноо плеера
     currentTrackIndex = tracksList.findIndex(t => t.id === id)
     //получаем доступ к элементам на странице
-    //	Объяснение для робота
+    //Объяснение для робота
     //const player	Робот создает ящик с надписью "player" и кладет туда то, что найдет.
     //document.getElementById	Робот идет в HTML-код страницы и ищет элемент с ID равным audio-player.
     //'audio-player'	Это уникальное имя тега <audio> на странице
     currentTrackId = id //запоминаем id трека
     //добавляем сохранение обложки
     currentCover = cover
-    const player = document.getElementById('audio-player')
     //находим место для названия песни
     const currentTitle = document.getElementById('current-title')
     const currentArtist = document.getElementById('current-artist')
-    //добавили обложку !!!!!!!!!!!!
+    //добавили обложку
     const coverImage = document.getElementById('cover-image')
-
-    //!!!!!!!!!!!
     if (cover && cover !== 'null') {
     // обложка есть — показываем её
-    coverImage.src = `http://localhost:3000/uploads/covers/${cover}`
-} else {
+        coverImage.src = `http://localhost:3000/uploads/covers/${cover}`
+    } else {
     // обложки нет — показываем пингвина
-    coverImage.src = 'images/penguin-logo.png'
-}
-        //!!!!!!!!!1
-    //загружаем нужный файл в плеер
-    player.src = `http://localhost:3000/uploads/${filename}`
-    //меняем текст на текущую песню
-    //Это значит: "Возьми исполнителя из посылки (artist) и напиши его на табличке (currentArtist.textContent)"
-    currentTitle.textContent = title
-    currentArtist.textContent = artist
-    player.play()
+        coverImage.src = 'images/penguin-logo.png'
+    }
+        //загружаем нужный файл в плеер
+        player.src = `http://localhost:3000/uploads/${filename}`
+        //меняем текст на текущую песню
+        //Это значит: "Возьми исполнителя из посылки (artist) и напиши его на табличке (currentArtist.textContent)"
+        currentTitle.textContent = title
+        currentArtist.textContent = artist
+        player.play()
+} 
+
+//Обновление кнопок плей и пауза
+// Ждем, пока робот загрузит страницу, находит плеер и следит за ним
+document.addEventListener('DOMContentLoaded', () => {
+    const player = document.getElementById('audio-player')
+    
+    if (player) {
+        // Если плеер запел или встал на паузу — запускаем пересчет кнопок
+        player.addEventListener('play', updatePlayButtons)
+        player.addEventListener('pause', updatePlayButtons)
+        player.addEventListener('ended', () => {
+            currentTrackId = null // Трек закончился — сбрасываем ID
+            updatePlayButtons()
+        });
+    }
+});
+
+// Функция, которая пробегается по сайту и меняет  играть на стоп у нужной песни
+function updatePlayButtons() {
+    const player = document.getElementById('audio-player')
+    // Находим абсолютно все круглые кнопочки на странице
+    const allPlayButtons = document.querySelectorAll('.play-icon-btn')
+
+    allPlayButtons.forEach(btn => {
+        // Робот смотрит, какой ID зашит в атрибут onclick этой кнопки
+        const match = btn.getAttribute('onclick').match(/,\s*(\d+)\s*,/) || btn.getAttribute('onclick').match(/,\s*(\d+)\s*\)/)
+        const btnTrackId = match ? parseInt(match[1]) : null
+
+        // Если ID кнопки совпадает с играющим треком И плеер сейчас РАБОТАЕТ
+        if (btnTrackId === currentTrackId && !player.paused) {
+            btn.innerHTML = '❚❚'// Рисуем паузу
+            btn.classList.add('is-playing')
+        } else {
+            btn.innerHTML = '▶'// Возвращаем стрелочку
+            btn.classList.remove('is-playing')
+        }
+    });
 }
 
 function likeTrack(id, button) {
     if (!id) return
-
     const token = localStorage.getItem('token')
     fetch(`http://localhost:3000/tracks/${id}/like`, {
         method: 'POST',
@@ -139,6 +178,14 @@ function likeTrack(id, button) {
             if (button) {
                 button.classList.add('liked')
             }
+            //ищем этот трек во всех списках и ставим ему сердечко
+            const trackRows = document.querySelectorAll(`[data-track-id="${id}"]`)
+            trackRows.forEach(row => {
+                const heartSpan = row.querySelector('.track-heart')
+                if (heartSpan) {
+                    heartSpan.innerHTML = '❤️' // Рисуем сердечко
+                }
+            })
         })
 }
 
@@ -188,7 +235,7 @@ function loadPlaylists() {
             playlists.forEach(playlist => {
                 list.innerHTML += `
                     <div class="playlist-card" onclick="openPlaylist(${playlist.id}, '${playlist.name}')">
-                        📁 ${playlist.name}
+                        ${playlist.name}
                     </div>
                     `
                 })
@@ -197,12 +244,10 @@ function loadPlaylists() {
 
 function createPlaylist() {
     const name = document.getElementById('playlist-name').value
-
     if (!name) {
         alert('Введи название плейлиста')
         return
     }
-
     fetch('http://localhost:3000/playlists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -295,7 +340,7 @@ function togglePlaylistMenu(trackId, btn) {
                 playlists.forEach(playlist => {
                     menu.innerHTML += `
                         <div class="playlist-menu-item" onclick="addToPlaylist(${trackId}, ${playlist.id}, '${playlist.name}')">
-                            📁 ${playlist.name}
+                             ${playlist.name}
                         </div>
                     `
                 })
@@ -346,12 +391,15 @@ function openPlaylist(id, name) {
             } else {
                 tracks.forEach(track => {
                     container.innerHTML += `
-                        <div class="playlist-track-row">
+                        <div class="playlist-track-row" data-track-id="${track.id}">
                             <div class="track-info-block">
                                 <span class="track-title">${track.title}</span>
                                 <span class="track-artist">${track.artist}</span>
                             </div>
-                            <button class="play-icon-btn" onclick="event.stopPropagation(); playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="track-heart">${track.is_liked ? '❤️' : ''}</span> 
+                                <button class="play-icon-btn" onclick="event.stopPropagation(); playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+                            </div>
                         </div>
                     `;
                 });
@@ -441,7 +489,6 @@ function uploadAvatar(input) {
 // применяем тему и аватарку при загрузке
 const savedTheme = localStorage.getItem('theme')
 if (savedTheme) applyTheme(savedTheme)
-
 const savedAvatar = localStorage.getItem('avatar')
 if (savedAvatar) {
     const preview = document.getElementById('avatar-preview')
@@ -488,7 +535,6 @@ function loadProfile() {
     const nameEl = document.getElementById('profile-name')
     if (loginEl) loginEl.textContent = '👤 ' + (login || '')
     if (nameEl) nameEl.textContent = '🎵 ' + (name || '')
-
     // загружаем дизлайкнутые треки
     const token = localStorage.getItem('token')
     fetch('http://localhost:3000/tracks/disliked', {
@@ -510,11 +556,10 @@ function loadProfile() {
                         <span class="track-title">${track.title}</span>
                         <span class="track-artist">${track.artist}</span>
                     </div>
-                </div>
                 <button onclick="removeDislike(${track.id}, this)" 
-                    style="background:none; border:none; font-size:1.2rem; 
-                       cursor:pointer; color:var(--text-secondary)">×</button>
-            </div>`
+            style="background:none; border:none; font-size:1.2rem; 
+                   cursor:pointer; color:var(--text-secondary)">×</button>
+</div>`
             })
         })
 }
@@ -636,7 +681,6 @@ function stopBlobs() {
 // обновляем ползунок каждую секунду
 document.addEventListener('DOMContentLoaded', () => {
     const audio = document.getElementById('audio-player')
-
     audio.addEventListener('timeupdate', () => {
         const current = audio.currentTime
         const total = audio.duration || 0
@@ -646,11 +690,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('current-time').textContent = formatTime(current)
         document.getElementById('total-time').textContent = formatTime(total)
     })
-
     audio.addEventListener('play', () => {
         document.getElementById('play-btn').textContent = '⏸'
     })
-
     audio.addEventListener('pause', () => {
         document.getElementById('play-btn').textContent = '▶'
     })
