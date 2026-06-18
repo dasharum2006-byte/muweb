@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentTrackId = null
 //добавляем переменную для обложки
 let currentCover = null
+//для поиска
+let tracksList = []
 //защита
 // проверяем есть ли токен - если нет то на страницу входа
 const token = localStorage.getItem('token')
@@ -47,6 +49,7 @@ function loadTracks() {
                 //Робот сказал "песен нет", вывел сообщение и ушел. Он не будет пытаться показывать песни, которых нет.
                 return
             }
+    
             //мы получаем ответ от сервера,который мы превратили в массив
             //Для КАЖДОГО трека из списка делаем одно и то же действие
             //!!!!Добавили карточку трека 
@@ -54,6 +57,7 @@ function loadTracks() {
             //<div class="playlist-menu" id="playlist-menu-${currentsong.id}" style="display:none"></div> ----
             //Это контейнер для выпадающего меню с плейлистами.Это контейнер для выпадающего меню с плейлистами.
 //Когда нажимаешь кнопку + — функция togglePlaylistMenu ищет этот контейнер по id и показывает внутри него список плейлистов.
+            //Комментим потому что нам надо было бы копировать весь код отрисовки в поиск
             tracks.forEach(currentsong => {
                 //Для каждой песни создаём карточку в HTML и кидаем её в коробку. += значит "добавь к тому что уже есть", а не замени. ${} — это способ вставить переменную внутрь текста.
                 list.innerHTML += `
@@ -71,14 +75,14 @@ function loadTracks() {
                     </div>`
             })
             //onclick — это значит "когда кликнули на эту кнопку — вызови функцию".
-//playTrack(...) — функция которую мы напишем в app.js. Ей нужно знать ЧТО играть, поэтому передаём три вещи:
-//currentsong.filename — имя файла например 1234567.mp3 чтобы найти его на сервере
-//currentsong.title — название трека чтобы показать в плеере
-//currentsong.artist — имя артиста чтобы показать в плеере
-        })
+            //playTrack(...) — функция которую мы напишем в app.js. Ей нужно знать ЧТО играть, поэтому передаём три вещи:
+            //currentsong.filename — имя файла например 1234567.mp3 чтобы найти его на сервере
+            //currentsong.title — название трека чтобы показать в плеере
+            //currentsong.artist — имя артиста чтобы показать в плеере
+            })
         //this — это ссылка на саму кнопку которую нажали.
-//Представь у тебя 10 треков и у каждого своя кнопка лайка. Когда ты нажимаешь лайк на треке №3 — как функция узнает КАКУЮ кнопку обновить чтобы показать новое число лайков?
-//Вот для этого и нужен this — он говорит функции "вот та самая кнопка которую только что нажали, обнови именно её":
+        //Представь у тебя 10 треков и у каждого своя кнопка лайка. Когда ты нажимаешь лайк на треке №3 — как функция узнает КАКУЮ кнопку обновить чтобы показать новое число лайков?
+        //Вот для этого и нужен this — он говорит функции "вот та самая кнопка которую только что нажали, обнови именно её":
 }
 
 //воспроизвести трек
@@ -145,9 +149,11 @@ function uploadTrack() {
     formData.append('artist', artist)
     formData.append('cover', cover)  
     formData.append('audio', file)
-
+    //add new stroke чтобы токен не получал пустой токен и падал
+    const token = localStorage.getItem('token') 
     fetch('http://localhost:3000/tracks/upload', {
         method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
         body: formData
     })
         .then(res => res.json())
@@ -224,6 +230,14 @@ function showPage(name, btn) {
     }
     if (name === 'settings') {
         loadProfile()
+    }
+    if (name === 'search') {
+    const token = localStorage.getItem('token')
+    fetch('http://localhost:3000/tracks/search', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(res => res.json())
+        .then(tracks => { tracksList = tracks })
 }
 }
 
@@ -629,10 +643,10 @@ function seekAudio(event) {
     const percent = (event.clientX - rect.left) / rect.width
     audio.currentTime = percent * audio.duration
 }
-
-// список треков для переключения
-let tracksList = []
-let currentTrackIndex = 0
+//Мы объявили вверху уже
+// // список треков для переключения
+// let tracksList = []
+// let currentTrackIndex = 0
 
 function prevTrack() {
     if (tracksList.length === 0) return
@@ -723,4 +737,38 @@ function toggleRepeat() {
     repeatOnce = !repeatOnce
     const btn = document.getElementById('repeat-btn')
     btn.style.color = repeatOnce ? 'var(--accent)' : ''  // розовая если включён
+}
+
+//функция поиска линейного и рисовка
+function searchTracks() {
+    const query = document.getElementById('search-input').value.toLowerCase().trim()
+    const list = document.getElementById('search-results')
+    if (query === '') {
+        list.innerHTML = ''
+        return
+    }
+    const filtered = tracksList.filter(track =>
+        track.title.toLowerCase().includes(query) ||
+        track.artist.toLowerCase().includes(query)
+    )
+    if (filtered.length === 0) {
+        list.innerHTML = '<p>Ничего не найдено</p>'
+        return
+    }
+
+    filtered.forEach(track => {
+    const icon = track.inLibrary ? '✓' : '✕'
+    const iconColor = track.inLibrary ? '#729773' : '#ccc'
+    list.innerHTML += `
+    <div class="search-track-card">
+        <div class="search-track-info">
+            <span class="track-title">${track.title}</span>
+            <span class="track-artist">${track.artist}</span>
+        </div>
+        <div class="search-track-actions">
+            <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+            <span class="search-library-icon" style="color:${iconColor}">${icon}</span>
+        </div>
+    </div>`
+})
 }

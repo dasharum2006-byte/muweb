@@ -751,3 +751,53 @@ audio {
     /* margin-right: 5px; */
     margin-left: 26px;
 }
+/*для страницы поиск*/
+#search-input {
+    margin-bottom: 20px;
+}
+
+.search-track-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background-color: var(--card-inner);
+    border: 1px solid var(--border);
+}
+
+.search-track-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.search-track-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-play-btn {
+    background: none !important;
+    border: none !important;
+    font-size: 1.1rem !important;
+    color: var(--accent) !important;
+    cursor: pointer !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    transition: background 0.2s !important;
+}
+
+.search-play-btn:hover {
+    background-color: var(--border) !important;
+}
+
+.search-library-icon {
+    font-size: 1.2rem;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+}

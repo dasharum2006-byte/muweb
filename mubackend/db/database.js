@@ -57,5 +57,14 @@ db.exec(`
     rating INTEGER NOT null,
     UNIQUE(user_id, track_id)
     )`)
+    //бд для галочки что у пользователя уже загружен трек
+    db.exec(`
+    CREATE TABLE IF NOT EXISTS user_library (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        track_id INTEGER NOT NULL,
+        UNIQUE(user_id, track_id)
+    )
+`)
 // отдаем нашу базу данных
 module.exports = db

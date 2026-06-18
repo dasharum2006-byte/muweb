@@ -81,10 +81,18 @@ router.get('/', (req, res) => {
     if (!title || !artist) {
         return res.status(400).json({ error: 'Укажите название и артиста' })
     }
-//insert into tracks - add new row in table tracks !!!!!!!!!!!!
-    db.prepare(
+//insert into tracks - add new row in table tracks добавляем трек
+    const result = db.prepare(
         'INSERT INTO TRACKS (title, artist, filename, cover) VALUES (?,?,?,?)').run(title, artist, req.file.filename, cover || null)
-
+        //достаем id пользователя из токена
+        const token = req.headers.authorization?.split(' ')[1]
+        const jwt = require('jsonwebtoken')
+        //!!! тоже заменили строку с токеном!!!!!!!!!!!
+        const decoded = jwt.verify(token, process.env.SECRET)
+        // добавляем в библиотеку пользователя
+        db.prepare(
+            'INSERT OR IGNORE INTO user_library (user_id, track_id) VALUES (?,?)'
+        ).run(decoded.id, result.lastInsertRowid)
         res.json({message: 'Трек загружен' })
  })
 
@@ -151,6 +159,24 @@ router.get('/:id/rate', (req, res) => {
         avg: avg.avg ? Math.round(avg.avg * 10) / 10 : 0
     })
 })
+//новый роутер с галочкой для поиска треков
+router.get('/search', (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1]
+    const jwt = require('jsonwebtoken')
+    //заменили строчку с токеном
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const userId = decoded.id
 
+    // все треки + флаг есть ли в библиотеке пользователя
+    const tracks = db.prepare(`
+        SELECT tracks.*, 
+        CASE WHEN user_library.id IS NOT NULL THEN 1 ELSE 0 END as inLibrary
+        FROM tracks
+        LEFT JOIN user_library 
+        ON tracks.id = user_library.track_id AND user_library.user_id = ?
+    `).all(userId)
+
+    res.json(tracks)
+})
 //делаем доступный роутер для server.js
 module.exports = router

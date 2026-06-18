@@ -12,7 +12,7 @@
 
 <!-- БОКОВОЕ МЕНЮ -->
 <aside class="sidebar">
-    <img src="images/penguin-logo.png" alt="логотип" class="sidebar-logo">
+    <img src="images/penguin-logo.png" alt="логотип" class="sidebar-logo" onclick="showPage('home', null)" style="cursor:pointer">
     <nav class="sidebar-nav">
         <button class="nav-btn" title="Поиск" onclick="showPage('search',this)">🔍</button>
         <button class="nav-btn active" title="Музыка" onclick="showPage('music', this)">🎵</button>
@@ -54,12 +54,15 @@
     </div>
 
     <!-- СТРАНИЦА ПОИСКА -->
-    <div id="page-search" class="page">
-        <div class="center-column">
+   <div id="page-search" class="page">
+    <div class="center-column">
+        <section class="tracks-section">
             <h2>Поиск 🔍</h2>
-            <p>Скоро будет!</p>
-        </div>
+            <input type="text" id="search-input" placeholder="Название или артист..." oninput="searchTracks()">
+            <div id="search-results"></div>
+        </section>
     </div>
+</div>
    <!-- СТРАНИЦА ПЛЕЙЛИСТОВ -->
 <div id="page-playlists" class="page">
     <div class="center-column">
