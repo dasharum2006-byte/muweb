@@ -99,13 +99,58 @@ router.post('/:id/like', (req, res) => {
     res.json({ likes: track.likes })
 })
 
- //ставим dislike - потом добавить функцию что если ты ставишь дизлайк то потом этот трэк переходит в 
- //плейлист дизлайки и ты его больше не встретишь
-
+ //ставим dislike - потом добавить функцию что если  ставить дизлайк то потом этот трэк переходит в 
+ //плейлист дизлайки и  его больше не встретишь
+//!!!!!!!!!!!!!!!!!!!!!!!!!!1
  //удаляем трек - ДОПИСАТЬ ПОТОМУ ЧТО УДАЛЯЕТСЯ ТОЛЬКО ПЕСНЯ ИЗ БД А НА ДИСКЕ ОСТАЕТСЯ
 router.delete('/:id', (req, res) => {
     db.prepare('DELETE FROM tracks WHERE id = ?').run(req.params.id)
     res.json({ message: 'Трек удалён' })
 })
+// звездочки(rating)
+// поставить оценку
+router.post('/:id/rate', (req, res) => {
+    const { rating } = req.body
+    const track_id = req.params.id
+    const token = req.headers.authorization?.split(' ')[1]
+
+    if (!token) return res.status(401).json({ error: 'Нет токена' })
+
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const user_id = decoded.id
+
+    // INSERT OR REPLACE - если оценка уже есть то обновляем
+    db.prepare(`
+        INSERT INTO ratings (user_id, track_id, rating)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id, track_id) DO UPDATE SET rating = ?
+    `).run(user_id, track_id, rating, rating)
+
+    // считаем средний рейтинг
+    const avg = db.prepare('SELECT AVG(rating) as avg FROM ratings WHERE track_id = ?').get(track_id)
+    res.json({ rating, avg: Math.round(avg.avg * 10) / 10 })
+})
+
+// получить свою оценку
+router.get('/:id/rate', (req, res) => {
+    const track_id = req.params.id
+    const token = req.headers.authorization?.split(' ')[1]
+
+    if (!token) return res.status(401).json({ rating: 0 })
+
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const user_id = decoded.id
+
+    const rating = db.prepare('SELECT rating FROM ratings WHERE user_id = ? AND track_id = ?').get(user_id, track_id)
+    const avg = db.prepare('SELECT AVG(rating) as avg FROM ratings WHERE track_id = ?').get(track_id)
+
+    res.json({ 
+        rating: rating ? rating.rating : 0,
+        avg: avg.avg ? Math.round(avg.avg * 10) / 10 : 0
+    })
+})
+
 //делаем доступный роутер для server.js
 module.exports = router

@@ -163,16 +163,30 @@
                 <div class="progress-dot" id="progress-dot"></div>
             </div>
             <div class="player-controls">
+                <button class="control-btn repeat-btn" id="repeat-btn" onclick="toggleRepeat()">⏸</button>
                 <button class="control-btn" onclick="prevTrack()">⏮</button>
                 <button class="control-btn play-btn" id="play-btn" onclick="togglePlay()">▶</button>
                 <button class="control-btn" onclick="nextTrack()">⏭</button>
+                <button class="star-btn" id="star-btn" onclick="toggleStars()">★</button>
             </div>
         </div>
-            <div class="like-buttons">
-                <button class="dislike-btn" onclick="dislikeTrack()">👎</button>
-                <button class="view-btn" onclick="togglePlayerView()">◆</button>
-                <button class="like-btn" onclick="likeTrack(currentTrackId, this)">❤️</button>
-            </div>
+        <!-- дизлайк, ромб, лайк -->
+        <div class="like-buttons">
+            <button class="dislike-btn" onclick="dislikeTrack()">👎</button>
+            <button class="view-btn" onclick="togglePlayerView()">◆</button>
+            <button class="like-btn" onclick="likeTrack(currentTrackId, this)">❤️</button>
+        </div>
+
+        <!-- 5 звёздочек снизу - скрыты по умолчанию -->
+         <!-- звёздочки — появляются под like-buttons -->
+        <div class="stars-popup" id="stars-popup" style="display:none">
+            <span class="star" onclick="rateTrack(1)">☆</span>
+            <span class="star" onclick="rateTrack(2)">☆</span>
+            <span class="star" onclick="rateTrack(3)">☆</span>
+            <span class="star" onclick="rateTrack(4)">☆</span>
+            <span class="star" onclick="rateTrack(5)">☆</span>
+        </div>
+        <p class="avg-rating" id="avg-rating"></p>
         </div>
     </div>
 

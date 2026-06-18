@@ -683,3 +683,71 @@ audio {
     font-size: 2rem !important;
     color: var(--accent) !important;
 }
+
+/*для звездочек в плеере*/
+.star-btn {
+    background: none !important;
+    border: none !important;
+    font-size: 1.2rem !important;
+    cursor: pointer !important;
+    /* чтобы звезда была черная 
+    filter: grayscale(100%); */
+    filter: none !important; 
+    transition: filter 0.2s !important;
+    color: var(--text) !important;
+    padding: 0 !important;
+    /*чтобы не центрировалась отдельно 
+    display: block !important;
+    margin: 0 auto !important; */
+}
+
+.star-btn.rated {
+    color: #ffd700 !important;
+}
+
+.stars-popup {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.star {
+    font-size: 2rem;
+    cursor: pointer;
+    color: #dddddd;
+    transition: color 0.15s;
+}
+
+.star.active {
+    color: #ffd700;
+}
+
+.star:hover {
+    color: #ffd700;
+}
+
+.avg-rating {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    min-height: 20px;
+}
+
+/*чтобы кнопка не выбивалась из ряда*/
+.repeat-btn {
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+    padding: 5px !important;
+    vertical-align: middle !important;
+}
+
+#repeat-btn {
+    /* margin-left: 5px; */
+    margin-right: 20px;
+}
+
+#star-btn {
+    /* margin-right: 5px; */
+    margin-left: 26px;
+}

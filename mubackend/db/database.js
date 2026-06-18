@@ -47,5 +47,15 @@ db.exec(`
         track_id INTEGER
     )
 `)
+//unique - чтобы один пользователь мог поставить только одну оценку треку,
+//если поставит снова то обновиться
+db.exec(`
+    CREATE TABLE IF NOT EXISTS ratings(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGET NOT null,
+    track_id INTEGER NOT null,
+    rating INTEGER NOT null,
+    UNIQUE(user_id, track_id)
+    )`)
 // отдаем нашу базу данных
 module.exports = db

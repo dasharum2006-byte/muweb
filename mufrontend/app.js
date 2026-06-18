@@ -580,7 +580,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const current = audio.currentTime
         const total = audio.duration || 0
         const percent = total ? (current / total) * 100 : 0
-
         document.getElementById('progress-fill').style.width = percent + '%'
         document.getElementById('progress-dot').style.left = percent + '%'
         document.getElementById('current-time').textContent = formatTime(current)
@@ -593,6 +592,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     audio.addEventListener('pause', () => {
         document.getElementById('play-btn').textContent = '▶'
+    })
+    //добавили для повтора трека в плеере
+    audio.addEventListener('ended', () => {
+        if (repeatOnce) {
+            audio.currentTime = 0
+            audio.play()
+            repeatOnce = false
+            document.getElementById('repeat-btn').style.color = ''
+        } else {
+            nextTrack()
+        }
     })
 })
 
@@ -636,4 +646,81 @@ function nextTrack() {
     currentTrackIndex = (currentTrackIndex + 1) % tracksList.length
     const track = tracksList[currentTrackIndex]
     playTrack(track.filename, track.title, track.artist, track.id, track.cover)
+}
+
+//Для звездочек в плеере(rating)
+let currentRating = 0
+
+function toggleStars() {
+    const popup = document.getElementById('stars-popup')
+    if (popup.style.display === 'flex') {
+        popup.style.display = 'none'
+    } else {
+        popup.style.display = 'flex'
+        if (currentTrackId) loadRating(currentTrackId)
+    }
+}
+
+function loadRating(trackId) {
+    const token = localStorage.getItem('token')
+    fetch(`http://localhost:3000/tracks/${trackId}/rate`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(res => res.json())
+        .then(data => {
+            currentRating = data.userRating ?? data.rating ?? 0  //оценка
+            updateStars(currentRating)  //красим в жёлтый сразу
+            const avg = document.getElementById('avg-rating')
+            if (data.avg > 0) {
+                avg.textContent = `Средняя оценка: ${data.avg} ⭐`
+            } else {
+                avg.textContent = ''
+            }
+        })
+}
+
+function updateStars(rating) {
+    const stars = document.querySelectorAll('.star')
+    stars.forEach((star, i) => {
+        if (i < rating) {
+            star.textContent = '★'
+            star.classList.add('active')
+        } else {
+            star.textContent = '☆'
+            star.classList.remove('active')
+        }
+    })
+}
+
+function rateTrack(rating) {
+    if (!currentTrackId) {
+        alert('Сначала выбери трек!')
+        return
+    }
+
+    const token = localStorage.getItem('token')
+    fetch(`http://localhost:3000/tracks/${currentTrackId}/rate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ rating })
+    })
+        .then(res => res.json())
+        .then(data => {
+            currentRating = rating
+            updateStars(rating)
+            document.getElementById('star-btn').classList.add('rated')
+            const avg = document.getElementById('avg-rating')
+            avg.textContent = `Средняя оценка: ${data.avg} ⭐`
+        })
+}
+
+//for repeat || in player
+let repeatOnce = false
+function toggleRepeat() {
+    repeatOnce = !repeatOnce
+    const btn = document.getElementById('repeat-btn')
+    btn.style.color = repeatOnce ? 'var(--accent)' : ''  // розовая если включён
 }
