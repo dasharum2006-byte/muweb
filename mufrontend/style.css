@@ -211,44 +211,8 @@ button:hover {
     padding: 8px 0;
 }
 
-/* ПЛЕЙЛИСТЫ */
-.create-playlist {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    align-items: center;
-}
 
-.create-playlist input {
-    flex: 1;
-    margin-bottom: 0;
-    height: 40px;
-    padding: 0 14px;
-}
 
-.create-playlist button {
-    height: 40px;
-    padding: 0 20px;
-    white-space: nowrap;
-}
-
-.playlist-card {
-    background-color: var(--card-inner);
-    border: 1px solid var(--border);
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.2s;
-    color: var(--text);
-}
-
-.playlist-card:hover {
-    background-color: var(--border);
-}
 
 /* ИНПУТЫ */
 input[type="text"], input[type="file"], input[type="password"] {
@@ -332,76 +296,19 @@ audio {
     border-radius: 50px;
     cursor: pointer;
     filter: grayscale(100%);
-    transition: filter 0.2s;
+    transition: filter 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .like-btn.liked {
     filter: grayscale(0%);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .like-btn:hover, .dislike-btn:hover {
     background-color: var(--card-inner);
 }
 
-/* МЕНЮ ПЛЕЙЛИСТА */
-.add-to-playlist-btn {
-    width: 35px !important;
-    background-color: var(--border) !important;
-    color: var(--heading) !important;
-    font-size: 1.2rem !important;
-    padding: 4px 0 !important;
-}
-
-.playlist-menu {
-    position: absolute;
-    margin-top: 5px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    z-index: 100;
-    min-width: 150px;
-}
-
-.playlist-menu p {
-    padding: 10px 15px;
-    color: var(--heading);
-    font-size: 0.85rem;
-    text-align: center;
-}
-
-.playlist-menu-item {
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: var(--text);
-}
-
-.playlist-menu-item:hover {
-    background-color: var(--card-inner);
-}
-
-/* ОТКРЫТЫЙ ПЛЕЙЛИСТ */
-.open-playlist {
-    margin-top: 15px;
-    background: var(--card-inner);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 15px;
-}
-
-.open-playlist h3 {
-    color: var(--heading);
-    margin-bottom: 10px;
-    font-size: 1rem;
-}
-
-.open-playlist .track-buttons button {
-    width: 80px;
-    padding: 8px 0;
-    text-align: center;
-}
 
 /* НАСТРОЙКИ */
 .settings-wrapper {
@@ -510,6 +417,7 @@ audio {
 .dark-theme { background: linear-gradient(135deg, #2c2c2c, #1a1a2e); }
 
 .settings-profile {
+    flex: 1;  
     display: flex;
     gap: 25px;
     align-items: flex-start;
@@ -519,7 +427,6 @@ audio {
     padding: 25px;
     min-height: 160px;
 }
-
 .avatar-preview {
     width: 130px;
     height: 130px;
@@ -663,6 +570,7 @@ audio {
     justify-content: center;
     align-items: center;
     gap: 20px;
+    height: 50px;  /* ← фиксированная высота строки */
 }
 
 .control-btn {
@@ -680,9 +588,14 @@ audio {
 }
 
 .play-btn {
-    font-size: 2rem !important;
+    font-size: 1.8rem !important;
     color: var(--accent) !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+    position: relative !important;
+    top: -3px !important;  /* двигай это значение - плюс вниз, минус вверх */
 }
+
 
 /*для звездочек в плеере*/
 .star-btn {
@@ -800,4 +713,450 @@ audio {
     font-weight: 700;
     min-width: 20px;
     text-align: center;
+}
+
+/*для артистов*/
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.artist-card {
+    background: var(--card-inner);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.artist-card:hover {
+    background: var(--border);
+}
+
+.artist-card img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.artist-card .artist-no-photo {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.artist-card span {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.artist-page-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.artist-page-header img {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.artist-page-header h2 {
+    margin-bottom: 0;
+}
+.dislike-btn.disliked {
+    filter: grayscale(0%);
+    border-color: var(--accent);
+}
+.settings-top-row {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.settings-top-row {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.settings-top-row .settings-profile,
+.settings-top-row .settings-section {
+    flex: 1;
+}
+
+/*змейка для испольнителей*/
+/* Контейнер для полоски — белый фон, без теней */
+.gradient-strip {
+  position: relative;
+  width: 100%;
+  height: 130px; 
+  border-radius: 20px;
+  overflow: hidden; 
+  background: #ffffff; 
+  border: 1px solid rgba(0, 0, 0, 0.08); 
+  margin-bottom: 25px;
+  box-shadow: none; 
+}
+
+/* Базовые свойства для фигур */
+.snake-blob {
+  position: absolute;
+  filter: blur(12px); /* Размытие наполовину */
+  mix-blend-mode: multiply; 
+  opacity: 0.8;
+  will-change: transform;
+}
+
+/* 1. РОЗОВЫЙ КРУГ — летает в левой части (вверх-вниз и по углам) */
+.blob-1 {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%; /* Идеальный кружок */
+  background: radial-gradient(circle, #ff4da6 0%, #ff007f 100%);
+  top: 15px;
+  left: 5%;
+  animation: bounceLeft 7s infinite ease-in-out; /* Живая скорость */
+}
+
+/* 2. СИРЕНЕВЫЙ КВАДРАТ — плавает в центре (меняет наклон) */
+.blob-2 {
+  width: 90px;
+  height: 90px;
+  border-radius: 30% 30% 30% 30%; /* Мягкая квадратная форма */
+  background: radial-gradient(circle, #b366ff 0%, #7f00ff 100%);
+  top: 20px;
+  left: 32%;
+  animation: bounceCenter 8s infinite ease-in-out;
+}
+
+/* 3. ГОЛУБОЙ ОВАЛ — бегает в правой части по диагоналям */
+.blob-3 {
+  width: 120px; /* Вытянутый */
+  height: 70px; /* Узкий */
+  border-radius: 50%; /* Получается четкий овал */
+  background: radial-gradient(circle, #00f0ff 0%, #00bfff 100%);
+  top: 30px;
+  left: 75%;
+  animation: bounceRight 6s infinite ease-in-out;
+}
+
+/* 4. СИНИЙ НЕОПРЕДЕЛЕННЫЙ — курсирует снизу между центром и левым углом */
+.blob-4 {
+  width: 95px;
+  height: 85px;
+  /* Абстрактная ломаная форма */
+  border-radius: 20% 70% 40% 50% / 50% 30% 70% 40%; 
+  background: radial-gradient(circle, #3366ff 0%, #0000ff 100%);
+  top: 25px;
+  left: 58%;
+  animation: bounceBetween 9s infinite ease-in-out;
+}
+
+/* --- ТРАЕКТОРИИ ДВИЖЕНИЯ БЕЗ СТОЛКНОВЕНИЙ --- */
+
+/* Розовый круг: ходит строго по левым углам */
+@keyframes bounceLeft {
+  0% { transform: translate(0px, 0px); }
+  25% { transform: translate(30px, 25px); }
+  50% { transform: translate(5px, 40px); }
+  75% { transform: translate(-10px, 15px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+/* Сиреневый квадрат: колеблется в центре вверх-вниз и крутится */
+@keyframes bounceCenter {
+  0% { transform: translate(0px, 0px) rotate(0deg); }
+  33% { transform: translate(15px, -20px) rotate(30deg); }
+  66% { transform: translate(-20px, 20px) rotate(-25deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+/* Голубой овал: активно летает по правым углам */
+@keyframes bounceRight {
+  0% { transform: translate(0px, 0px); }
+  30% { transform: translate(-40px, -25px); }
+  70% { transform: translate(-15px, 30px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+/* Синий неопределенный: держит дистанцию между центром и овалом */
+@keyframes bounceBetween {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-45px, 15px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+/* стили именно для контейнера создания артиста на странице артистов */
+#page-artists .create-playlist {
+    display: flex;         /* Выстраиваем элементы в одну строку */
+    align-items: center;   /* Выравниваем их строго по центру вертикали */
+    gap: 12px;            /* Делаем красивый отступ между ними */
+    width: 100%;
+}
+
+/* Перебиваем дефолтные width: 100% и маргины только для этой формы */
+#page-artists .create-playlist input[type="text"] {
+    flex: 2;               /* Поле ввода имени будет пошире */
+    margin-bottom: 0;      /* Убираем нижний маргин, который ломал высоту */
+    height: 40px;          /* Задаем фиксированную высоту */
+}
+
+#page-artists .create-playlist input[type="file"] {
+    flex: 2;               /* Поле выбора файла */
+    margin-bottom: 0;      /* Убираем нижний маргин */
+    height: 40px;          /* Даем такую же высоту, как у текстового инпута */
+    display: flex;
+    align-items: center;   /* Выравниваем текст "Choose File" внутри инпута */
+}
+
+#page-artists .create-playlist button {
+    flex: 1;               /* Кнопка "Добавить" */
+    height: 40px;          /* Такая же высота, как у всех */
+    white-space: nowrap;   /* Чтобы текст кнопки не переносился */
+}
+
+/*для кнопки выбрать фото для артиста*/
+/* Контейнер для нашей новой кнопки */
+.custom-file-upload {
+    flex: 2;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--card-inner);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+/* Полностью скрываем оригинальный страшный инпут внутри лейбла */
+.custom-file-upload input[type="file"] {
+    display: none !important;
+}
+
+/* Эффект при наведении на кнопку загрузки */
+.custom-file-upload:hover {
+    background-color: var(--border);
+    border-color: var(--accent);
+    color: var(--heading);
+}
+
+/* Эффект при клике (активное состояние) */
+.custom-file-upload:active {
+    transform: scale(0.98);
+}
+
+
+/*
+ФИКС ДЛЯ СТРАНИЦЫ ЗАГРУЗКИ (СТРОГО ДЛЯ ФОРМЫ ЗАГРУЗКИ ТРЕКА)
+ */
+
+.upload-section {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important; /* Ровные отступы только в блоке загрузки */
+    width: 100%;
+}
+
+.upload-section input {
+    margin-bottom: 0 !important;
+    height: 40px !important;
+}
+
+/* Красивая кнопка выбора аудиофайла */
+.custom-audio-upload {
+    width: 100% !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: var(--card-inner) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    color: var(--text) !important;
+    font-weight: 500 !important;
+    user-select: none !important;
+    margin-bottom: 0 !important;
+}
+
+.custom-audio-upload input[type="file"] {
+    display: none !important;
+}
+
+.custom-audio-upload:hover {
+    background-color: var(--border) !important;
+    border-color: var(--accent) !important;
+    color: var(--heading) !important;
+}
+
+/* Кнопка "Загрузить" на странице загрузки */
+.upload-section button {
+    width: 100% !important;
+    height: 40px !important;
+    margin: 0 !important;
+    display: block !important;
+}
+
+
+/*
+ФИКС ДЛЯ СТРАНИЦЫ ПЛЕЙЛИСТОВ (СТРОКА ТРЕКА В ОДНУ ЛИНИЮ)
+ */
+/* Контейнер самой карточки плейлиста */
+.playlist-card {
+    background-color: var(--card-inner);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column; /* Меняем на колонку, чтобы треки ложились под название папки */
+    align-items: flex-start;
+    gap: 4px;
+    transition: all 0.2s ease;
+    color: var(--text);
+    width: 100%;
+}
+
+/* Оформление верхней строчки плейлиста (иконка папки + имя) */
+.playlist-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    width: 100%;
+}
+
+/* Эффект при наведении на закрытый плейлист */
+.playlist-card:hover {
+    background-color: var(--border);
+    transform: translateY(-1px);
+}
+
+/* Если плейлист открыт, делаем его рамку чуть активнее */
+.playlist-card.is-open {
+    border-color: var(--accent);
+    background-color: var(--card-inner) !important; /* Убираем ховер-эффект темного цвета, когда папка развернута */
+}
+
+/* --- ВНУТРЕННИЙ СПИСОК ТРЕКОВ  --- */
+.open-playlist-tracks {
+    width: 100%;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border); /* Аккуратная пунктирная линия отделения от названия */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: default; 
+}
+
+/* Сама строчка трека: сделали её тоньше */
+.playlist-track-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important; 
+    align-items: center !important;
+    padding: 6px 10px !important; /* Уменьшили падинги */
+    background: #ffffff !important; 
+    border: 1px solid rgba(0, 0, 0, 0.04) !important; 
+    border-radius: 8px !important;
+    width: 100% !important;
+}
+
+/* Блок текста песни */
+.track-info-block {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important; 
+    gap: 8px !important; 
+}
+
+.playlist-track-row .track-title {
+    font-weight: 600 !important;
+    font-size: 0.85rem !important; /* Чуть уменьшили шрифт названия */
+    color: var(--text) !important;
+}
+
+.playlist-track-row .track-artist {
+    font-size: 0.75rem !important; /* Чуть уменьшили шрифт артиста */
+    color: var(--text-secondary) !important;
+}
+
+/* Аккуратная кнопка Play */
+.play-icon-btn {
+    width: 28px !important; /* Сделали кнопку компактнее под размер трека */
+    height: 28px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important; 
+    background-color: var(--accent) !important; 
+    color: #000000 !important; 
+    font-size: 0.8rem !important; 
+    border: none !important;
+    cursor: pointer !important;
+    text-indent: 1px !important;
+}
+
+.play-icon-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Текст для пустого плейлиста */
+.empty-playlist-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    padding: 4px;
+    font-style: italic;
+}
+/*Отступы от папок */
+#page-playlists .create-playlist {
+    display: flex !important;
+    flex-direction: row !important; /* Строго выстраиваем инпут и кнопку в ОДИН ряд */
+    align-items: center !important;  /* Центрируем их по вертикали */
+    gap: 10px !important;            /* Расстояние между инпутом и кнопкой */
+    width: 100% !important;
+    
+    /* Добавляем ОТСТУП СНИЗУ, чтобы папки отодвинулись от кнопки «Создать» */
+    margin-bottom: 25px !important; 
+}
+
+#page-playlists .create-playlist input {
+    flex: 1 !important;             /* Инпут растягивается во всю ширину */
+    margin-bottom: 0 !important;    /* Убираем старый маргин, ломавший высоту */
+    height: 40px !important;        /* Фиксированная высота */
+}
+
+#page-playlists .create-playlist button {
+    height: 40px !important;        /* Кнопка одной высоты с инпутом */
+    white-space: nowrap !important; /* Запрещаем перенос текста кнопки */
+    margin: 0 !important;           /* Сбрасываем лишние отступы */
 }

@@ -3,6 +3,7 @@
 // DOMContentLoaded - event - all page loaded(HTML,CSS)
 document.addEventListener('DOMContentLoaded', () => {
     showPage('home') // показываем главную по умолчанию
+    loadHomePage() //добавили после функций топ 5 
 })
 // запоминаем какой трек сейчас играет
 let currentTrackId = null
@@ -31,7 +32,9 @@ const userName = localStorage.getItem('name')
 ////
 function loadTracks() {
 // go to my server and  get data
-    fetch('http://localhost:3000/tracks')
+    fetch('http://localhost:3000/tracks', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
     //then - когда данные придут то ответ от сервера преврати из формата json to java script - распаковывем данные
         .then(res => res.json())
         //переменная в которую попали превращенные данные - массив песен и мы их используем
@@ -68,7 +71,7 @@ function loadTracks() {
                         </div>
                         <div class="track-buttons">
                             <button onclick="playTrack('${currentsong.filename}', '${currentsong.title}', '${currentsong.artist}', ${currentsong.id}, '${currentsong.cover}')">▶ Играть</button>
-                            <button onclick="likeTrack(${currentsong.id}, this)">❤ ${currentsong.likes}</button>
+                            <button onclick="likeTrack(${currentsong.id}, this)">❤</button>
                                   <button class="add-to-playlist-btn" onclick="togglePlaylistMenu(${currentsong.id}, this)">+</button>
                         </div>
                                <div class="playlist-menu" id="playlist-menu-${currentsong.id}" style="display:none"></div>
@@ -123,12 +126,19 @@ function playTrack(filename, title, artist, id, cover) {
 }
 
 function likeTrack(id, button) {
-    fetch(`http://localhost:3000/tracks/${id}/like`, {method: 'POST'})
+    if (!id) return
+
+    const token = localStorage.getItem('token')
+    fetch(`http://localhost:3000/tracks/${id}/like`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
         .then(res => res.json())
         .then(data => {
-            button.textContent = `❤ ${data.likes}`
-            //чтобы сначала она была серая а потом красная
-            button.classList.add('liked') 
+            if (data.alreadyLiked) return
+            if (button) {
+                button.classList.add('liked')
+            }
         })
 }
 
@@ -228,6 +238,15 @@ function showPage(name, btn) {
     if (name === 'playlists') {
         loadPlaylists()
     }
+    if (name === 'artists') {
+    loadArtists()
+    }
+    // плеер прячем как в настройках
+    if (name === 'artists' || name === 'artist' || name === 'settings') {
+        rightColumn.style.display = 'none'
+    } else {
+        rightColumn.style.display = 'flex'
+    }
     if (name === 'settings') {
         loadProfile()
     }
@@ -238,7 +257,10 @@ function showPage(name, btn) {
     })
         .then(res => res.json())
         .then(tracks => { tracksList = tracks })
-}
+    }
+    if (name === 'home') {
+    loadHomePage()
+    }
 }
 
 //функция выхода 
@@ -251,13 +273,11 @@ function logout() {
 //Добавила новые функции две для трека чтобы можно было загружать их в плейлист
 function togglePlaylistMenu(trackId, btn) {
     const menu = document.getElementById('playlist-menu-' + trackId)
-    
     // если меню уже открыто - закрываем
     if (menu.style.display === 'block') {
         menu.style.display = 'none'
         return
     }
-
     // загружаем плейлисты и показываем меню
     fetch('http://localhost:3000/playlists')
         .then(res => res.json())
@@ -284,6 +304,7 @@ function togglePlaylistMenu(trackId, btn) {
         })
 }
 
+
 function addToPlaylist(trackId, playlistId, playlistName) {
     fetch(`http://localhost:3000/playlists/${playlistId}/tracks`, {
         method: 'POST',
@@ -293,65 +314,67 @@ function addToPlaylist(trackId, playlistId, playlistName) {
         //изменила - добавила проверку на то что трек уже есть в плейлисте
         .then(data => {
             if (data.error) {
-                alert(data.error)  // ← покажет "Трек уже в плейлисте!"
+                alert(data.error) 
             } else {
                 alert(`Добавлено в "${playlistName}"!`)
             }
             document.getElementById('playlist-menu-' + trackId).style.display = 'none'
-        })
+        }).catch(err => console.error("Ошибка добавления:", err))
 }
-//функция открытия плейлиста
+
+
+// Функция открытия плейлиста прямо внутри его карточки
 function openPlaylist(id, name) {
+    // Ищем карточку плейлиста, на которую кликнули (в твоем коде они рендерятся в #playlists-list)
+    // Чтобы это сработало, убедись, что при рендере списка плейлистов ты задаешь им id, например: id="playlist-card-${playlist.id}"
+    const playlistCard = document.getElementById('playlist-card-' + id) || event.currentTarget;
+    // Ищем, открыт ли уже список треков внутри этой карточки
+    let container = playlistCard.querySelector('.open-playlist-tracks');
+    if (container) {
+        // Если уже открыт — просто закрываем (сворачиваем папку)
+        container.remove();
+        playlistCard.classList.remove('is-open');
+        return;
+    }
     fetch(`http://localhost:3000/playlists/${id}/tracks`)
         .then(res => res.json())
         .then(tracks => {
-            // ищем контейнер для треков плейлиста или создаём
-            let container = document.getElementById('open-playlist-' + id)
-            
-            if (container) {
-                // если уже открыт - закрываем
-                container.remove()
-                return
-            }
-
-            container = document.createElement('div')
-            container.id = 'open-playlist-' + id
-            container.className = 'open-playlist'
-            container.innerHTML = `<h3>📁 ${name}</h3>`
-
+            container = document.createElement('div');
+            container.className = 'open-playlist-tracks';
             if (tracks.length === 0) {
-                container.innerHTML += '<p>Плейлист пустой</p>'
+                container.innerHTML = '<p class="empty-playlist-text">Плейлист пока пустой</p>';
             } else {
                 tracks.forEach(track => {
                     container.innerHTML += `
-                        <div class="track-card">
-                            <div class="track-info">
+                        <div class="playlist-track-row">
+                            <div class="track-info-block">
                                 <span class="track-title">${track.title}</span>
                                 <span class="track-artist">${track.artist}</span>
                             </div>
-                            <div class="track-buttons">
-                                <button onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶ Играть</button>
-                            </div>
+                            <button class="play-icon-btn" onclick="event.stopPropagation(); playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
                         </div>
-                    `
-                })
+                    `;
+                });
             }
-
-            // добавляем после списка плейлистов
-            document.getElementById('playlists-list').after(container)
-        })
+            // Добавляем список треков прямо внутрь карточки плейлиста
+            playlistCard.appendChild(container);
+            playlistCard.classList.add('is-open');
+        });
 }
+
+
+
 //Новые функции для настроек - аватар, смена тем
 function setTheme(name) {
     // убираем active со всех карточек
     document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'))
     // ставим active на выбранную
     event.target.closest('.theme-card').classList.add('active')
-
     // сохраняем тему
     localStorage.setItem('theme', name)
     applyTheme(name)
 }
+
 
 function applyTheme(name) {
     const root = document.documentElement
@@ -415,7 +438,6 @@ function uploadAvatar(input) {
     }
     reader.readAsDataURL(file)
 }
-
 // применяем тему и аватарку при загрузке
 const savedTheme = localStorage.getItem('theme')
 if (savedTheme) applyTheme(savedTheme)
@@ -425,27 +447,18 @@ if (savedAvatar) {
     const preview = document.getElementById('avatar-preview')
     if (preview) preview.innerHTML = `<img src="${savedAvatar}" alt="аватар">`
 }
-// функция смена пароля и показ профиля в настройках
-// показываем логин и имя в настройках
-function loadProfile() {
-    const login = localStorage.getItem('login')
-    const name = localStorage.getItem('name')
-    const loginEl = document.getElementById('profile-login')
-    const nameEl = document.getElementById('profile-name')
-    if (loginEl) loginEl.textContent = '👤 ' + (login || '')
-    if (nameEl) nameEl.textContent = '🎵 ' + (name || '')
-}
+
+
+
 
 async function changePassword() {
     const oldPassword = document.getElementById('old-password').value
     const newPassword = document.getElementById('new-password').value
     const msg = document.getElementById('password-msg')
-
     if (!oldPassword || !newPassword) {
         msg.textContent = 'Заполните оба поля!'
         return
     }
-
     const token = localStorage.getItem('token')
     const res = await fetch('http://localhost:3000/auth/change-password', {
         method: 'POST',
@@ -455,7 +468,6 @@ async function changePassword() {
         },
         body: JSON.stringify({ oldPassword, newPassword })
     })
-
     const data = await res.json()
     if (!res.ok) {
         msg.style.color = '#e07090'
@@ -467,6 +479,47 @@ async function changePassword() {
         document.getElementById('new-password').value = ''
     }
 }
+
+
+function loadProfile() {
+    const login = localStorage.getItem('login')
+    const name = localStorage.getItem('name')
+    const loginEl = document.getElementById('profile-login')
+    const nameEl = document.getElementById('profile-name')
+    if (loginEl) loginEl.textContent = '👤 ' + (login || '')
+    if (nameEl) nameEl.textContent = '🎵 ' + (name || '')
+
+    // загружаем дизлайкнутые треки
+    const token = localStorage.getItem('token')
+    fetch('http://localhost:3000/tracks/disliked', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(res => res.json())
+        .then(tracks => {
+            const list = document.getElementById('disliked-list')
+            if (!list) return
+            if (tracks.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-secondary); font-size:0.85rem">Пока ничего нет</p>'
+                return
+            }
+            list.innerHTML = ''
+            tracks.forEach(track => {
+                list.innerHTML += `
+                <div class="search-track-card">
+                    <div class="search-track-info">
+                        <span class="track-title">${track.title}</span>
+                        <span class="track-artist">${track.artist}</span>
+                    </div>
+                </div>
+                <button onclick="removeDislike(${track.id}, this)" 
+                    style="background:none; border:none; font-size:1.2rem; 
+                       cursor:pointer; color:var(--text-secondary)">×</button>
+            </div>`
+            })
+        })
+}
+
+
 //функции для cover
 let playerView = 'default'
 let blobs = []
@@ -506,14 +559,15 @@ function startBlobs(canvas) {
 
     blobs = []
     const colors = [
-        ['#fffd9d', '#e77bde'],
+        ['#fffd9d', '#e9a246'],
         ['#c77dff', '#d218f3'],
         ['#4fc3f7', '#3462eb'],
         ['#ff6eb4', '#ff9de2'],
         ['#a78bfa', '#60a5fa'],
+        ['#60d4c1', '#2ccc6a']
     ]
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 7; i++) {
         blobs.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
@@ -532,24 +586,18 @@ function startBlobs(canvas) {
     }
 
     let time = 0
-
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
-
         // белый фон
         ctx.fillStyle = '#ffffff'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
-
         // размытие
-        ctx.filter = 'blur(5px)'
-
+        ctx.filter = 'blur(3px)'
         blobs.forEach(blob => {
             blob.x += blob.dx
             blob.y += blob.dy
-
             if (blob.x < blob.r || blob.x > canvas.width - blob.r) blob.dx *= -1
             if (blob.y < blob.r || blob.y > canvas.height - blob.r) blob.dy *= -1
-
             // рисуем неправильную форму
             const gradient = ctx.createRadialGradient(
                 blob.x, blob.y, 0,
@@ -575,7 +623,6 @@ function startBlobs(canvas) {
         time++
         animFrame = requestAnimationFrame(draw)
     }
-
     draw()
 }
 function stopBlobs() {
@@ -620,12 +667,14 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 })
 
+
 function formatTime(seconds) {
     if (isNaN(seconds)) return '0:00'
     const m = Math.floor(seconds / 60)
     const s = Math.floor(seconds % 60)
     return m + ':' + (s < 10 ? '0' + s : s)
 }
+
 
 function togglePlay() {
     const audio = document.getElementById('audio-player')
@@ -635,6 +684,7 @@ function togglePlay() {
         audio.pause()
     }
 }
+
 
 function seekAudio(event) {
     const audio = document.getElementById('audio-player')
@@ -648,12 +698,14 @@ function seekAudio(event) {
 // let tracksList = []
 // let currentTrackIndex = 0
 
+
 function prevTrack() {
     if (tracksList.length === 0) return
     currentTrackIndex = (currentTrackIndex - 1 + tracksList.length) % tracksList.length
     const track = tracksList[currentTrackIndex]
     playTrack(track.filename, track.title, track.artist, track.id, track.cover)
 }
+
 
 function nextTrack() {
     if (tracksList.length === 0) return
@@ -662,9 +714,9 @@ function nextTrack() {
     playTrack(track.filename, track.title, track.artist, track.id, track.cover)
 }
 
+
 //Для звездочек в плеере(rating)
 let currentRating = 0
-
 function toggleStars() {
     const popup = document.getElementById('stars-popup')
     if (popup.style.display === 'flex') {
@@ -674,6 +726,7 @@ function toggleStars() {
         if (currentTrackId) loadRating(currentTrackId)
     }
 }
+
 
 function loadRating(trackId) {
     const token = localStorage.getItem('token')
@@ -693,6 +746,7 @@ function loadRating(trackId) {
         })
 }
 
+
 function updateStars(rating) {
     const stars = document.querySelectorAll('.star')
     stars.forEach((star, i) => {
@@ -706,12 +760,12 @@ function updateStars(rating) {
     })
 }
 
+
 function rateTrack(rating) {
     if (!currentTrackId) {
         alert('Сначала выбери трек!')
         return
     }
-
     const token = localStorage.getItem('token')
     fetch(`http://localhost:3000/tracks/${currentTrackId}/rate`, {
         method: 'POST',
@@ -730,7 +784,6 @@ function rateTrack(rating) {
             avg.textContent = `Средняя оценка: ${data.avg} ⭐`
         })
 }
-
 //for repeat || in player
 let repeatOnce = false
 function toggleRepeat() {
@@ -738,6 +791,7 @@ function toggleRepeat() {
     const btn = document.getElementById('repeat-btn')
     btn.style.color = repeatOnce ? 'var(--accent)' : ''  // розовая если включён
 }
+
 
 //функция поиска линейного и рисовка
 function searchTracks() {
@@ -755,7 +809,6 @@ function searchTracks() {
         list.innerHTML = '<p>Ничего не найдено</p>'
         return
     }
-
     filtered.forEach(track => {
     const icon = track.inLibrary ? '✓' : '✕'
     const iconColor = track.inLibrary ? '#729773' : '#ccc'
@@ -771,4 +824,165 @@ function searchTracks() {
         </div>
     </div>`
 })
+}
+
+
+//Новые функции для главной страницы
+function loadHomePage() {
+    // топ 5
+    fetch('http://localhost:3000/tracks/top')
+        .then(res => res.json())
+        .then(tracks => {
+            const list = document.getElementById('top-tracks')
+            list.innerHTML = ''
+            tracks.forEach((track, i) => {
+                list.innerHTML += `
+                <div class="search-track-card">
+                    <span style="font-weight:700; color:var(--accent); min-width:25px">${i + 1}</span>
+                    <div class="search-track-info">
+                        <span class="track-title">${track.title}</span>
+                        <span class="track-artist">${track.artist}</span>
+                    </div>
+                    <div class="search-track-actions">
+                        <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+                    </div>
+                </div>`
+            })
+        })
+    // последние 5
+    fetch('http://localhost:3000/tracks/recent')
+        .then(res => res.json())
+        .then(tracks => {
+            const list = document.getElementById('recent-tracks')
+            list.innerHTML = ''
+            tracks.forEach(track => {
+                list.innerHTML += `
+                <div class="search-track-card">
+                    <div class="search-track-info">
+                        <span class="track-title">${track.title}</span>
+                        <span class="track-artist">${track.artist}</span>
+                    </div>
+                    <div class="search-track-actions">
+                        <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+                    </div>
+                </div>`
+            })
+        })
+}
+
+
+// НОВЫЕ ФУНКЦИИ ДЛЯ СТРАНИЦЫ С АРТИСТАМИ
+function addArtist() {
+    const name = document.getElementById('artist-name').value
+    const photo = document.getElementById('artist-photo').files[0]
+    if (!name) {
+        alert('Введи имя артиста')
+        return
+    }
+    const formData = new FormData()
+    formData.append('name', name)
+    if (photo) formData.append('photo', photo)
+    fetch('http://localhost:3000/artists', {
+        method: 'POST',
+        body: formData
+    })
+        .then(res => res.json())
+        .then(() => {
+            document.getElementById('artist-name').value = ''
+            document.getElementById('artist-photo').value = ''
+            loadArtists()
+        })
+}
+
+
+function loadArtists() {
+    fetch('http://localhost:3000/artists')
+        .then(res => res.json())
+        .then(artists => {
+            const grid = document.getElementById('artists-grid')
+            grid.innerHTML = ''
+            if (artists.length === 0) {
+                grid.innerHTML = '<p>Артистов пока нет</p>'
+                return
+            }
+            grid.className = 'artists-grid'
+            artists.forEach(artist => {
+                const photo = artist.photo
+                    ? `<img src="http://localhost:3000/uploads/covers/${artist.photo}" alt="${artist.name}">`
+                    : `<div class="artist-no-photo">🎤</div>`
+                grid.innerHTML += `
+                <div class="artist-card" onclick="openArtist(${artist.id}, '${artist.name}')">
+                    ${photo}
+                    <span>${artist.name}</span>
+                </div>`
+            })
+        })
+}
+
+
+function openArtist(id, name) {
+    fetch(`http://localhost:3000/artists/${id}/tracks`)
+        .then(res => res.json())
+        .then(data => {
+            showPage('artist')
+            // шапка артиста
+            const header = document.getElementById('artist-header')
+            const photo = data.artist.photo
+                ? `<img src="http://localhost:3000/uploads/covers/${data.artist.photo}" alt="${data.artist.name}">`
+                : `<div style="font-size:3rem">🎤</div>`
+            header.innerHTML = `
+            <div class="artist-page-header">
+                ${photo}
+                <h2>${data.artist.name}</h2>
+            </div>`
+            // треки артиста
+            const list = document.getElementById('artist-tracks')
+            list.innerHTML = ''
+            if (data.tracks.length === 0) {
+                list.innerHTML = '<p>Треков пока нет</p>'
+                return
+            }
+            data.tracks.forEach(track => {
+                list.innerHTML += `
+                <div class="search-track-card">
+                    <div class="search-track-info">
+                        <span class="track-title">${track.title}</span>
+                        <span class="track-artist">${track.artist}</span>
+                    </div>
+                    <div class="search-track-actions">
+                        <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+                        <button class="search-play-btn" onclick="togglePlay()">⏸</button>
+                    </div>
+                </div>`
+            })
+        })
+}
+
+
+function dislikeTrack() {
+    if (!currentTrackId) return
+    const token = localStorage.getItem('token')
+    fetch(`http://localhost:3000/tracks/${currentTrackId}/dislike`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.alreadyDisliked) return
+            document.querySelector('.dislike-btn').classList.add('disliked')
+        })
+}
+
+
+function removeDislike(trackId, btn) {
+    const token = localStorage.getItem('token')
+    fetch(`http://localhost:3000/tracks/undislike/${trackId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+})
+        .then(res => res.json())
+        .then(() => {
+            // убираем карточку из списка
+            btn.closest('.search-track-card').remove()
+        })
 }

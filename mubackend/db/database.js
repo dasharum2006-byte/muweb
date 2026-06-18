@@ -58,8 +58,32 @@ db.exec(`
     UNIQUE(user_id, track_id)
     )`)
     //бд для галочки что у пользователя уже загружен трек
-    db.exec(`
+db.exec(`
     CREATE TABLE IF NOT EXISTS user_library (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        track_id INTEGER NOT NULL,
+        UNIQUE(user_id, track_id)
+    )
+`)
+//база данных для артистов
+db.exec(`
+    CREATE TABLE IF NOT EXISTS artists (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        photo TEXT
+    )
+`)
+db.exec(`
+    CREATE TABLE IF NOT EXISTS track_likes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        track_id INTEGER NOT NULL,
+        UNIQUE(user_id, track_id)
+    )
+`)
+db.exec(`
+    CREATE TABLE IF NOT EXISTS disliked_tracks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         track_id INTEGER NOT NULL,

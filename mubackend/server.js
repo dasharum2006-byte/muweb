@@ -12,6 +12,8 @@ const authRouter = require('./routes/auth')
 const tracksRouter = require('./routes/tracks')
 //for playlists.js
 const playlistsRouter = require('./routes/playlists')
+//add new router for artist
+const artistsRouter = require('./routes/artists')
 //создаем сервак
 const muweb = express()
 
@@ -32,6 +34,8 @@ muweb.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 muweb.use(express.static(path.join(__dirname, '../mufrontend')))
 muweb.use('/tracks', tracksRouter)
 muweb.use('/playlists', playlistsRouter)
+//add for artists
+muweb.use('/artists', artistsRouter)
 muweb.get('/', (req, res) => {
     res.json({ message: 'Сервер работает'})
 })

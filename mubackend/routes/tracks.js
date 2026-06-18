@@ -57,18 +57,40 @@ const storage = multer.diskStorage({
 //мы вызываем функцию multer с настройками,затем передаем наши настройки и сохраняем настроенного
 //загрузчика в переменную - типо теперь мы можем принимать файлы,класть их в папку uploads/,и давать им уникальные имена
 const upload = multer({storage: storage})
-//это типо магазин наших песен
-//get all tracks(сервер идет в бд и запрашивает все треки и сервер потом возвращает json со списком песен)
+// //это типо магазин наших песен
+// //get all tracks(сервер идет в бд и запрашивает все треки и сервер потом возвращает json со списком песен)
+// router.get('/', (req, res) => {
+//     // в базе данных для all
+//     //.all() — вернуть все строки (массив)
+//     //.get() — вернуть только первую строку (одну запись)
+//     //.run() — выполнить, но ничего не возвращать (для INSERT, UPDATE, DELETE)
+//     //
+//     const tracks = db.prepare('SELECT * FROM tracks').all()
+//     //получается пользователю отправиться json
+//     res.json(tracks)
+// } )
+
+
 router.get('/', (req, res) => {
-    // в базе данных для all
-    //.all() — вернуть все строки (массив)
-    //.get() — вернуть только первую строку (одну запись)
-    //.run() — выполнить, но ничего не возвращать (для INSERT, UPDATE, DELETE)
-    //
-    const tracks = db.prepare('SELECT * FROM tracks').all()
-    //получается пользователю отправиться json
+    const token = req.headers.authorization?.split(' ')[1]
+    // если нет токена — отдаём все треки
+    if (!token) {
+        const tracks = db.prepare('SELECT * FROM tracks').all()
+        return res.json(tracks)
+    }
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const userId = decoded.id
+    // отдаём треки кроме дизлайкнутых этим пользователем
+    const tracks = db.prepare(`
+        SELECT tracks.* FROM tracks
+        WHERE tracks.id NOT IN (
+            SELECT track_id FROM disliked_tracks WHERE user_id = ?
+        )
+    `).all(userId)
     res.json(tracks)
-} )
+})
+
 
 //download track.Post - - отправить данные(создаит или записать)
  router.post('/upload', upload.single('audio'), (req, res)=> {
@@ -77,7 +99,6 @@ router.get('/', (req, res) => {
     //мы используем деструктуризацию а по длинному пути чтобы достать эти данные нам надо прописывать так 
     //const title = req.body.title   // достаю подарок с ярлыком "title"
     //const artist = req.body.artist // достаю подарок с ярлыком "artist"
-
     if (!title || !artist) {
         return res.status(400).json({ error: 'Укажите название и артиста' })
     }
@@ -96,69 +117,91 @@ router.get('/', (req, res) => {
         res.json({message: 'Трек загружен' })
  })
 
- // ставим лайк
+
 router.post('/:id/like', (req, res) => {
-    const id = parseInt(req.params.id)  // ← преобразуем в число
-    db.prepare('UPDATE tracks SET likes = likes + 1 WHERE id = ?').run(id)
-    const track = db.prepare('SELECT * FROM tracks WHERE id = ?').get(id)
-    if (!track) {
-        return res.status(404).json({ error: 'Трек не найден' })
+    const id = parseInt(req.params.id)
+    const token = req.headers.authorization?.split(' ')[1]
+    if (!token) return res.status(401).json({ error: 'Нет токена' })
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const userId = decoded.id
+    // проверяем лайкал ли уже
+    const existing = db.prepare(
+        'SELECT * FROM track_likes WHERE user_id = ? AND track_id = ?'
+    ).get(userId, id)
+    if (existing) {
+        // уже лайкнул — просто возвращаем текущее количество
+        const track = db.prepare('SELECT likes FROM tracks WHERE id = ?').get(id)
+        return res.json({ likes: track.likes, alreadyLiked: true })
     }
-    res.json({ likes: track.likes })
+    // ещё не лайкал — добавляем
+    db.prepare('INSERT INTO track_likes (user_id, track_id) VALUES (?,?)').run(userId, id)
+    db.prepare('UPDATE tracks SET likes = likes + 1 WHERE id = ?').run(id)
+    const track = db.prepare('SELECT likes FROM tracks WHERE id = ?').get(id)
+    res.json({ likes: track.likes, alreadyLiked: false })
 })
 
- //ставим dislike - потом добавить функцию что если  ставить дизлайк то потом этот трэк переходит в 
- //плейлист дизлайки и  его больше не встретишь
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!!1
  //удаляем трек - ДОПИСАТЬ ПОТОМУ ЧТО УДАЛЯЕТСЯ ТОЛЬКО ПЕСНЯ ИЗ БД А НА ДИСКЕ ОСТАЕТСЯ
 router.delete('/:id', (req, res) => {
     db.prepare('DELETE FROM tracks WHERE id = ?').run(req.params.id)
     res.json({ message: 'Трек удалён' })
 })
+
+// router.delete('/:id/dislike', (req, res) => {
+//     const token = req.headers.authorization?.split(' ')[1]
+//     if (!token) return res.status(401).json({ error: 'Нет токена' })
+//     const jwt = require('jsonwebtoken')
+//     const decoded = jwt.verify(token, process.env.SECRET)
+//     const userId = decoded.id
+//     db.prepare(
+//         'DELETE FROM disliked_tracks WHERE user_id = ? AND track_id = ?'
+//     ).run(userId, req.params.id)
+
+//     res.json({ message: 'Убрано из дизлайков' })
+// })
+
+
 // звездочки(rating)
 // поставить оценку
 router.post('/:id/rate', (req, res) => {
     const { rating } = req.body
     const track_id = req.params.id
     const token = req.headers.authorization?.split(' ')[1]
-
     if (!token) return res.status(401).json({ error: 'Нет токена' })
-
     const jwt = require('jsonwebtoken')
     const decoded = jwt.verify(token, process.env.SECRET)
     const user_id = decoded.id
-
     // INSERT OR REPLACE - если оценка уже есть то обновляем
     db.prepare(`
         INSERT INTO ratings (user_id, track_id, rating)
         VALUES (?, ?, ?)
         ON CONFLICT(user_id, track_id) DO UPDATE SET rating = ?
     `).run(user_id, track_id, rating, rating)
-
     // считаем средний рейтинг
     const avg = db.prepare('SELECT AVG(rating) as avg FROM ratings WHERE track_id = ?').get(track_id)
     res.json({ rating, avg: Math.round(avg.avg * 10) / 10 })
 })
 
+
 // получить свою оценку
 router.get('/:id/rate', (req, res) => {
     const track_id = req.params.id
     const token = req.headers.authorization?.split(' ')[1]
-
     if (!token) return res.status(401).json({ rating: 0 })
-
     const jwt = require('jsonwebtoken')
     const decoded = jwt.verify(token, process.env.SECRET)
     const user_id = decoded.id
-
     const rating = db.prepare('SELECT rating FROM ratings WHERE user_id = ? AND track_id = ?').get(user_id, track_id)
     const avg = db.prepare('SELECT AVG(rating) as avg FROM ratings WHERE track_id = ?').get(track_id)
-
     res.json({ 
         rating: rating ? rating.rating : 0,
         avg: avg.avg ? Math.round(avg.avg * 10) / 10 : 0
     })
 })
+
+
 //новый роутер с галочкой для поиска треков
 router.get('/search', (req, res) => {
     const token = req.headers.authorization?.split(' ')[1]
@@ -166,7 +209,6 @@ router.get('/search', (req, res) => {
     //заменили строчку с токеном
     const decoded = jwt.verify(token, process.env.SECRET)
     const userId = decoded.id
-
     // все треки + флаг есть ли в библиотеке пользователя
     const tracks = db.prepare(`
         SELECT tracks.*, 
@@ -176,6 +218,61 @@ router.get('/search', (req, res) => {
         ON tracks.id = user_library.track_id AND user_library.user_id = ?
     `).all(userId)
 
+    res.json(tracks)
+})
+
+//новые роутеры для топ 5 на главной странице
+// топ 5 популярных треков
+router.get('/top', (req, res) => {
+    const tracks = db.prepare(
+        'SELECT * FROM tracks ORDER BY likes DESC LIMIT 5'
+    ).all()
+    res.json(tracks)
+})
+
+
+// 5 последних добавленных треков
+router.get('/recent', (req, res) => {
+    const tracks = db.prepare(
+        'SELECT * FROM tracks ORDER BY id DESC LIMIT 5'
+    ).all()
+    res.json(tracks)
+})
+
+
+// dislike
+router.delete('/undislike/:id', (req, res) => {
+    const id = parseInt(req.params.id)
+    const token = req.headers.authorization?.split(' ')[1]
+    if (!token) return res.status(401).json({ error: 'Нет токена' })
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const userId = decoded.id
+    // проверяем уже дизлайкнул?
+    const existing = db.prepare(
+        'SELECT * FROM disliked_tracks WHERE user_id = ? AND track_id = ?'
+    ).get(userId, id)
+    if (existing) return res.json({ alreadyDisliked: true })
+    // добавляем в дизлайки
+    db.prepare(
+        'INSERT INTO disliked_tracks (user_id, track_id) VALUES (?,?)'
+    ).run(userId, id)
+    res.json({ alreadyDisliked: false })
+})
+
+
+// получить дизлайкнутые треки пользователя
+router.get('/disliked', (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1]
+    if (!token) return res.status(401).json({ error: 'Нет токена' })
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const userId = decoded.id
+    const tracks = db.prepare(`
+        SELECT tracks.* FROM tracks
+        JOIN disliked_tracks ON tracks.id = disliked_tracks.track_id
+        WHERE disliked_tracks.user_id = ?
+    `).all(userId)
     res.json(tracks)
 })
 //делаем доступный роутер для server.js

@@ -17,6 +17,7 @@
         <button class="nav-btn" title="Поиск" onclick="showPage('search',this)">🔍</button>
         <button class="nav-btn active" title="Музыка" onclick="showPage('music', this)">🎵</button>
         <button class="nav-btn" title="Плейлисты" onclick="showPage('playlists', this)">📁</button>
+        <button class="nav-btn" title="Артисты" onclick="showPage('artists', this)">🎤</button>
         <button class="nav-btn" title="Совместное прослушивание" onclick="showPage('together', this)">🎧</button>
         <button class="nav-btn" title="Настройки" onclick="showPage('settings', this)">⚙️</button>
 
@@ -28,11 +29,17 @@
 
     <!-- ГЛАВНАЯ СТРАНИЦА (по умолчанию) -->
     <div id="page-home" class="page active-page">
-        <div class="center-column">
-            <h2>Добро пожаловать 🐧</h2>
-            <p>Нажми 🎵 чтобы слушать музыку</p>
-        </div>
+    <div class="center-column">
+        <section class="tracks-section">
+            <h2>Топ 5 популярных</h2>
+            <div id="top-tracks"></div>
+        </section>
+        <section class="tracks-section">
+            <h2>Недавно добавленные</h2>
+            <div id="recent-tracks"></div>
+        </section>
     </div>
+</div>
 
     <!-- СТРАНИЦА МУЗЫКИ -->
     <div id="page-music" class="page">
@@ -45,9 +52,12 @@
                 <h2>Загрузить трек</h2>
                 <input type="text" id="track-title" placeholder="Название трека">
                 <input type="text" id="track-artist" placeholder="Артист">
-                <!--добавили обложку для трека!!!!!!!!!!!!-->
-                <input type="text" id="track-cover" placeholder="Имя файла обложки (например: rtut.jpg)">
-                <input type="file" id="track-file" accept=".mp3,.wav,.ogg">
+                <input type="text" id="track-cover-name" placeholder="Имя файла обложки">
+                <!--кнопка для файла-->
+                 <label class="custom-audio-upload">
+                    <input type="file" id="track-file" accept="audio/*">
+                     <span>🎵 Выбрать аудиофайл</span>
+                    </label>
                 <button onclick="uploadTrack()">Загрузить</button>
             </section>
         </div>
@@ -57,7 +67,7 @@
    <div id="page-search" class="page">
     <div class="center-column">
         <section class="tracks-section">
-            <h2>Поиск 🔍</h2>
+            <h2>Поиск</h2>
             <input type="text" id="search-input" placeholder="Название или артист..." oninput="searchTracks()">
             <div id="search-results"></div>
         </section>
@@ -67,7 +77,7 @@
 <div id="page-playlists" class="page">
     <div class="center-column">
         <section class="playlists-section">
-            <h2>Мои плейлисты 📁</h2>
+            <h2>Мои плейлисты</h2>
             <div class="create-playlist">
                 <input type="text" id="playlist-name" placeholder="Название плейлиста">
                 <button onclick="createPlaylist()">Создать</button>
@@ -76,31 +86,86 @@
         </section>
     </div>
 </div>
+
     <!-- СТРАНИЦА ВМЕСТЕ -->
     <div id="page-together" class="page">
         <div class="center-column">
-            <h2>Слушать вместе 🎧</h2>
+            <h2>Слушать вместе</h2>
             <p>Скоро будетs</p>
         </div>
     </div>
 
+    <!-- СТРАНИЦА АРТИСТОВ -->
+<div id="page-artists" class="page">
+    <div class="center-column" style="width:100%">
+        <section class="tracks-section">
+            <!--  новая анимированная полоска -->
+            <div class="gradient-strip">
+                <div class="snake-blob blob-1"></div>
+                <div class="snake-blob blob-2"></div>
+                <div class="snake-blob blob-3"></div>
+                <div class="snake-blob blob-4"></div>
+            </div>
+            <h2>Артисты</h2>
+            <!-- форма добавления артиста -->
+            <div class="create-playlist" style="margin-bottom:20px">
+                <input type="text" id="artist-name" placeholder="Имя артиста">
+                
+                <!-- Красивая кастомная кнопка загрузки файла -->
+                <label class="custom-file-upload">
+                    <input type="file" id="artist-photo" accept="image/*">
+                <span>📎 Выбрать фото</span>
+            </label>
+        <button onclick="addArtist()">Добавить</button>
+</div>
+
+            <!-- карточки артистов -->
+            <div id="artists-grid"></div>
+        </section>
+    </div>
+</div>
+
+<!-- СТРАНИЦА КОНКРЕТНОГО АРТИСТА -->
+<div id="page-artist" class="page">
+    <div class="center-column" style="width:100%">
+        <button onclick="showPage('artists')" 
+                style="background:none; border:none; color:var(--heading); 
+                       font-size:1rem; cursor:pointer; margin-bottom:15px; padding:0">
+            ← Назад к артистам
+        </button>
+        <section class="tracks-section">
+            <div id="artist-header"></div>
+            <div id="artist-tracks"></div>
+        </section>
+    </div>
+</div>
+
 <!-- СТРАНИЦА НАСТРОЕК -->
 <div id="page-settings" class="page">
     <div class="settings-wrapper">
-
         <h2>Настройки</h2>
-        <!-- профиль -->
-        <div class="settings-profile">
-            <div class="avatar-block">
-                <div class="avatar-preview" id="avatar-preview">
-                    <span>👤</span>
+        <!-- профиль и пароль в одну строку -->
+        <div class="settings-top-row">
+            <div class="settings-profile">
+                <div class="avatar-block">
+                    <div class="avatar-preview" id="avatar-preview">
+                        <span>👤</span>
+                    </div>
+                    <label class="avatar-label" for="avatar-input">Добавить аватар</label>
+                    <input type="file" id="avatar-input" accept="image/*" onchange="uploadAvatar(this)">
                 </div>
-                <label class="avatar-label" for="avatar-input">Добавить аватар</label>
-                <input type="file" id="avatar-input" accept="image/*" onchange="uploadAvatar(this)">
+                <div class="profile-info">
+                    <p class="profile-login" id="profile-login"></p>
+                    <p class="profile-name" id="profile-name"></p>
+                </div>
             </div>
-            <div class="profile-info">
-                <p class="profile-login" id="profile-login"></p>
-                <p class="profile-name" id="profile-name"></p>
+
+            <div class="settings-section">
+                <h3>Сменить пароль</h3>
+                <input type="password" id="old-password" placeholder="Старый пароль">
+                <input type="password" id="new-password" placeholder="Новый пароль">
+                <button onclick="changePassword()">Сохранить</button>
+                <p id="password-msg" class="settings-msg"></p>
             </div>
         </div>
 
@@ -127,13 +192,10 @@
             </div>
         </div>
 
-        <!-- сменить пароль -->
+        <!-- не понравилось -->
         <div class="settings-section">
-            <h3>Сменить пароль</h3>
-            <input type="password" id="old-password" placeholder="Старый пароль">
-            <input type="password" id="new-password" placeholder="Новый пароль">
-            <button onclick="changePassword()">Сохранить</button>
-            <p id="password-msg" class="settings-msg"></p>
+            <h3>Не понравилось</h3>
+            <div id="disliked-list"></div>
         </div>
 
         <!-- выйти -->
