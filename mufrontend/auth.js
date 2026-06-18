@@ -27,7 +27,7 @@ async function register() {
     }
 
     errorMsg.style.color = '#4c7aaf'
-    errorMsg.textContent = 'Успешно! Теперь войди в аккаунт'
+    errorMsg.textContent = 'Успешно,теперь войдите в аккаунт'
 }
 
 // вход
@@ -52,6 +52,8 @@ async function login() {
     // сохраняем токен в браузере
     localStorage.setItem('token', data.token)
     localStorage.setItem('name', data.name)
+    //add save tokens
+    localStorage.setItem('login', data.login)
 
     // переходим на главную страницу
     window.location.href = 'index.html'

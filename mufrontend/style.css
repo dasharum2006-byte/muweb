@@ -1,3 +1,16 @@
+:root {
+    --bg: #fdf0f5;
+    --accent: #e07090;
+    --accent-hover: #c2678a;
+    --border: #f4c2d8;
+    --sidebar-bg: #fff0f5;
+    --card-bg: #ffffff;
+    --card-inner: #fff5f9;
+    --text: #3a2a35;
+    --text-secondary: #b89aaa;
+    --heading: #c2678a;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,8 +19,8 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: #fdf0f5;
-    color: #3a2a35;
+    background-color: var(--bg);
+    color: var(--text);
     display: flex;
     height: 100vh;
     overflow: hidden;
@@ -16,13 +29,13 @@ body {
 /* БОКОВОЕ МЕНЮ */
 .sidebar {
     width: 70px;
-    background-color: #fff0f5;
-    border-right: 2px solid #f4c2d8;
+    background-color: var(--sidebar-bg);
+    border-right: 2px solid var(--border);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 15px 0;
-    gap: 0px;
+    padding: 5px 0;
+    gap: 5px;
     height: 100vh;
     position: fixed;
     left: 0;
@@ -32,16 +45,14 @@ body {
     z-index: 100;
 }
 
-/* когда наводим — выдвигается */
 .sidebar:hover {
     width: 180px;
 }
 
 .sidebar-logo {
-    width: 120px;
-    height: 120px;
+    width: 50px;
+    height: 50px;
     object-fit: contain;
-    flex-shrink: 0;
 }
 
 .sidebar-nav {
@@ -66,94 +77,104 @@ body {
     white-space: nowrap;
     width: 100%;
     text-align: left;
+    color: var(--text);
 }
 
 .nav-btn::after {
     font-size: 0.85rem;
-    color: #c2678a;
+    color: var(--heading);
     font-family: 'Montserrat', sans-serif;
     font-weight: 600;
     opacity: 0;
     transition: opacity 0.2s;
 }
 
-/* подписи к кнопкам */
 .nav-btn[title="Поиск"]::after { content: "Поиск"; }
 .nav-btn[title="Музыка"]::after { content: "Музыка"; }
 .nav-btn[title="Плейлисты"]::after { content: "Плейлисты"; }
 .nav-btn[title="Совместное прослушивание"]::after { content: "Вместе"; }
 .nav-btn[title="Настройки"]::after { content: "Настройки"; }
-.nav-btn[title="Выйти"]::after { content: "Выйти"; }
 
 .sidebar:hover .nav-btn::after {
     opacity: 1;
 }
 
-.nav-btn:hover {
-    background-color: #f4c2d8;
-}
-
-.nav-btn.active {
-    background-color: #f4c2d8;
+.nav-btn:hover, .nav-btn.active {
+    background-color: var(--border);
 }
 
 /* ОСНОВНОЙ КОНТЕНТ */
 .main-wrapper {
     margin-left: 70px;
     display: flex;
-    width: 100%;
+    width: calc(100% - 70px);
     height: 100vh;
     overflow: hidden;
-    max-width: 1100px;        /* ← максимальная ширина */
-    margin-right: auto; 
+    max-width: 1200px;
 }
 
-/* ЦЕНТРАЛЬНАЯ КОЛОНКА */
-.center-column {
-    flex: 1;
+.page {
+    display: none;
+    width: 100%;
+}
+
+.page.active-page {
     display: flex;
-    max-width: 420px;   
+}
+
+.center-column {
+    width: 380px;
+    min-width: 380px;
+    display: flex;
     flex-direction: column;
     gap: 20px;
     padding: 25px;
     overflow-y: auto;
 }
 
+/* СЕКЦИИ */
 .tracks-section, .playlists-section, .upload-section {
-    background-color: #ffffff;
+    background-color: var(--card-bg);
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(194, 103, 138, 0.1);
-    border: 1px solid #f4c2d8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
 }
 
 h2 {
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 15px;
-    color: #c2678a;
+    color: var(--heading);
 }
 
+/* КАРТОЧКА ТРЕКА */
 .track-card {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     padding: 12px 15px;
     border-radius: 8px;
     margin-bottom: 8px;
-    background-color: #fff5f9;
-    border: 1px solid #f4c2d8;
-    position: relative; 
+    background-color: var(--card-inner);
+    border: 1px solid var(--border);
+    position: relative;
+}
+
+.track-card > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .track-title {
     font-weight: 600;
     display: block;
     font-size: 0.95rem;
+    color: var(--text);
 }
 
 .track-artist {
-    color: #b89aaa;
+    color: var(--text-secondary);
     font-size: 0.85rem;
 }
 
@@ -161,7 +182,23 @@ h2 {
     display: flex;
     gap: 8px;
 }
-/*фиксированный размер книопок*/
+
+/* КНОПКИ */
+button {
+    background-color: var(--accent);
+    color: #ffffff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+}
+
+button:hover {
+    background-color: var(--accent-hover);
+}
+
 .track-buttons button:first-child {
     width: 90px;
     text-align: center;
@@ -174,43 +211,30 @@ h2 {
     padding: 8px 0;
 }
 
-button {
-    background-color: #e07090;
-    color: #ffffff;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.85rem;
-}
-
-button:hover {
-    background-color: #c2678a;
-}
-
+/* ПЛЕЙЛИСТЫ */
 .create-playlist {
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
-    align-items: center;  /* ← выравнивает по высоте */
+    align-items: center;
 }
 
 .create-playlist input {
     flex: 1;
     margin-bottom: 0;
-    height: 40px;  /* ← фиксированная высота */
+    height: 40px;
     padding: 0 14px;
 }
 
 .create-playlist button {
-    height: 40px;  /* ← такая же высота как у input */
+    height: 40px;
+    padding: 0 20px;
     white-space: nowrap;
 }
 
 .playlist-card {
-    background-color: #fff5f9;
-    border: 1px solid #f4c2d8;
+    background-color: var(--card-inner);
+    border: 1px solid var(--border);
     padding: 12px 15px;
     border-radius: 8px;
     margin-bottom: 8px;
@@ -219,27 +243,30 @@ button:hover {
     align-items: center;
     gap: 8px;
     transition: background 0.2s;
-}
-.playlist-card:hover {
-    background-color: #f4c2d8;
+    color: var(--text);
 }
 
-input[type="text"], input[type="file"] {
+.playlist-card:hover {
+    background-color: var(--border);
+}
+
+/* ИНПУТЫ */
+input[type="text"], input[type="file"], input[type="password"] {
     width: 100%;
     padding: 10px 14px;
     margin-bottom: 10px;
     border-radius: 6px;
-    border: 1px solid #f4c2d8;
-    background-color: #fff5f9;
-    color: #3a2a35;
+    border: 1px solid var(--border);
+    background-color: var(--card-inner);
+    color: var(--text);
     font-family: 'Montserrat', sans-serif;
     font-size: 0.9rem;
 }
 
 /* ПРАВАЯ КОЛОНКА — ПЛЕЕР */
 .right-column {
-    width: 50%;
-    min-width: 480px;
+    width: 470px;
+    min-width: 450px;
     padding: 25px;
     display: flex;
     align-items: flex-start;
@@ -249,15 +276,15 @@ input[type="text"], input[type="file"] {
 
 .player-card {
     width: 100%;
-    background-color: #ffffff;
-    border: 2px solid #f4c2d8;
+    background-color: var(--card-bg);
+    border: 2px solid var(--border);
     border-radius: 20px;
     padding: 25px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 18px;
-    box-shadow: 0 4px 20px rgba(194, 103, 138, 0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
 #cover-image {
@@ -265,7 +292,6 @@ input[type="text"], input[type="file"] {
     aspect-ratio: 1/1;
     border-radius: 12px;
     object-fit: cover;
-    box-shadow: 0 4px 15px rgba(194, 103, 138, 0.2);
 }
 
 .player-info {
@@ -278,17 +304,17 @@ input[type="text"], input[type="file"] {
 #current-title {
     font-weight: 700;
     font-size: 1.1rem;
-    color: #3a2a35;
+    color: var(--text);
 }
 
 #current-artist {
-    color: #b89aaa;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
 audio {
     width: 100%;
-    accent-color: #e07090;
+    accent-color: var(--accent);
 }
 
 .like-buttons {
@@ -300,89 +326,360 @@ audio {
 
 .like-btn, .dislike-btn {
     background: none;
-    border: 2px solid #e04e8d;
+    border: 2px solid var(--border);
     font-size: 1.5rem;
     padding: 10px 20px;
     border-radius: 50px;
     cursor: pointer;
-    filter: grayscale(100%);  /* ← делает эмодзи серым */
-    transition: background 0.2s;
+    filter: grayscale(100%);
+    transition: filter 0.2s;
 }
+
 .like-btn.liked {
-    filter: grayscale(0%);  /* ← после нажатия становится красным */
-}
-.like-btn:hover {
-    background-color: #dd6f94;
+    filter: grayscale(0%);
 }
 
-.dislike-btn:hover {
-    background-color: #fff0f5;
-}
-.page {
-    display: none;
-    width: 100%;
+.like-btn:hover, .dislike-btn:hover {
+    background-color: var(--card-inner);
 }
 
-.page.active-page {
-    display: flex;
-}
-
+/* МЕНЮ ПЛЕЙЛИСТА */
 .add-to-playlist-btn {
     width: 35px !important;
-    background-color: #d4c5f9 !important;
-    color: #6a4fa3 !important;
+    background-color: var(--border) !important;
+    color: var(--heading) !important;
     font-size: 1.2rem !important;
     padding: 4px 0 !important;
-}
-
-.add-to-playlist-btn:hover {
-    background-color: #b8a0e8 !important;
 }
 
 .playlist-menu {
     position: absolute;
     margin-top: 5px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #f4c2d8;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(194, 103, 138, 0.2);
-    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     z-index: 100;
     min-width: 150px;
+}
+
+.playlist-menu p {
+    padding: 10px 15px;
+    color: var(--heading);
+    font-size: 0.85rem;
+    text-align: center;
 }
 
 .playlist-menu-item {
     padding: 10px 15px;
     cursor: pointer;
     font-size: 0.9rem;
-    color: #3a2a35;
+    color: var(--text);
 }
 
 .playlist-menu-item:hover {
-    background-color: #fff5f9;
+    background-color: var(--card-inner);
 }
+
+/* ОТКРЫТЫЙ ПЛЕЙЛИСТ */
 .open-playlist {
     margin-top: 15px;
-    background: #fff5f9;
-    border: 1px solid #f5a5c7;
+    background: var(--card-inner);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 15px;
 }
 
 .open-playlist h3 {
-    color: #c2678a;
+    color: var(--heading);
     margin-bottom: 10px;
     font-size: 1rem;
 }
+
 .open-playlist .track-buttons button {
     width: 80px;
     padding: 8px 0;
     text-align: center;
 }
-.playlist-menu p {
-    padding: 10px 15px;
-    color: #c2678a;
+
+/* НАСТРОЙКИ */
+.settings-wrapper {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.settings-header h2 {
+    font-size: 1.5rem;
+    color: var(--heading);
+}
+
+.avatar-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    overflow: hidden;
+    border: 2px solid var(--border);
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-label {
+    font-size: 0.8rem;
+    color: var(--heading);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+#avatar-input {
+    display: none;
+}
+
+.themes-block h3 {
+    font-size: 1rem;
+    color: var(--heading);
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.themes-list {
+    display: flex;
+    gap: 15px;
+}
+
+.theme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.theme-card span {
     font-size: 0.85rem;
-    text-align: center;
+    color: var(--text);
+}
+
+.theme-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    border: 3px solid transparent;
+    transition: border 0.2s;
+}
+
+.theme-card:hover .theme-preview {
+    border-color: var(--accent);
+}
+
+.theme-card.active .theme-preview {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.pink-theme { background: linear-gradient(135deg, #fdf0f5, #f4c2d8); }
+.purple-theme { background: linear-gradient(135deg, #f0e6ff, #d4c5f9); }
+.blue-theme { background: linear-gradient(135deg, #e6f4ff, #b8d8f4); }
+.dark-theme { background: linear-gradient(135deg, #2c2c2c, #1a1a2e); }
+
+.settings-profile {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 25px;
+    min-height: 160px;
+}
+
+.avatar-preview {
+    width: 130px;
+    height: 130px;
+    border-radius: 12px;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+}
+
+.avatar-label {
+    font-size: 0.95rem;
+    color: var(--heading);
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 5px;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.profile-login {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.profile-name {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+.settings-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.settings-section h3 {
+    color: var(--heading);
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.settings-msg {
+    font-size: 0.85rem;
+    color: var(--heading);
+    min-height: 20px;
+}
+
+.logout-btn-settings {
+    background: none;
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+}
+
+.logout-btn-settings:hover {
+    background-color: var(--card-inner);
+}
+
+/*Для ромба меняем цвет который в плеере*/
+.view-btn {
+    background: none !important;
+    border: 2px solid var(--border) !important;
+    color: var(--accent) !important;
+    font-size: 1.2rem !important;
+    padding: 10px 15px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+}
+
+.view-btn:hover {
+    background-color: var(--card-inner) !important;
+}
+/*Для кастомного плеера*/
+.custom-player {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--accent);
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.1s;
+}
+
+.progress-dot {
+    width: 14px;
+    height: 14px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    transform: translate(-50%, -50%);
+    transition: left 0.1s;
+}
+
+.player-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.control-btn {
+    background: none !important;
+    border: none !important;
+    font-size: 1.5rem !important;
+    cursor: pointer !important;
+    color: var(--text) !important;
+    padding: 5px !important;
+    transition: color 0.2s !important;
+}
+
+.control-btn:hover {
+    color: var(--accent) !important;
+}
+
+.play-btn {
+    font-size: 2rem !important;
+    color: var(--accent) !important;
 }
