@@ -12,7 +12,9 @@
 
 <!-- БОКОВОЕ МЕНЮ -->
 <aside class="sidebar">
-    <img src="images/penguin-logo.png" alt="логотип" class="sidebar-logo" onclick="showPage('home', null)" style="cursor:pointer">
+    <button class="sidebar-logo-wrapper" onclick="showPage('home', null)" title="На главную">
+        <img src="images/penguin-logo.png" alt="логотип" class="sidebar-logo">
+    </button>
     <nav class="sidebar-nav">
         <button class="nav-btn" title="Поиск" onclick="showPage('search',this)">🔍</button>
         <button class="nav-btn active" title="Музыка" onclick="showPage('music', this)">🎵</button>
@@ -143,64 +145,59 @@
 <!-- СТРАНИЦА НАСТРОЕК -->
 <div id="page-settings" class="page">
     <div class="settings-wrapper">
-        <h2>Настройки</h2>
-        <!-- профиль и пароль в одну строку -->
-        <div class="settings-top-row">
-            <div class="settings-profile">
-                <div class="avatar-block">
-                    <div class="avatar-preview" id="avatar-preview">
-                        <span>👤</span>
+        <h2 class="settings-main-title">Настройки</h2>
+        <div class="settings-grid-layout">
+            <!-- Левая колонка: Профиль пользователя -->
+            <div class="settings-card profile-main-card">
+                <div class="avatar-container">
+                    <img id="avatar-img" src="images/penguin-logo.png" alt="Аватар">
+                    <label class="custom-avatar-btn">
+                        <input type="file" id="avatar-input" accept="image/*" onchange="uploadAvatar()">
+                        <span> Изменить фото</span>
+                    </label>
+                </div>
+        
+                    <div class="profile-info-details">
+                    <div class="info-row login-row">
+                        <span class="info-label">Логин</span>
+                        <span class="info-value" id="user-login-val"></span>
                     </div>
-                    <label class="avatar-label" for="avatar-input">Добавить аватар</label>
-                    <input type="file" id="avatar-input" accept="image/*" onchange="uploadAvatar(this)">
-                </div>
-                <div class="profile-info">
-                    <p class="profile-login" id="profile-login"></p>
-                    <p class="profile-name" id="profile-name"></p>
+                    <div class="info-row name-row">
+                        <span class="info-label">Имя</span>
+                        <span class="info-value" id="user-name-val"></span>
+                    </div>
                 </div>
             </div>
-
-            <div class="settings-section">
-                <h3>Сменить пароль</h3>
-                <input type="password" id="old-password" placeholder="Старый пароль">
-                <input type="password" id="new-password" placeholder="Новый пароль">
-                <button onclick="changePassword()">Сохранить</button>
-                <p id="password-msg" class="settings-msg"></p>
+                <!-- Правая колонка Безопасность и Выход -->
+            <div class="settings-card security-card">
+                <h3>Безопасность</h3>
+                <div class="password-form">
+                    <input type="password" id="old-password" placeholder="Старый пароль">
+                    <input type="password" id="new-password" placeholder="Новый пароль">
+                    <button class="settings-action-btn" onclick="changePassword()">Сохранить</button>
+                </div>
+                <button class="logout-btn-danger" onclick="logout()">
+                     Выйти из аккаунта
+                </button>
             </div>
         </div>
-
-        <!-- темы -->
-        <div class="themes-block">
+        <!-- Блок Выбора Тем -->
+        <div class="settings-card themes-card">
             <h3>Темы</h3>
-            <div class="themes-list">
-                <div class="theme-card" onclick="setTheme('pink', this)">
-                    <div class="theme-preview pink-theme"></div>
-                    <span>Розовая</span>
-                </div>
-                <div class="theme-card" onclick="setTheme('purple', this)">
-                    <div class="theme-preview purple-theme"></div>
-                    <span>Сиреневая</span>
-                </div>
-                <div class="theme-card" onclick="setTheme('blue', this)">
-                    <div class="theme-preview blue-theme"></div>
-                    <span>Голубая</span>
-                </div>
-                <div class="theme-card" onclick="setTheme('dark', this)">
-                    <div class="theme-preview dark-theme"></div>
-                    <span>Тёмная</span>
-                </div>
+            <div class="themes-options-row">
+                <div class="theme-dot pink" onclick="setTheme('pink')"><span>Розовая</span></div>
+                <div class="theme-dot purple" onclick="setTheme('purple')"><span>Сиреневая</span></div>
+                <div class="theme-dot blue" onclick="setTheme('blue')"><span>Голубая</span></div>
+                <div class="theme-dot dark" onclick="setTheme('dark')"><span>Тёмная</span></div>
             </div>
         </div>
-
-        <!-- не понравилось -->
-        <div class="settings-section">
+            <div class="settings-card blacklist-card">
             <h3>Не понравилось</h3>
-            <div id="disliked-list"></div>
+            <p class="blacklist-subtitle">Здесь можно быстро вернуть треки обратно в общие подборки</p>
+            <div id="blacklist-tracks-container" class="blacklist-grid">
+            </div>
         </div>
-
-        <!-- выйти -->
-        <button class="logout-btn-settings" onclick="logout()">🚪 Выйти из аккаунта</button>
-
+    
     </div>
 </div>
  

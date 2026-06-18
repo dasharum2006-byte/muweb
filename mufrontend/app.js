@@ -412,27 +412,28 @@ function openPlaylist(id, name) {
 
 
 
-//Новые функции для настроек - аватар, смена тем
 function setTheme(name) {
-    // убираем active со всех карточек
-    document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'))
-    // ставим active на выбранную
-    event.target.closest('.theme-card').classList.add('active')
-    // сохраняем тему
+    document.querySelectorAll('.theme-dot').forEach(c => c.classList.remove('active'))
+    event.target.closest('.theme-dot').classList.add('active')
     localStorage.setItem('theme', name)
     applyTheme(name)
 }
 
-
 function applyTheme(name) {
     const root = document.documentElement
+
+    // Сохраняем выбор пользователя в память браузера
+    localStorage.setItem('selected-theme', name)
 
     if (name === 'pink') {
         root.style.setProperty('--bg', '#fdf0f5')
         root.style.setProperty('--accent', '#e07090')
         root.style.setProperty('--accent-hover', '#c2678a')
         root.style.setProperty('--border', '#f4c2d8')
-        root.style.setProperty('--sidebar-bg', '#fff0f5')
+        
+        // Розовое полупрозрачное стекло
+        root.style.setProperty('--sidebar-bg', 'rgba(255, 240, 245, 0.4)') 
+        
         root.style.setProperty('--card-bg', '#ffffff')
         root.style.setProperty('--card-inner', '#fff5f9')
         root.style.setProperty('--text', '#3a2a35')
@@ -443,7 +444,10 @@ function applyTheme(name) {
         root.style.setProperty('--accent', '#9b7fd4')
         root.style.setProperty('--accent-hover', '#7a5cb8')
         root.style.setProperty('--border', '#d4c5f9')
-        root.style.setProperty('--sidebar-bg', '#ede6ff')
+        
+        // Сиреневое полупрозрачное стекло
+        root.style.setProperty('--sidebar-bg', 'rgba(237, 230, 255, 0.45)') 
+        
         root.style.setProperty('--card-bg', '#ffffff')
         root.style.setProperty('--card-inner', '#f5f0ff')
         root.style.setProperty('--text', '#2a1a3a')
@@ -454,7 +458,10 @@ function applyTheme(name) {
         root.style.setProperty('--accent', '#5b9bd5')
         root.style.setProperty('--accent-hover', '#3a7ab8')
         root.style.setProperty('--border', '#b8d8f4')
-        root.style.setProperty('--sidebar-bg', '#e6f4ff')
+        
+        // Голубое полупрозрачное стекло
+        root.style.setProperty('--sidebar-bg', 'rgba(230, 244, 255, 0.45)') 
+        
         root.style.setProperty('--card-bg', '#ffffff')
         root.style.setProperty('--card-inner', '#f0f7ff')
         root.style.setProperty('--text', '#1a2a3a')
@@ -465,7 +472,10 @@ function applyTheme(name) {
         root.style.setProperty('--accent', '#b2bbc088')
         root.style.setProperty('--accent-hover', '#9db9cf')
         root.style.setProperty('--border', '#adadb8')
-        root.style.setProperty('--sidebar-bg', '#16213e')
+        
+        // Тёмно-серый стеклянный сайдбар для темной темы
+        root.style.setProperty('--sidebar-bg', 'rgba(22, 33, 62, 0.5)') 
+        
         root.style.setProperty('--card-bg', '#0f3460')
         root.style.setProperty('--card-inner', '#16213e')
         root.style.setProperty('--text', '#ffffff')
@@ -473,6 +483,13 @@ function applyTheme(name) {
         root.style.setProperty('--heading', '#7e9bf8')
     }
 }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('selected-theme') || 'pink' // Если ничего не сохранено, будет по дефолту розовая
+    applyTheme(savedTheme)
+})
+
 
 function uploadAvatar(input) {
     const file = input.files[0]
@@ -531,10 +548,10 @@ async function changePassword() {
 function loadProfile() {
     const login = localStorage.getItem('login')
     const name = localStorage.getItem('name')
-    const loginEl = document.getElementById('profile-login')
-    const nameEl = document.getElementById('profile-name')
-    if (loginEl) loginEl.textContent = '👤 ' + (login || '')
-    if (nameEl) nameEl.textContent = '🎵 ' + (name || '')
+    const loginEl = document.getElementById('user-login-val')
+    const nameEl = document.getElementById('user-name-val')
+    if (loginEl) loginEl.textContent = login || ''
+    if (nameEl) nameEl.textContent = name || ''
     // загружаем дизлайкнутые треки
     const token = localStorage.getItem('token')
     fetch('http://localhost:3000/tracks/disliked', {
@@ -542,7 +559,7 @@ function loadProfile() {
     })
         .then(res => res.json())
         .then(tracks => {
-            const list = document.getElementById('disliked-list')
+            const list = document.getElementById('blacklist-tracks-container')
             if (!list) return
             if (tracks.length === 0) {
                 list.innerHTML = '<p style="color:var(--text-secondary); font-size:0.85rem">Пока ничего нет</p>'
@@ -551,15 +568,15 @@ function loadProfile() {
             list.innerHTML = ''
             tracks.forEach(track => {
                 list.innerHTML += `
-                <div class="search-track-card">
-                    <div class="search-track-info">
-                        <span class="track-title">${track.title}</span>
-                        <span class="track-artist">${track.artist}</span>
+                <div class="blacklist-item-row">
+                    <div class="track-title-info">
+                        <span class="b-title">${track.title}</span>
+                        <span class="b-artist">${track.artist}</span>
                     </div>
-                <button onclick="removeDislike(${track.id}, this)" 
-            style="background:none; border:none; font-size:1.2rem; 
-                   cursor:pointer; color:var(--text-secondary)">×</button>
-</div>`
+                    <button onclick="removeDislike(${track.id}, this)"
+                            style="background:none; border:none; font-size:1.2rem;
+                                   cursor:pointer; color:var(--text-secondary)">×</button>
+                </div>`
             })
         })
 }
@@ -878,19 +895,22 @@ function loadHomePage() {
             const list = document.getElementById('top-tracks')
             list.innerHTML = ''
             tracks.forEach((track, i) => {
-                list.innerHTML += `
-                <div class="search-track-card">
-                    <span style="font-weight:700; color:var(--accent); min-width:25px">${i + 1}</span>
-                    <div class="search-track-info">
-                        <span class="track-title">${track.title}</span>
-                        <span class="track-artist">${track.artist}</span>
-                    </div>
-                    <div class="search-track-actions">
-                        <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
-                    </div>
-                </div>`
-            })
-        })
+    const stars = '★'.repeat(Math.round(track.avg_rating || 0)) +
+                  '☆'.repeat(5 - Math.round(track.avg_rating || 0))
+    list.innerHTML += `
+    <div class="search-track-card">
+        <span style="font-weight:700; color:var(--accent); min-width:25px">${i + 1}</span>
+        <div class="search-track-info">
+            <span class="track-title">${track.title}</span>
+            <span class="track-artist">${track.artist}</span>
+        </div>
+        <div class="search-track-actions">
+            <span style="color:#ffd700; font-size:0.85rem">${stars}</span>
+            <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+        </div>
+    </div>`
+    }) 
+})
     // последние 5
     fetch('http://localhost:3000/tracks/recent')
         .then(res => res.json())
@@ -1020,11 +1040,65 @@ function removeDislike(trackId, btn) {
     const token = localStorage.getItem('token')
     fetch(`http://localhost:3000/tracks/undislike/${trackId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + token }
-})
+        headers: { 'Authorization': 'Bearer ' + token }})
         .then(res => res.json())
         .then(() => {
             // убираем карточку из списка
-            btn.closest('.search-track-card').remove()
+            btn.closest('.blacklist-item-row').remove()
         })
 }
+
+function loadBlacklist() {
+    const token = localStorage.getItem('token')
+    fetch('http://localhost:3000/blacklist', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(res => res.json())
+    .then(tracks => {
+        const container = document.getElementById('blacklist-tracks-container')
+        container.innerHTML = ''
+        if (tracks.length === 0) {
+            container.innerHTML = '<p class="empty-playlist-text">Список пуст</p>'
+            return
+        }
+        tracks.forEach(track => {
+            container.innerHTML += `
+                <div class="blacklist-item-row" id="blacklist-row-${track.id}">
+                    <div class="track-title-info">
+                        <span class="b-title">${track.title}</span>
+                        <span class="b-artist">${track.artist}</span>
+                    </div>
+                    <!-- При клике шлём запрос на бэкенд -->
+                    <button class="remove-from-blacklist-btn" onclick="removeFromBlacklist(${track.id})">❌</button>
+                </div>
+            `
+        })
+    })
+}
+
+function removeFromBlacklist(trackId) {
+    const token = localStorage.getItem('token')
+    // Делаем запрос к роуту 
+    fetch(`http://localhost:3000/tracks/${trackId}/undislike`, {
+        method: 'DELETE', // или 'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Если сервер подтвердил удаление из БД
+        if (data.success || !data.error) {
+            const row = document.getElementById(`blacklist-row-${trackId}`)
+            if (row) row.remove()
+            //выводим уведомление
+            console.log('Трек успешно вернулся в общий доступ!')
+            // Если список опустел, пишем, что он пуст
+            const container = document.getElementById('blacklist-tracks-container')
+            if (container.children.length === 0) {
+                container.innerHTML = '<p class="empty-playlist-text">Список пуст</p>'
+            }
+        } else {
+            alert('Ошибка сервера: ' + data.error)
+        }
+    })
+    .catch(err => console.error('Ошибка:', err))
+}
+

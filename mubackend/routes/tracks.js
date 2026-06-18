@@ -224,9 +224,17 @@ router.get('/search', (req, res) => {
 //новые роутеры для топ 5 на главной странице
 // топ 5 популярных треков
 router.get('/top', (req, res) => {
-    const tracks = db.prepare(
-        'SELECT * FROM tracks ORDER BY likes DESC LIMIT 5'
-    ).all()
+    const tracks = db.prepare(`
+        SELECT tracks.*, 
+        AVG(ratings.rating) as avg_rating,
+        COUNT(ratings.id) as rating_count
+        FROM tracks
+        LEFT JOIN ratings ON tracks.id = ratings.track_id
+        GROUP BY tracks.id
+        HAVING rating_count > 0
+        ORDER BY avg_rating DESC
+        LIMIT 5
+    `).all()
     res.json(tracks)
 })
 
