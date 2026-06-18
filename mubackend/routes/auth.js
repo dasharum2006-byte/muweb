@@ -59,6 +59,31 @@ router.post('/login', async (req, res) => {
         { expiresIn: '7d' }  // токен живет 7 дней
     )
 
-    res.json({ token, name: user.name })
+    res.json({ token, name: user.name, login: user.login })
+})
+
+router.post('/change-password', async (req, res) => {
+    const { oldPassword, newPassword } = req.body
+    const token = req.headers.authorization?.split(' ')[1]
+
+    if (!token) return res.status(401).json({ error: 'Нет токена' })
+
+    const jwt = require('jsonwebtoken')
+    const SECRET = process.env.SECRET
+
+    try {
+        const decoded = jwt.verify(token, SECRET)
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(decoded.id)
+
+        const isCorrect = await bcrypt.compare(oldPassword, user.password)
+        if (!isCorrect) return res.status(400).json({ error: 'Неверный старый пароль' })
+
+        const hashed = await bcrypt.hash(newPassword, 10)
+        db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashed, user.id)
+
+        res.json({ message: 'Пароль изменён' })
+    } catch {
+        res.status(401).json({ error: 'Неверный токен' })
+    }
 })
 module.exports = router
