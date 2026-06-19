@@ -142,6 +142,10 @@ router.post('/like/:id', (req, res) => {
     const jwt = require('jsonwebtoken')
     const decoded = jwt.verify(token, process.env.SECRET)
     const userId = decoded.id
+    //Если юзер ставит лайк, мы автоматически удаляем трек из дизлайков!
+    db.prepare(
+        'DELETE FROM disliked_tracks WHERE user_id = ? AND track_id = ?'
+    ).run(userId, id)
     // проверяем лайкал ли уже
     const existing = db.prepare(
         'SELECT * FROM track_likes WHERE user_id = ? AND track_id = ?'
@@ -165,19 +169,6 @@ router.delete('/:id', (req, res) => {
     db.prepare('DELETE FROM tracks WHERE id = ?').run(req.params.id)
     res.json({ message: 'Трек удалён' })
 })
-
-// router.delete('/:id/dislike', (req, res) => {
-//     const token = req.headers.authorization?.split(' ')[1]
-//     if (!token) return res.status(401).json({ error: 'Нет токена' })
-//     const jwt = require('jsonwebtoken')
-//     const decoded = jwt.verify(token, process.env.SECRET)
-//     const userId = decoded.id
-//     db.prepare(
-//         'DELETE FROM disliked_tracks WHERE user_id = ? AND track_id = ?'
-//     ).run(userId, req.params.id)
-
-//     res.json({ message: 'Убрано из дизлайков' })
-// })
 
 
 // звездочки(rating)
@@ -318,3 +309,25 @@ router.get('/disliked', (req, res) => {
 })
 //делаем доступный роутер для server.js
 module.exports = router
+
+
+//Снять лайк (когда жмешь на сердечко на странице Любимое)
+router.delete('/unlike/:id', (req, res) => {
+    const id = parseInt(req.params.id)
+    const token = req.headers.authorization?.split(' ')[1]
+    if (!token) return res.status(401).json({ error: 'Нет токена' })
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const userId = decoded.id
+    // Проверяем, стоял ли лайк, чтобы уменьшить счетчик в общей таблице
+    const existing = db.prepare(
+        'SELECT * FROM track_likes WHERE user_id = ? AND track_id = ?'
+    ).get(userId, id)
+    if (existing) {
+        // Удаляем из таблицы связи
+        db.prepare('DELETE FROM track_likes WHERE user_id = ? AND track_id = ?').run(userId, id)
+        // Уменьшаем счетчик лайков у самого трека
+        db.prepare('UPDATE tracks SET likes = likes - 1 WHERE id = ?').run(id)
+    }
+    res.json({ success: true })
+})

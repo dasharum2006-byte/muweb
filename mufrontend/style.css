@@ -30,7 +30,7 @@ body {
 .nav-btn[title="Поиск"]::after { content: "Поиск"; }
 .nav-btn[title="Музыка"]::after { content: "Музыка"; }
 .nav-btn[title="Плейлисты"]::after { content: "Плейлисты"; }
-.nav-btn[title="Совместное прослушивание"]::after { content: "Вместе"; }
+.nav-btn[title="Любимое"]::after { content: "Любимое"; } 
 .nav-btn[title="Артисты"]::after { content: "Исполнители"; }
 .nav-btn[title="Настройки"]::after { content: "Настройки"; }
 
@@ -1482,4 +1482,256 @@ audio {
     font-size: 0.8rem !important;
     font-style: italic;
     margin: 0 !important;
+}
+
+/* Контейнер страницы Любимое */
+.favorites-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.favorites-header {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: var(--accent);
+}
+
+/* Прямоугольные карточки треков */
+.fav-track-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: color-mix(in srgb, var(--accent) 8%, transparent); /* Под цвет темы */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.fav-track-row:hover {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    transform: translateX(5px);
+}
+
+.fav-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fav-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.fav-artist {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.fav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Кнопки управления в строке */
+.fav-play-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: scale 0.2s;
+}
+
+.fav-play-btn:hover {
+    scale: 1.1;
+}
+
+.fav-heart-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #fff; /* Белое сердечко по умолчанию */
+    transition: opacity 0.2s;
+}
+
+.fav-heart-btn:hover {
+    opacity: 0.7;
+}
+
+/* НИЖНИЙ КОМПАКТНЫЙ ОСТРОВНОЙ ПЛЕЕР */
+.bottom-player {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1000px;
+    height: 75px;
+    
+    /* ЦВЕТ ПОД ТЕМУ: смешиваем цвет темы с прозрачностью для стеклянного эффекта */
+    background: color-mix(in srgb, var(--accent) 12%, rgba(255, 255, 255, 0.85)) !important;
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.2)) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    
+    display: none; /* JS включает на странице favorites */
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    box-sizing: border-box;
+    z-index: 9999;
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, color 0.3s;
+}
+
+/* Автоматическая адаптация, если в теме используется класс темной темы */
+.theme-dot.dark ~ #bottom-player-bar,
+[data-theme="dark"] #bottom-player-bar {
+    background: color-mix(in srgb, var(--accent) 12%, rgba(24, 24, 28, 0.85)) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff;
+}
+
+/* Левая часть: только трек и автор */
+.bp-left-block {
+    display: flex;
+    align-items: center;
+    width: 35%;
+    overflow: hidden;
+}
+
+/* Блок названия и артиста в одну строку */
+.bp-track-info {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.bp-title {
+    font-weight: bold;
+    font-size: 1rem;
+    color: inherit;
+}
+
+.bp-artist {
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+
+/* ЦЕНТРАЛЬНЫЙ БЛОК КНОПОК */
+.bp-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Кнопки переключения треков ⏮ и ⏭ */
+.bp-nav-btn {
+    background: none !important; /* Намертво убираем квадратные фоны */
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* Эффект при наведении на стрелочки */
+.bp-nav-btn:hover {
+    opacity: 1;
+}
+
+/* ТВОЙ ЗАПРОС: Эффект прозрачности при нажатии (клик мышкой) */
+.bp-nav-btn:active, .bp-main-play:active, .bp-heart-btn:active {
+    opacity: 0.3 !important; /* Кнопка становится сильно прозрачной в момент зажатия */
+    transform: scale(0.95);  /* Слегка вдавливается для интерактивности */
+}
+
+/* Центральная круглая кнопка Play (черный треугольник внутри) */
+.bp-main-play {
+    width: 42px;
+    height: 42px;
+    border-radius: 50% !important;
+    background: var(--accent, #a78bfa) !important;
+    color: #000000 !important; /* Черная иконка ▶ внутри */
+    border: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.bp-main-play:hover {
+    transform: scale(1.05);
+}
+
+
+/* ПРАВАЯ ЧАСТЬ: Время + Ползунок + Сердце */
+.bp-right-block {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 35%;
+    justify-content: flex-end;
+}
+
+.bp-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-grow: 1;
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+/* СВЕТЛО-СЕРЫЙ ПОЛЗУНОК */
+#bp-progress-bar {
+    width: 100%;
+    accent-color: var(--accent, #a78bfa);
+    cursor: pointer;
+    background: rgba(200, 200, 200, 0.4); /* Очень светлая дорожка */
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+}
+
+/* Кнопка-сердечко в самом конце */
+.bp-heart-btn {
+    background: none !important;
+    border: none !important;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+    padding: 0 !important;
+}
+
+.bp-heart-btn:hover {
+    transform: scale(1.1);
 }

@@ -20,7 +20,7 @@
         <button class="nav-btn active" title="Музыка" onclick="showPage('music', this)">🎵</button>
         <button class="nav-btn" title="Плейлисты" onclick="showPage('playlists', this)">📁</button>
         <button class="nav-btn" title="Артисты" onclick="showPage('artists', this)">🎤</button>
-        <button class="nav-btn" title="Совместное прослушивание" onclick="showPage('together', this)">🎧</button>
+        <button class="nav-btn" title="Любимое" onclick="showPage('favorites', this)">❤️</button>
         <button class="nav-btn" title="Настройки" onclick="showPage('settings', this)">⚙️</button>
     </nav>
 </aside>
@@ -70,11 +70,12 @@
         <section class="tracks-section">
             <h2>Поиск</h2>
             <!-- Добавили autocomplete="off", чтобы браузер не мешал своими подсказками -->
-            <input type="text" id="search-input" placeholder="Название трека или имя артиста..." oninput="liveSearch()" autocomplete="off">
+            <input type="text" id="search-input" placeholder="Название трека или имя артиста..." oninput="searchTracks()" autocomplete="off">
             <div id="search-results"></div>
         </section>
     </div>
 </div>
+
    <!-- СТРАНИЦА ПЛЕЙЛИСТОВ -->
 <div id="page-playlists" class="page">
     <div class="center-column">
@@ -89,13 +90,45 @@
     </div>
 </div>
 
-    <!-- СТРАНИЦА ВМЕСТЕ -->
-    <div id="page-together" class="page">
-        <div class="center-column">
-            <h2>Слушать вместе</h2>
-            <p>Скоро будетs</p>
+
+    <!-- СТРАНИЦА ЛЮБИМОЕ -->
+<div id="page-favorites" class="page">
+    <div class="favorites-container">
+        <h2 class="favorites-header">Любимое</h2>
+        <div id="favorites-tracks-list">
+            <!-- Сюда JS будет рендерить прямоугольные карточки треков -->
         </div>
     </div>
+</div>
+<!-- НИЖНИЙ КОМПАКТНЫЙ ОСТРОВНОЙ ПЛЕЕР -->
+<div id="bottom-player-bar" class="bottom-player">
+    <!-- Левая часть: Статус  + Информация о треке -->
+    <div class="bp-left-block">
+        <div class="bp-track-info">
+            <span id="bp-title" class="bp-title">Название трека</span>
+            <span id="bp-artist" class="bp-artist">Исполнитель</span>
+        </div>
+    </div>
+    
+    <!-- Центральная часть: Кнопки управления (Переключение треков и Play) -->
+    <div class="bp-controls">
+        <button class="bp-nav-btn" onclick="prevTrack()">⏮</button>
+        <button id="bp-play-btn" class="bp-main-play" onclick="togglePlay()">▶</button>
+        <button class="bp-nav-btn" onclick="nextTrack()">⏭</button>
+    </div>
+    
+    <!-- Правая часть: Светлый ползунок + Кнопка-Сердечко в самом конце -->
+    <div class="bp-right-block">
+        <div class="bp-progress-container">
+            <span id="bp-current-time">0:00</span>
+            <input type="range" id="bp-progress-bar" value="0" max="100" oninput="seekTrack(this.value)">
+            <span id="bp-total-time">0:00</span>
+        </div>
+        <button class="bp-heart-btn" onclick="toggleLikeCurrent()">❤️</button>
+    </div>
+</div>
+
+
 
     <!-- СТРАНИЦА АРТИСТОВ -->
 <div id="page-artists" class="page">
