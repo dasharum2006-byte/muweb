@@ -22,7 +22,6 @@
         <button class="nav-btn" title="Артисты" onclick="showPage('artists', this)">🎤</button>
         <button class="nav-btn" title="Совместное прослушивание" onclick="showPage('together', this)">🎧</button>
         <button class="nav-btn" title="Настройки" onclick="showPage('settings', this)">⚙️</button>
-
     </nav>
 </aside>
 <!--  в sidebar когда меню выдвигается подписи берутся из ::after в CSS через title. -->
@@ -70,7 +69,8 @@
     <div class="center-column">
         <section class="tracks-section">
             <h2>Поиск</h2>
-            <input type="text" id="search-input" placeholder="Название или артист..." oninput="searchTracks()">
+            <!-- Добавили autocomplete="off", чтобы браузер не мешал своими подсказками -->
+            <input type="text" id="search-input" placeholder="Название трека или имя артиста..." oninput="liveSearch()" autocomplete="off">
             <div id="search-results"></div>
         </section>
     </div>
@@ -112,7 +112,6 @@
             <!-- форма добавления артиста -->
             <div class="create-playlist" style="margin-bottom:20px">
                 <input type="text" id="artist-name" placeholder="Имя артиста">
-                
                 <!-- Красивая кастомная кнопка загрузки файла -->
                 <label class="custom-file-upload">
                     <input type="file" id="artist-photo" accept="image/*">
@@ -234,7 +233,7 @@
         </div>
         <!-- дизлайк, ромб, лайк -->
         <div class="like-buttons">
-            <button class="dislike-btn" onclick="dislikeTrack()">👎</button>
+            <button class="dislike-btn" onclick="dislikeTrack()">💘</button>
             <button class="view-btn" onclick="togglePlayerView()">◆</button>
             <button class="like-btn" onclick="likeTrack(currentTrackId, this)">❤️</button>
         </div>

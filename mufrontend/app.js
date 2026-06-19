@@ -2,8 +2,8 @@
 //document - all web page, .addEventListener - listen event - wait when something happend
 // DOMContentLoaded - event - all page loaded(HTML,CSS)
 document.addEventListener('DOMContentLoaded', () => {
-    showPage('home') // показываем главную по умолчанию
-    loadHomePage() //добавили после функций топ 5 
+    const savedPage = localStorage.getItem('currentPage') || 'home'
+    showPage(savedPage)
 })
 // запоминаем какой трек сейчас играет
 let currentTrackId = null//добавляем переменную для обложки
@@ -28,6 +28,7 @@ const userName = localStorage.getItem('name')
 ////
 function loadTracks() {
 // go to my server and  get data
+const token = localStorage.getItem('token')
     fetch('http://localhost:3000/tracks', {
         headers: { 'Authorization': 'Bearer ' + token }
     })
@@ -44,33 +45,24 @@ function loadTracks() {
         //проверяем есть ли песни, === - строго равно
             if (tracks.length === 0){
                 //list - контейнер как полка в шкафу куда мы кладем песни,Робот берет нашу пустую полку (list) и вешает на неё табличку с надписью: "Треков пока нет".
-                list.innerHTML = '<p>Треков пока нет</p>'
+                list.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem; padding: 10px;">Треков пока нет</p>'
                 //Робот сказал "песен нет", вывел сообщение и ушел. Он не будет пытаться показывать песни, которых нет.
                 return
             }
-            //мы получаем ответ от сервера,который мы превратили в массив
-            //Для КАЖДОГО трека из списка делаем одно и то же действие
-            //!!!!Добавили карточку трека 
-            //Добавила + к треку чобы можно было добавить в плейлист
-            //<div class="playlist-menu" id="playlist-menu-${currentsong.id}" style="display:none"></div> ----
-            //Это контейнер для выпадающего меню с плейлистами.Это контейнер для выпадающего меню с плейлистами.
-//Когда нажимаешь кнопку + — функция togglePlaylistMenu ищет этот контейнер по id и показывает внутри него список плейлистов.
-            //Комментим потому что нам надо было бы копировать весь код отрисовки в поиск
-            tracks.forEach(currentsong => {
-                //Для каждой песни создаём карточку в HTML и кидаем её в коробку. += значит "добавь к тому что уже есть", а не замени. ${} — это способ вставить переменную внутрь текста.
-                list.innerHTML += `
-                <div class="track-card">
-                <div class="track-info">
-                            <span class="track-title">${currentsong.title}</span>
-                            <span class="track-artist">${currentsong.artist}</span>
-                        </div>
-                        <div class="track-buttons">
-                            <button onclick="playTrack('${currentsong.filename}', '${currentsong.title}', '${currentsong.artist}', ${currentsong.id}, '${currentsong.cover}')">▶ Играть</button>
-                            <button onclick="likeTrack(${currentsong.id}, this)">❤</button>
-                                  <button class="add-to-playlist-btn" onclick="togglePlaylistMenu(${currentsong.id}, this)">+</button>
-                        </div>
-                               <div class="playlist-menu" id="playlist-menu-${currentsong.id}" style="display:none"></div>
-                    </div>`
+            tracks.forEach(track => {
+            list.innerHTML += `
+            <div class="playlist-track-row" data-track-id="${track.id}">
+            <div class="track-info-block">
+                <span class="track-title">${track.title}</span>
+                <span class="track-artist">${track.artist}</span>
+            </div>
+            <div class="track-actions-row-block">
+                <button class="add-to-playlist-circle-btn" onclick="togglePlaylistMenu(${track.id}, this)">+</button>
+                <button class="play-icon-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+        </div>
+    </div>
+`
+
             })
             //onclick — это значит "когда кликнули на эту кнопку — вызови функцию".
             //playTrack(...) — функция которую мы напишем в app.js. Ей нужно знать ЧТО играть, поэтому передаём три вещи:
@@ -124,7 +116,21 @@ function playTrack(filename, title, artist, id, cover) {
         //Это значит: "Возьми исполнителя из посылки (artist) и напиши его на табличке (currentArtist.textContent)"
         currentTitle.textContent = title
         currentArtist.textContent = artist
-        player.play()
+        // Сбрасываем старые подсветки кнопок в плеере
+        const likeBtn = document.querySelector('.like-btn')
+        const dislikeBtn = document.querySelector('.dislike-btn')
+        if (likeBtn) likeBtn.classList.remove('liked')
+        if (dislikeBtn) dislikeBtn.classList.remove('disliked')
+        // Ищем текущий трек в нашем общем массиве tracksList, который пришел из SQLite
+        const trackData = tracksList.find(t => t.id === id)
+        if (trackData) {
+            // Если в базе у трека стоит отметка лайка, робот сразу подсветит кнопку ❤️
+            if (trackData.is_liked) if (likeBtn) likeBtn.classList.add('liked')
+            // Если стоит отметка дизлайка, подсветит пронзенное сердце 💘
+            if (trackData.is_disliked) if (dislikeBtn) dislikeBtn.classList.add('disliked')
+    }
+    
+    player.play()
 } 
 
 //Обновление кнопок плей и пауза
@@ -148,7 +154,6 @@ function updatePlayButtons() {
     const player = document.getElementById('audio-player')
     // Находим абсолютно все круглые кнопочки на странице
     const allPlayButtons = document.querySelectorAll('.play-icon-btn')
-
     allPlayButtons.forEach(btn => {
         // Робот смотрит, какой ID зашит в атрибут onclick этой кнопки
         const match = btn.getAttribute('onclick').match(/,\s*(\d+)\s*,/) || btn.getAttribute('onclick').match(/,\s*(\d+)\s*\)/)
@@ -165,42 +170,71 @@ function updatePlayButtons() {
     });
 }
 
-function likeTrack(id, button) {
-    if (!id) return
+// function likeTrack(id, button) {
+//     if (!id) return
+//     const token = localStorage.getItem('token')
+//     fetch(`http://localhost:3000/tracks/${id}/like`, {
+//         method: 'POST',
+//         headers: { 'Authorization': 'Bearer ' + token }
+//     })
+//         .then(res => res.json())
+//         .then(data => {
+//             if (data.alreadyLiked) return
+//             if (button) {
+//                 button.classList.add('liked')
+//             }
+//             //ищем этот трек во всех списках и ставим ему сердечко
+//             const trackRows = document.querySelectorAll(`[data-track-id="${id}"]`)
+//             trackRows.forEach(row => {
+//                 const heartSpan = row.querySelector('.track-heart')
+//                 if (heartSpan) {
+//                     heartSpan.innerHTML = '❤️' // Рисуем сердечко
+//                 }
+//             })
+//         })
+// }
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+function likeTrack() {
+    if (!currentTrackId) return
     const token = localStorage.getItem('token')
-    fetch(`http://localhost:3000/tracks/${id}/like`, {
-        method: 'POST',
+    const likeBtn = document.querySelector('.like-btn')
+    const isLikedNow = likeBtn.classList.contains('liked')
+    // Шлем запрос на Node.js (POST ставит лайк, DELETE убирает — или делай как у тебя на бэке)
+    fetch(`http://localhost:3000/tracks/${currentTrackId}/like`, {
+        method: isLikedNow ? 'DELETE' : 'POST',
         headers: { 'Authorization': 'Bearer ' + token }
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.alreadyLiked) return
-            if (button) {
-                button.classList.add('liked')
+    .then(res => res.json())
+    .then(data => {
+        // Переключаем класс подсветки кнопки в плеере
+        likeBtn.classList.toggle('liked')
+        // Синхронизируем в памяти: находим трек в массиве и меняем ему статус вечно
+        const track = tracksList.find(t => t.id === currentTrackId)
+        if (track) {
+            track.is_liked = !isLikedNow
+            // Если лайкнули, то дизлайк автоматически должен сняться
+            if (track.is_liked) {
+                track.is_disliked = false
+                const dislikeBtn = document.querySelector('.dislike-btn')
+                if (dislikeBtn) dislikeBtn.classList.remove('disliked')
             }
-            //ищем этот трек во всех списках и ставим ему сердечко
-            const trackRows = document.querySelectorAll(`[data-track-id="${id}"]`)
-            trackRows.forEach(row => {
-                const heartSpan = row.querySelector('.track-heart')
-                if (heartSpan) {
-                    heartSpan.innerHTML = '❤️' // Рисуем сердечко
-                }
-            })
-        })
+        }
+    })
 }
+
+
 
 function uploadTrack() {
     const title = document.getElementById('track-title').value
     const artist = document.getElementById('track-artist').value
     //добавили обложку для трека!!!!!!!!!
-    const cover = document.getElementById('track-cover').value
+    const cover = document.getElementById('track-cover-name').value
     const file = document.getElementById('track-file').files[0]
-
     if (!title || !artist || !file) {
         alert('Заполните все поля')
         return
     }
-//добавила cover 
+    //добавила cover 
     const formData = new FormData()
     formData.append('title', title)
     formData.append('artist', artist)
@@ -208,17 +242,27 @@ function uploadTrack() {
     formData.append('audio', file)
     //add new stroke чтобы токен не получал пустой токен и падал
     const token = localStorage.getItem('token') 
-    fetch('http://localhost:3000/tracks/upload', {
+        fetch('http://localhost:3000/tracks/upload', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token },
         body: formData
     })
         .then(res => res.json())
         .then(data => {
+            // Если бэкенд вернул ошибку про дубликат
+            if (data.error) {
+                alert(data.error) // Выведет: "Этот трек уже есть в вашей медиатеке!"
+                return // Выходим из функции, списки обновлять не нужно
+            }
+            // Если всё прошло успешно
             alert('Трек загружен')
+            // 1. Обновляет список "Все треки" на странице музыки
             loadTracks()
-        })
+            // 2. ДОБАВЛЯЕМ СЮДА: мгновенно обновляет "Недавно добавленные" и Топ-5 на главной
+            loadHomePage()
+        }).catch(err => console.error('Ошибка отправки формы', err))
 }
+
 
 function loadPlaylists() {
     fetch('http://localhost:3000/playlists')
@@ -269,6 +313,8 @@ function showPage(name, btn) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
     // ставим active на нажатую кнопку
     if (btn) btn.classList.add('active')
+    //добавили текущую страницу
+    localStorage.setItem('currentPage', name)
     // загружаем данные для нужной страницы
     // прячем плеер на странице настроек
     const rightColumn = document.querySelector('.right-column')
@@ -317,8 +363,17 @@ function logout() {
 
 //Добавила новые функции две для трека чтобы можно было загружать их в плейлист
 function togglePlaylistMenu(trackId, btn) {
-    const menu = document.getElementById('playlist-menu-' + trackId)
-    // если меню уже открыто - закрываем
+    let  menu = document.getElementById('playlist-menu-' + trackId)
+    // Если меню еще нет на этой странице (например, в поиске), 
+    // робот сам создаст его и прикрепит прямо к кнопке плюсика
+     if (!menu) {
+        menu = document.createElement('div')
+        menu.id = 'playlist-menu-' + trackId
+        menu.className = 'playlist-menu'
+        menu.style.display = 'none'
+        // Вставляем меню в HTML сразу после кнопки, на которую нажали
+        btn.after(menu)
+    }
     if (menu.style.display === 'block') {
         menu.style.display = 'none'
         return
@@ -328,7 +383,7 @@ function togglePlaylistMenu(trackId, btn) {
         .then(res => res.json())
         .then(playlists => {
             menu.innerHTML = ''
-//добавили время
+            //добавили время
             if (playlists.length === 0) {
                 menu.innerHTML = '<p>Сначала создай плейлист</p>'
                 menu.style.display = 'block'
@@ -346,7 +401,7 @@ function togglePlaylistMenu(trackId, btn) {
                 })
             }
             menu.style.display = 'block'
-        })
+        }).catch(err => console.error('Ошибка загрузки меню плейлистов:', err))
 }
 
 
@@ -397,7 +452,6 @@ function openPlaylist(id, name) {
                                 <span class="track-artist">${track.artist}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <span class="track-heart">${track.is_liked ? '❤️' : ''}</span> 
                                 <button class="play-icon-btn" onclick="event.stopPropagation(); playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
                             </div>
                         </div>
@@ -430,10 +484,8 @@ function applyTheme(name) {
         root.style.setProperty('--accent', '#e07090')
         root.style.setProperty('--accent-hover', '#c2678a')
         root.style.setProperty('--border', '#f4c2d8')
-        
         // Розовое полупрозрачное стекло
         root.style.setProperty('--sidebar-bg', 'rgba(255, 240, 245, 0.4)') 
-        
         root.style.setProperty('--card-bg', '#ffffff')
         root.style.setProperty('--card-inner', '#fff5f9')
         root.style.setProperty('--text', '#3a2a35')
@@ -444,10 +496,8 @@ function applyTheme(name) {
         root.style.setProperty('--accent', '#9b7fd4')
         root.style.setProperty('--accent-hover', '#7a5cb8')
         root.style.setProperty('--border', '#d4c5f9')
-        
         // Сиреневое полупрозрачное стекло
         root.style.setProperty('--sidebar-bg', 'rgba(237, 230, 255, 0.45)') 
-        
         root.style.setProperty('--card-bg', '#ffffff')
         root.style.setProperty('--card-inner', '#f5f0ff')
         root.style.setProperty('--text', '#2a1a3a')
@@ -458,10 +508,8 @@ function applyTheme(name) {
         root.style.setProperty('--accent', '#5b9bd5')
         root.style.setProperty('--accent-hover', '#3a7ab8')
         root.style.setProperty('--border', '#b8d8f4')
-        
         // Голубое полупрозрачное стекло
         root.style.setProperty('--sidebar-bg', 'rgba(230, 244, 255, 0.45)') 
-        
         root.style.setProperty('--card-bg', '#ffffff')
         root.style.setProperty('--card-inner', '#f0f7ff')
         root.style.setProperty('--text', '#1a2a3a')
@@ -472,10 +520,8 @@ function applyTheme(name) {
         root.style.setProperty('--accent', '#b2bbc088')
         root.style.setProperty('--accent-hover', '#9db9cf')
         root.style.setProperty('--border', '#adadb8')
-        
         // Тёмно-серый стеклянный сайдбар для темной темы
         root.style.setProperty('--sidebar-bg', 'rgba(22, 33, 62, 0.5)') 
-        
         root.style.setProperty('--card-bg', '#0f3460')
         root.style.setProperty('--card-inner', '#16213e')
         root.style.setProperty('--text', '#ffffff')
@@ -872,16 +918,16 @@ function searchTracks() {
     const icon = track.inLibrary ? '✓' : '✕'
     const iconColor = track.inLibrary ? '#729773' : '#ccc'
     list.innerHTML += `
-    <div class="search-track-card">
-        <div class="search-track-info">
-            <span class="track-title">${track.title}</span>
-            <span class="track-artist">${track.artist}</span>
+    <div class="search-result-row">
+        <div class="search-result-info">
+            <span class="s-title">${track.title}</span>
+            <span class="s-artist">${track.artist}</span>
         </div>
-        <div class="search-track-actions">
-            <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
-            <span class="search-library-icon" style="color:${iconColor}">${icon}</span>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button class="play-icon-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
         </div>
-    </div>`
+    </div>
+`
 })
 }
 
@@ -1024,15 +1070,34 @@ function openArtist(id, name) {
 function dislikeTrack() {
     if (!currentTrackId) return
     const token = localStorage.getItem('token')
-    fetch(`http://localhost:3000/tracks/${currentTrackId}/dislike`, {
-        method: 'POST',
+    const dislikeBtn = document.querySelector('.dislike-btn')
+    // Проверяем, горит ли кнопка дизлайка прямо сейчас
+    const isDislikedNow = dislikeBtn.classList.contains('disliked')
+    // Если дизлайк уже стоит — шлем DELETE на удаление, если нет — POST на добавление
+    const url = isDislikedNow 
+        ? `http://localhost:3000/tracks/undislike/${currentTrackId}` 
+        : `http://localhost:3000/tracks/dislike/${currentTrackId}`
+    const method = isDislikedNow ? 'DELETE' : 'POST'
+    fetch(url, {
+        method: method,
         headers: { 'Authorization': 'Bearer ' + token }
     })
         .then(res => res.json())
         .then(data => {
-            if (data.alreadyDisliked) return
-            document.querySelector('.dislike-btn').classList.add('disliked')
-        })
+            // Переключаем класс подсветки кнопки-сердца 
+            dislikeBtn.classList.toggle('disliked')
+            // Запоминаем статус в памяти, чтобы при обновлении или переключении треков всё помнилось
+            const track = tracksList.find(t => t.id === currentTrackId)
+            if (track) {
+                track.is_disliked = !isDislikedNow
+                // Если мы поставили дизлайк, то лайк автоматически должен сняться!
+                if (track.is_disliked) {
+                    track.is_liked = false
+                    const likeBtn = document.querySelector('.like-btn')
+                    if (likeBtn) likeBtn.classList.remove('liked')
+                }
+            }
+        }).catch( err => console.error('Ошибка дизлайка:', err))
 }
 
 
@@ -1079,8 +1144,9 @@ function loadBlacklist() {
 function removeFromBlacklist(trackId) {
     const token = localStorage.getItem('token')
     // Делаем запрос к роуту 
-    fetch(`http://localhost:3000/tracks/${trackId}/undislike`, {
+    fetch(`http://localhost:3000/tracks/undislike/${trackId}`, {
         method: 'DELETE', // или 'POST'
+        headers: {'Authorization': 'Bearer ' + token}
     })
     .then(res => res.json())
     .then(data => {
@@ -1089,15 +1155,18 @@ function removeFromBlacklist(trackId) {
             const row = document.getElementById(`blacklist-row-${trackId}`)
             if (row) row.remove()
             //выводим уведомление
-            console.log('Трек успешно вернулся в общий доступ!')
+            console.log('Трек успешно вернулся в общий доступ')
             // Если список опустел, пишем, что он пуст
             const container = document.getElementById('blacklist-tracks-container')
-            if (container.children.length === 0) {
+            if (container && container.children.length === 0) {
                 container.innerHTML = '<p class="empty-playlist-text">Список пуст</p>'
             }
-        } else {
-            alert('Ошибка сервера: ' + data.error)
-        }
+            // Обновляем статус трека в памяти, если он сейчас загружен на главной
+            const track = tracksList.find(t => t.id === trackId)
+            if (track) track.is_disliked = false
+            } else {
+                alert('Ошибка сервера: ' + data.error)
+            }
     })
     .catch(err => console.error('Ошибка:', err))
 }
