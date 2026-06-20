@@ -2,8 +2,9 @@
 //document - all web page, .addEventListener - listen event - wait when something happend
 // DOMContentLoaded - event - all page loaded(HTML,CSS)
 document.addEventListener('DOMContentLoaded', () => {
-    const savedPage = localStorage.getItem('currentPage') || 'home'
-    showPage(savedPage)
+    const lastPage = localStorage.getItem('currentPage') || 'home'
+    showPage(lastPage)
+    loadHomePage()
 })
 // запоминаем какой трек сейчас играет
 let currentTrackId = null//добавляем переменную для обложки
@@ -79,10 +80,12 @@ const token = localStorage.getItem('token')
 // Воспроизвести трек (Обновленная версия)
 function playTrack(filename, title, artist, id, cover) {
     const player = document.getElementById('audio-player')
+    const trackData = tracksList.find(t => t.id === id)
+    const isLiked = trackData ? trackData.is_liked : false 
     // Если кликнули на тот же самый трек, который уже играет или на паузе
     if (currentTrackId === id) {
         if (player.paused) {
-            player.play(); // Если стоял на паузе — запускаем
+            player.play().catch(err => console.log('Прервано')) // Если стоял на паузе — запускаем
         } else {
             player.pause(); // Если играл — ставим на паузу
         }
@@ -112,28 +115,33 @@ function playTrack(filename, title, artist, id, cover) {
     }
         //загружаем нужный файл в плеер
         player.src = `http://localhost:3000/uploads/${filename}`
-        //меняем текст на текущую песню
-        //Это значит: "Возьми исполнителя из посылки (artist) и напиши его на табличке (currentArtist.textContent)"
-        currentTitle.textContent = title
-        currentArtist.textContent = artist
-        // Сбрасываем старые подсветки кнопок в плеере
-        const likeBtn = document.querySelector('.like-btn')
-        const dislikeBtn = document.querySelector('.dislike-btn')
-        if (likeBtn) likeBtn.classList.remove('liked')
-        if (dislikeBtn) dislikeBtn.classList.remove('disliked')
-        // Ищем текущий трек в нашем общем массиве tracksList, который пришел из SQLite
-        const trackData = tracksList.find(t => t.id === id)
-        if (trackData) {
-            // Если в базе у трека стоит отметка лайка, робот сразу подсветит кнопку ❤️
-            if (trackData.is_liked) if (likeBtn) likeBtn.classList.add('liked')
-            // Если стоит отметка дизлайка, подсветит пронзенное сердце 💘
-            if (trackData.is_disliked) if (dislikeBtn) dislikeBtn.classList.add('disliked')
-                //Обновляем нижний плеер данными нового трека
-                updateBottomPlayer(title, artist, isLiked)
-            }
+      // меняем текст на текущую песню
+    if (currentTitle) currentTitle.textContent = title
+    if (currentArtist) currentArtist.textContent = artist
     
-    player.play()
-} 
+    // Сбрасываем старые подсветки кнопок в плеере
+    const track = tracksList.find(t => t.id === id)
+    const likeBtn = document.querySelector('.like-btn')
+    const dislikeBtn = document.querySelector('.dislike-btn')
+    if (likeBtn) likeBtn.classList.toggle('liked', !!track?.is_liked)
+    if (dislikeBtn) dislikeBtn.classList.toggle('disliked', !!track?.is_disliked)
+    if (likeBtn) likeBtn.classList.remove('liked')
+    if (dislikeBtn) dislikeBtn.classList.remove('disliked')
+    
+    // 2. Убрали повторное const, просто проверяем уже созданную переменную trackData
+    if (trackData) {
+        if (trackData.is_liked && likeBtn) likeBtn.classList.add('liked')
+        if (trackData.is_disliked && dislikeBtn) dislikeBtn.classList.add('disliked')
+    }
+    
+    // 3. ВЫНЕСЛИ СЮДА: Обновляем нижний плеер ВСЕГДА при запуске нового трека
+    updateBottomPlayer(title, artist, isLiked)
+    
+    // Запускаем музыку асинхронно и безопасно
+    player.play().catch(err => {
+        console.log('Загрузка трека была прервана или отменена, всё в порядке:', err.message)
+    })
+}
 
 //Обновление кнопок плей и пауза
 // Ждем, пока робот загрузит страницу, находит плеер и следит за ним
@@ -177,32 +185,27 @@ function likeTrack() {
     if (!currentTrackId) return
     const token = localStorage.getItem('token')
     const likeBtn = document.querySelector('.like-btn')
-    const isLikedNow = likeBtn.classList.contains('liked')
-    // Шлем запрос на Node.js (POST ставит лайк, DELETE убирает — или делай как у тебя на бэке)
-    fetch(`http://localhost:3000/tracks/${currentTrackId}/like`, {
-        method: isLikedNow ? 'DELETE' : 'POST',
+    const dislikeBtn = document.querySelector('.dislike-btn')
+
+    fetch(`http://localhost:3000/tracks/like/${currentTrackId}`, {
+        method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token }
     })
-    .then(res => res.json())
-    .then(data => {
-        // Переключаем класс подсветки кнопки в плеере
-        likeBtn.classList.toggle('liked')
-        // Синхронизируем в памяти: находим трек в массиве и меняем ему статус вечно
-        const track = tracksList.find(t => t.id === currentTrackId)
-        if (track) {
-            track.is_liked = !isLikedNow
-            // Если лайкнули, то дизлайк автоматически должен сняться
-            if (track.is_liked) {
-                track.is_disliked = false
-                const dislikeBtn = document.querySelector('.dislike-btn')
-                if (dislikeBtn) dislikeBtn.classList.remove('disliked')
-            }
-        }
-    })
+        .then(res => res.json())
+        .then(data => {
+    if (data.alreadyLiked) return
+    likeBtn.classList.add('liked')
+    const dislikeBtn = document.querySelector('.dislike-btn')
+    if (dislikeBtn) dislikeBtn.classList.remove('disliked')
+    const track = tracksList.find(t => t.id === currentTrackId)
+    if (track) { track.is_liked = true; track.is_disliked = false }
+    // обновляем страницу любимое если открыта
+    const favPage = document.getElementById('page-favorites')
+    if (favPage && favPage.classList.contains('active-page')) {
+        loadFavorites()
+    }
+})
 }
-
-
-
 function uploadTrack() {
     const title = document.getElementById('track-title').value
     const artist = document.getElementById('track-artist').value
@@ -241,8 +244,6 @@ function uploadTrack() {
             loadHomePage()
         }).catch(err => console.error('Ошибка отправки формы', err))
 }
-
-
 function loadPlaylists() {
     fetch('http://localhost:3000/playlists')
         .then(res => res.json())
@@ -264,7 +265,6 @@ function loadPlaylists() {
                 })
         })
 }
-
 function createPlaylist() {
     const name = document.getElementById('playlist-name').value
     if (!name) {
@@ -282,7 +282,6 @@ function createPlaylist() {
             loadPlaylists()
         })
 }
-
 function showPage(name, btn) {
     // прячем все страницы
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'))
@@ -334,6 +333,9 @@ function showPage(name, btn) {
     } else {
         rightColumn.style.display = 'flex'
     }
+    if (name === 'favorites') {
+    loadFavorites()
+    }
     if (name === 'settings') {
         loadProfile()
     }
@@ -349,14 +351,12 @@ function showPage(name, btn) {
     loadHomePage()
     }
 }
-
 //функция выхода 
 function logout() {
     localStorage.removeItem('token')
     localStorage.removeItem('name')
     window.location.href = 'login.html'
 }
-
 //Добавила новые функции две для трека чтобы можно было загружать их в плейлист
 function togglePlaylistMenu(trackId, btn) {
     let  menu = document.getElementById('playlist-menu-' + trackId)
@@ -399,8 +399,6 @@ function togglePlaylistMenu(trackId, btn) {
             menu.style.display = 'block'
         }).catch(err => console.error('Ошибка загрузки меню плейлистов:', err))
 }
-
-
 function addToPlaylist(trackId, playlistId, playlistName) {
     fetch(`http://localhost:3000/playlists/${playlistId}/tracks`, {
         method: 'POST',
@@ -417,8 +415,6 @@ function addToPlaylist(trackId, playlistId, playlistName) {
             document.getElementById('playlist-menu-' + trackId).style.display = 'none'
         }).catch(err => console.error("Ошибка добавления:", err))
 }
-
-
 // Функция открытия плейлиста прямо внутри его карточки
 function openPlaylist(id, name) {
     // Ищем карточку плейлиста, на которую кликнули (в твоем коде они рендерятся в #playlists-list)
@@ -459,16 +455,12 @@ function openPlaylist(id, name) {
             playlistCard.classList.add('is-open');
         });
 }
-
-
-
 function setTheme(name) {
     document.querySelectorAll('.theme-dot').forEach(c => c.classList.remove('active'))
     event.target.closest('.theme-dot').classList.add('active')
     localStorage.setItem('theme', name)
     applyTheme(name)
 }
-
 function applyTheme(name) {
     const root = document.documentElement
 
@@ -525,14 +517,10 @@ function applyTheme(name) {
         root.style.setProperty('--heading', '#7e9bf8')
     }
 }
-
-
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('selected-theme') || 'pink' // Если ничего не сохранено, будет по дефолту розовая
     applyTheme(savedTheme)
 })
-
-
 function uploadAvatar(input) {
     const file = input.files[0]
     if (!file) return
@@ -553,9 +541,6 @@ if (savedAvatar) {
     const preview = document.getElementById('avatar-preview')
     if (preview) preview.innerHTML = `<img src="${savedAvatar}" alt="аватар">`
 }
-
-
-
 
 async function changePassword() {
     const oldPassword = document.getElementById('old-password').value
@@ -585,7 +570,6 @@ async function changePassword() {
         document.getElementById('new-password').value = ''
     }
 }
-
 
 function loadProfile() {
     const login = localStorage.getItem('login')
@@ -622,7 +606,6 @@ function loadProfile() {
             })
         })
 }
-
 
 //функции для cover
 let playerView = 'default'
@@ -735,7 +718,6 @@ function stopBlobs() {
         animFrame = null
     }
 }
-
 //Кастомный плеер
 // обновляем ползунок каждую секунду
 document.addEventListener('DOMContentLoaded', () => {
@@ -789,18 +771,22 @@ function formatTime(seconds) {
     const s = Math.floor(seconds % 60)
     return m + ':' + (s < 10 ? '0' + s : s)
 }
-
-
 function togglePlay() {
-    const audio = document.getElementById('audio-player')
-    if (audio.paused) {
-        audio.play()
+    // Берём элемент по ID и записываем строго в переменную с именем player
+    const player = document.getElementById('audio-player')
+    const bpPlayBtn = document.getElementById('bp-play-btn')
+    const mainPlayBtn = document.getElementById('play-btn') // кнопка главного плеера
+    if (!player) return // защита на случай, если тег audio не найден
+    if (player.paused) {
+        player.play().catch(err => console.log('Пауза нажата слишком быстро'))
+        if (bpPlayBtn) bpPlayBtn.textContent = '⏸'
+        if (mainPlayBtn) mainPlayBtn.textContent = '⏸'
     } else {
-        audio.pause()
+        player.pause()
+        if (bpPlayBtn) bpPlayBtn.textContent = '▶'
+        if (mainPlayBtn) mainPlayBtn.textContent = '▶'
     }
 }
-
-
 function seekAudio(event) {
     const audio = document.getElementById('audio-player')
     const bar = event.currentTarget
@@ -820,16 +806,12 @@ function prevTrack() {
     const track = tracksList[currentTrackIndex]
     playTrack(track.filename, track.title, track.artist, track.id, track.cover)
 }
-
-
 function nextTrack() {
     if (tracksList.length === 0) return
     currentTrackIndex = (currentTrackIndex + 1) % tracksList.length
     const track = tracksList[currentTrackIndex]
     playTrack(track.filename, track.title, track.artist, track.id, track.cover)
 }
-
-
 //Для звездочек в плеере(rating)
 let currentRating = 0
 function toggleStars() {
@@ -841,8 +823,6 @@ function toggleStars() {
         if (currentTrackId) loadRating(currentTrackId)
     }
 }
-
-
 function loadRating(trackId) {
     const token = localStorage.getItem('token')
     fetch(`http://localhost:3000/tracks/${trackId}/rate`, {
@@ -860,8 +840,6 @@ function loadRating(trackId) {
             }
         })
 }
-
-
 function updateStars(rating) {
     const stars = document.querySelectorAll('.star')
     stars.forEach((star, i) => {
@@ -874,8 +852,6 @@ function updateStars(rating) {
         }
     })
 }
-
-
 function rateTrack(rating) {
     if (!currentTrackId) {
         alert('Сначала выбери трек')
@@ -906,8 +882,6 @@ function toggleRepeat() {
     const btn = document.getElementById('repeat-btn')
     btn.style.color = repeatOnce ? 'var(--accent)' : ''  // розовая если включён
 }
-
-
 // Функция для загрузки списка треков с сервера в память фронтенда
 function loadTracksForSearch() {
     const token = localStorage.getItem('token')
@@ -921,8 +895,6 @@ function loadTracksForSearch() {
     })
     .catch(err => console.error('Ошибка загрузки треков для поиска:', err))
 }
-
-
 //функция поиска линейного и рисовка
 function searchTracks() {
     const query = document.getElementById('search-input').value.toLowerCase().trim()
@@ -955,8 +927,6 @@ function searchTracks() {
 `
 })
 }
-
-
 //Новые функции для главной страницы
 function loadHomePage() {
     // топ 5
@@ -1002,8 +972,6 @@ function loadHomePage() {
             })
         })
 }
-
-
 // НОВЫЕ ФУНКЦИИ ДЛЯ СТРАНИЦЫ С АРТИСТАМИ
 function addArtist() {
     const name = document.getElementById('artist-name').value
@@ -1026,8 +994,6 @@ function addArtist() {
             loadArtists()
         })
 }
-
-
 function loadArtists() {
     fetch('http://localhost:3000/artists')
         .then(res => res.json())
@@ -1051,8 +1017,6 @@ function loadArtists() {
             })
         })
 }
-
-
 function openArtist(id, name) {
     fetch(`http://localhost:3000/artists/${id}/tracks`)
         .then(res => res.json())
@@ -1090,42 +1054,35 @@ function openArtist(id, name) {
             })
         })
 }
-
-
 function dislikeTrack() {
     if (!currentTrackId) return
     const token = localStorage.getItem('token')
+    const likeBtn = document.querySelector('.like-btn')
     const dislikeBtn = document.querySelector('.dislike-btn')
-    // Проверяем, горит ли кнопка дизлайка прямо сейчас
     const isDislikedNow = dislikeBtn.classList.contains('disliked')
-    // Если дизлайк уже стоит — шлем DELETE на удаление, если нет — POST на добавление
-    const url = isDislikedNow 
-        ? `http://localhost:3000/tracks/undislike/${currentTrackId}` 
+
+    const url = isDislikedNow
+        ? `http://localhost:3000/tracks/undislike/${currentTrackId}`
         : `http://localhost:3000/tracks/dislike/${currentTrackId}`
-    const method = isDislikedNow ? 'DELETE' : 'POST'
+
     fetch(url, {
-        method: method,
+        method: isDislikedNow ? 'DELETE' : 'POST',
         headers: { 'Authorization': 'Bearer ' + token }
     })
         .then(res => res.json())
-        .then(data => {
-            // Переключаем класс подсветки кнопки-сердца 
+        .then(() => {
             dislikeBtn.classList.toggle('disliked')
-            // Запоминаем статус в памяти, чтобы при обновлении или переключении треков всё помнилось
-            const track = tracksList.find(t => t.id === currentTrackId)
-            if (track) {
-                track.is_disliked = !isDislikedNow
-                // Если мы поставили дизлайк, то лайк автоматически должен сняться!
-                if (track.is_disliked) {
-                    track.is_liked = false
-                    const likeBtn = document.querySelector('.like-btn')
-                    if (likeBtn) likeBtn.classList.remove('liked')
-                }
+            // если поставили дизлайк — гасим лайк
+            if (!isDislikedNow) {
+                likeBtn.classList.remove('liked')
+                const track = tracksList.find(t => t.id === currentTrackId)
+                if (track) { track.is_liked = false; track.is_disliked = true }
+            } else {
+                const track = tracksList.find(t => t.id === currentTrackId)
+                if (track) track.is_disliked = false
             }
-        }).catch( err => console.error('Ошибка дизлайка:', err))
+        })
 }
-
-
 function removeDislike(trackId, btn) {
     const token = localStorage.getItem('token')
     fetch(`http://localhost:3000/tracks/undislike/${trackId}`, {
@@ -1137,7 +1094,6 @@ function removeDislike(trackId, btn) {
             btn.closest('.blacklist-item-row').remove()
         })
 }
-
 function loadBlacklist() {
     const token = localStorage.getItem('token')
     fetch('http://localhost:3000/blacklist', {
@@ -1165,7 +1121,6 @@ function loadBlacklist() {
         })
     })
 }
-
 function removeFromBlacklist(trackId) {
     const token = localStorage.getItem('token')
     // Делаем запрос к роуту 
@@ -1195,7 +1150,6 @@ function removeFromBlacklist(trackId) {
     })
     .catch(err => console.error('Ошибка:', err))
 }
-
 // Функция загрузки списка Любимого с бэкенда
 function loadFavorites() {
     const token = localStorage.getItem('token')
@@ -1209,8 +1163,6 @@ function loadFavorites() {
     })
     .catch(err => console.error('Ошибка загрузки любимых треков:', err))
 }
-
-// Рендер карточек на странице Любимое
 function renderFavorites(tracks) {
     const container = document.getElementById('favorites-tracks-list')
     if (!container) return
@@ -1219,29 +1171,23 @@ function renderFavorites(tracks) {
         container.innerHTML = '<p style="opacity:0.6;">Тут пока пусто. Ставь лайки трекам</p>'
         return
     }
+    const audio = document.getElementById('audio-player')
     tracks.forEach(track => {
-        // Проверяем, играет ли этот трек прямо сейчас, чтобы поставить правильную иконку
         const isCurrentPlaying = (currentTrackId === track.id && !audio.paused)
         const playIcon = isCurrentPlaying ? '⏸' : '▶'
         container.innerHTML += `
-            <div class="fav-track-row" id="fav-row-${track.id}">
-                <div class="fav-meta">
-                    <span class="fav-title">${track.title}</span>
-                    <span class="fav-artist">${track.artist}</span>
-                </div>
-                <div class="fav-actions">
-                    <button class="fav-play-btn" onclick="handleFavPlay(${track.id}, '${track.filename}', '${track.title}', '${track.artist}')">${playIcon}</button>
-                    <!-- Круглая кнопка Play -->
-                    <button class="fav-play-btn" onclick="handleFavPlay(${track.id}, '${track.filename}', '${track.title}', '${track.artist}', '${track.cover}')">${playIcon}</button>
-                    <!-- Кнопка-сердечко в самом конце строки. Поскольку трек в любимом, оно изначально красное -->
-                    <button class="fav-heart-btn" onclick="removeLikeFromFavorites(${track.id})">❤️</button>
-                </div>
+        <div class="fav-track-row" id="fav-row-${track.id}">
+            <div class="fav-meta">
+                <span class="fav-title">${track.title}</span>
+                <span class="fav-artist">${track.artist}</span>
             </div>
-        </div>
-        `
+            <div class="fav-actions">
+                <button class="fav-play-btn" onclick="handleFavPlay(${track.id}, '${track.filename}', '${track.title}', '${track.artist}', '${track.cover}')">${playIcon}</button>
+                <button class="fav-heart-btn" onclick="removeLikeFromFavorites(${track.id})">❤️</button>
+            </div>
+        </div>`
     })
 }
-
 
 // Удаление лайка прямо со страницы Любимое
 function removeLikeFromFavorites(trackId) {
@@ -1265,20 +1211,27 @@ function removeLikeFromFavorites(trackId) {
         }
     })
 }
-
 // Обработка клика по кнопке Play в списке Любимого
-function handleFavPlay(id, filename, title, artist) {
+function handleFavPlay(id, filename, title, artist,cover) {
     if (currentTrackId === id) {
         togglePlay()
+        // Меняем иконку только на текущей кнопке внутри этой строки, не трогая остальной HTML
+        const row = document.getElementById(`fav-row-${id}`)
+        const btn = row ? row.querySelector('.fav-play-btn') : null
+        if (btn) {
+            const audio = document.getElementById('audio-player')
+            btn.textContent = audio.paused ? '▶' : '⏸'
+        }
     } else {
         // Вызываем твою стандартную функцию запуска трека
-        playTrack(filename, title, artist, id)
+        playTrack(filename, title, artist, id, cover)
+        // Вместо вызова полной loadFavorites() просто перерисуем иконки локально
+        document.querySelectorAll('.fav-play-btn').forEach(b => b.textContent = '▶')
+        const row = document.getElementById(`fav-row-${id}`)
+        const btn = row ? row.querySelector('.fav-play-btn') : null
+        if (btn) btn.textContent = '⏸'
     }
-    // Перерисовываем список, чтобы обновить иконки 
-    loadFavorites() 
 }
-
-
 // Функция, которая заменяет старое название и артиста на новые при переключении треков
 function updateBottomPlayer(title, artist, isLiked) {
     const bpTitle = document.getElementById('bp-title')
@@ -1294,15 +1247,12 @@ function updateBottomPlayer(title, artist, isLiked) {
         bpLike.textContent = isLiked ? '❤️' : '🤍'
     }
 }
-
-
 function seekTrack(value) {
     const audio = document.getElementById('audio-player')
     if (!audio.duration) return
     // Переводим проценты (0-100) в реальные секунды трека
     audio.currentTime = (value / 100) * audio.duration
 }
-
 //Эта функция нужна, чтобы когда ты слушаешь трек на странице «Любимое», ты мог нажать на сердечко в 
 // нижнем плеере, и лайк сразу снимался и на бэкенде, и карточка исчезала с экрана:
 function toggleLikeCurrent() {

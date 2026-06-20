@@ -547,17 +547,31 @@ audio {
 
 /*змейка для испольнителей*/
 /* Контейнер для полоски — белый фон, без теней */
+/* ========================================================
+   КОНТЕЙНЕР ДЛЯ ПОЛОСКИ (Автоматическое переключение темы)
+   ======================================================== */
+
+/* 1. По умолчанию: Светлая тема — белый фон, без теней */
 .gradient-strip {
-  position: relative;
-  width: 100%;
-  height: 130px; 
-  border-radius: 20px;
-  overflow: hidden; 
-  background: #ffffff; 
-  border: 1px solid rgba(0, 0, 0, 0.08); 
-  margin-bottom: 25px;
-  box-shadow: none; 
+  position: relative !important;
+  width: 100% !important;
+  height: 130px !important; 
+  border-radius: 20px !important;
+  overflow: hidden !important; 
+  background: #ffffff !important; /* Чисто белый фон */
+  border: 1px solid rgba(0, 0, 0, 0.08) !important; /* Тонкая темная рамка */
+  margin-bottom: 25px !important;
+  box-shadow: none !important; /* Без теней */
+  transition: background 0.3s ease, border-color 0.3s ease !important; /* Плавный переход цвета */
 }
+
+/* 2. ТВОЙ ЗАПРОС: Для тёмной темы делаем фон темнее */
+html[style*="--bg: #1a1a2e"] .gradient-strip,
+html[style*="--bg:#1a1a2e"] .gradient-strip {
+  background: #cdd6e7 !important; /* Глубокий тёмный фон (темнее, чем общий фон сайта) */
+  border: 1px solid rgba(255, 255, 255, 0.06) !important; /* Тонкая светлая рамка для стекла */
+}
+
 
 /* Базовые свойства для фигур */
 .snake-blob {
@@ -1485,166 +1499,135 @@ audio {
 }
 
 /* Контейнер страницы Любимое */
+/* Контейнер страницы Любимое */
 .favorites-container {
-    max-width: 900px;
+    max-width: 90%; /* Увеличиваем на всю доступную ширину */
+    width: 80%;      /* Делаем треки длиннее */
     margin: 0 auto;
     padding: 30px 20px;
+    padding-left: 5px;
 }
-
 .favorites-header {
     font-size: 1.8rem;
     margin-bottom: 25px;
     color: var(--accent);
 }
 
-/* Прямоугольные карточки треков */
+/* ========================================================
+   КАРТОЧКИ ТРЕКОВ НА СТРАНИЦЕ ЛЮБИМОЕ (Полный сброс глыб)
+   ======================================================== */
+
+/* Прямоугольник карточки: по умолчанию белый для светлой темы */
 .fav-track-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: color-mix(in srgb, var(--accent) 8%, transparent); /* Под цвет темы */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 15px 20px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    transition: transform 0.2s, background 0.2s;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    
+    background: #ffffff !important; /* Чисто белый прямоугольник */
+    border: 2px solid rgba(0, 0, 0, 0.06) !important; /* Аккуратная рамка */
+    padding: 10px 24px !important; /* Компактная высота, как ты просил */
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
+    color: #1a1a1a !important; /* Чёрный текст по умолчанию, чтобы не сливался на белом */
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* АВТО-ПЕРЕКРАСКА В ТЁМНУЮ ТЕМУ: привязываемся к переменной на html */
+html[style*="--bg: #1a1a2e"] .fav-track-row,
+html[style*="--bg:#1a1a2e"] .fav-track-row {
+    background: rgba(24, 24, 28, 0.9) !important; /* Красивый тёмный фон карточки */
+    border-color: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important; /* Текст становится идеально белым */
 }
 
 .fav-track-row:hover {
-    background: color-mix(in srgb, var(--accent) 15%, transparent);
-    transform: translateX(5px);
+    transform: translateY(-1px) !important;
+    border-color: var(--accent) !important; /* Подсветка рамки цветом темы */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05) !important;
 }
 
+/* Блок текста (Название + Исполнитель) */
 .fav-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 12px !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .fav-title {
-    font-weight: bold;
-    font-size: 1.1rem;
+    font-weight: 700 !important;
+    font-size: 1.05rem !important;
+    color: inherit !important; /* Автоматом чёрный на светлой, белый на тёмной */
 }
 
 .fav-artist {
-    font-size: 0.9rem;
-    opacity: 0.7;
+    font-size: 0.85rem !important;
+    color: inherit !important;
+    opacity: 0.5 !important; /* Исполнитель чуть приглушён */
 }
 
+/* Блок кнопок справа */
 .fav-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    background: none !important;
+    width: auto !important;
+    height: auto !important;
 }
 
-/* Кнопки управления в строке */
+/* Кнопка Плюс (если используется) */
+.fav-plus-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none !important;
+    font-size: 1.2rem !important;
+    cursor: pointer !important;
+    color: inherit !important;
+    opacity: 0.5 !important;
+    transition: opacity 0.15s !important;
+}
+.fav-plus-btn:hover { opacity: 1 !important; }
+
+/* Круглая кнопка Play под цвет темы */
 .fav-play-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: var(--accent);
-    color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: scale 0.2s;
+    background: var(--accent, #a78bfa) !important; /* Цвет темы сайта */
+    color: #ffffff !important; /* Белая стрелочка внутри */
+    
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.8rem !important;
+    cursor: pointer !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1) !important;
+    transition: transform 0.15s ease !important;
 }
+.fav-play-btn:hover { transform: scale(1.06) !important; }
 
-.fav-play-btn:hover {
-    scale: 1.1;
-}
-
+/* ТВОЙ ЗАПРОС: Убираем глыбу на заднем фоне сердечка */
 .fav-heart-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #fff; /* Белое сердечко по умолчанию */
-    transition: opacity 0.2s;
-}
-
-.fav-heart-btn:hover {
-    opacity: 0.7;
-}
-
-/* НИЖНИЙ КОМПАКТНЫЙ ОСТРОВНОЙ ПЛЕЕР */
-.bottom-player {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 1000px;
-    height: 75px;
-    
-    /* ЦВЕТ ПОД ТЕМУ: смешиваем цвет темы с прозрачностью для стеклянного эффекта */
-    background: color-mix(in srgb, var(--accent) 12%, rgba(255, 255, 255, 0.85)) !important;
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.2)) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
-    
-    display: none; /* JS включает на странице favorites */
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-    box-sizing: border-box;
-    z-index: 9999;
-    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, color 0.3s;
-}
-
-/* Автоматическая адаптация, если в теме используется класс темной темы */
-.theme-dot.dark ~ #bottom-player-bar,
-[data-theme="dark"] #bottom-player-bar {
-    background: color-mix(in srgb, var(--accent) 12%, rgba(24, 24, 28, 0.85)) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    color: #ffffff;
-}
-
-/* Левая часть: только трек и автор */
-.bp-left-block {
-    display: flex;
-    align-items: center;
-    width: 35%;
-    overflow: hidden;
-}
-
-/* Блок названия и артиста в одну строку */
-.bp-track-info {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-.bp-title {
-    font-weight: bold;
-    font-size: 1rem;
-    color: inherit;
-}
-
-.bp-artist {
-    font-size: 0.85rem;
-    opacity: 0.6;
-}
-
-
-/* ЦЕНТРАЛЬНЫЙ БЛОК КНОПОК */
-.bp-controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-/* Кнопки переключения треков ⏮ и ⏭ */
-.bp-nav-btn {
-    background: none !important; /* Намертво убираем квадратные фоны */
+    background: none !important; /* Намертво стираем серую коробку */
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -1653,85 +1636,230 @@ audio {
     border-radius: 0 !important;
     box-shadow: none !important;
     
-    font-size: 1.4rem;
-    cursor: pointer;
-    color: inherit;
-    opacity: 0.7;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    font-size: 1.3rem !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.15s ease, opacity 0.15s ease !important;
+}
+.fav-heart-btn:hover { transform: scale(1.15) !important; }
+
+/* Прозрачность при нажатии (клике) на кнопки */
+.fav-plus-btn:active, .fav-play-btn:active, .fav-heart-btn:active {
+    opacity: 0.2 !important; /* Делает цвет прозрачным в момент клика */
+    transform: scale(0.92) !important;
 }
 
-/* Эффект при наведении на стрелочки */
-.bp-nav-btn:hover {
-    opacity: 1;
+
+
+/* ========================================================
+   1. СВЕТЛАЯ ТЕМА: Чистый белый глянцевый островок
+   ======================================================== */
+.bottom-player {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90% !important;
+    max-width: 1000px !important;
+    height: 70px !important;
+    
+    background: rgba(255, 255, 255, 0.85) !important; 
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05) !important;
+    
+    color: #1a1a1a !important;
+    
+    display: none; /* Переключается через JS в showPage */
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 30px !important;
+    box-sizing: border-box !important;
+    z-index: 9999 !important;
+    border-radius: 16px !important;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease !important;
 }
 
-/* ТВОЙ ЗАПРОС: Эффект прозрачности при нажатии (клик мышкой) */
-.bp-nav-btn:active, .bp-main-play:active, .bp-heart-btn:active {
-    opacity: 0.3 !important; /* Кнопка становится сильно прозрачной в момент зажатия */
-    transform: scale(0.95);  /* Слегка вдавливается для интерактивности */
+/* Исполнитель в светлой теме */
+.bottom-player .bp-artist {
+    color: #1a1a1a !important;
+    opacity: 0.55 !important;
 }
 
-/* Центральная круглая кнопка Play (черный треугольник внутри) */
-.bp-main-play {
-    width: 42px;
-    height: 42px;
-    border-radius: 50% !important;
-    background: var(--accent, #a78bfa) !important;
-    color: #000000 !important; /* Черная иконка ▶ внутри */
+/* ========================================================
+   2. ТЁМНАЯ ТЕМА: Твой крутой тёмно-голубой стеклянный стиль
+   ======================================================== */
+html[style*="--bg: #1a1a2e"] #bottom-player-bar,
+html[style*="--bg:#1a1a2e"] #bottom-player-bar {
+    background: rgba(10, 20, 35, 0.8) !important; 
+    border: 1px solid rgba(0, 191, 255, 0.2) !important; 
+    box-shadow: 0 12px 40px rgba(0, 119, 182, 0.35) !important; 
+    color: #ffffff !important; 
+}
+
+html[style*="--bg: #1a1a2e"] #bottom-player-bar .bp-artist,
+html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
+    color: #ffffff !important;
+    opacity: 0.65 !important;
+}
+
+/* ========================================================
+   3. ВНУТРЕННЯЯ СТРУКТУРА И ЭЛЕМЕНТЫ (Защита от синих кубов)
+   ======================================================== */
+
+/* Левая часть: информация о треке */
+.bp-left-block {
+    display: flex !important;
+    align-items: center !important;
+    width: 30% !important;
+    overflow: hidden !important;
+    background: none !important;
+}
+
+.bp-track-info {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 10px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+}
+
+.bp-title {
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    color: inherit !important;
+}
+
+.bp-artist {
+    font-size: 0.85rem !important;
+    transition: color 0.3s ease !important;
+}
+
+/* Центральный блок кнопок управления */
+.bp-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 22px !important;
+    background: none !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+/* ЖЁСТКИЙ СБРОС СТИЛЕЙ ДЛЯ СТРЕЛОЧЕК ⏮ и ⏭ */
+.bp-nav-btn {
+    background: none !important; /* Намертво стираем синий фон */
     border: none !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    cursor: pointer;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.15s ease, opacity 0.15s ease;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    
+    font-size: 1.3rem !important;
+    cursor: pointer !important;
+    color: inherit !important; /* Берут цвет темы (черный или белый автоматически) */
+    opacity: 0.6 !important;
+    transition: opacity 0.15s ease, transform 0.15s ease !important;
+}
+
+.bp-nav-btn:hover {
+    opacity: 1 !important;
+}
+
+/* ЖЁСТКИЙ СБРОС И ПЕРЕКРАСКА КНОПКИ PLAY (Идеальный круглый кружок) */
+.bp-main-play {
+    background: var(--accent, #a78bfa) !important; /* Цвет твоей текущей темы сайта */
+    color: #ffffff !important; /* Иконка ▶ внутри становится белой */
+    
+    /* Сбрасываем синие размеры и ставим идеальный круг */
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.85rem !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    transition: transform 0.15s ease !important;
 }
 
 .bp-main-play:hover {
-    transform: scale(1.05);
+    transform: scale(1.08) !important;
 }
 
-
-/* ПРАВАЯ ЧАСТЬ: Время + Ползунок + Сердце */
+/* Правая часть: Таймлайн и Сердце ровно в один ряд */
 .bp-right-block {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 35%;
-    justify-content: flex-end;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    width: 35% !important;
+    justify-content: flex-end !important;
+    background: none !important;
 }
 
 .bp-progress-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-grow: 1;
-    font-size: 0.8rem;
-    opacity: 0.6;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-grow: 1 !important;
+    font-size: 0.8rem !important;
+    color: inherit !important;
+    opacity: 0.5 !important;
+    width: auto !important;
+    height: auto !important;
 }
 
-/* СВЕТЛО-СЕРЫЙ ПОЛЗУНОК */
+/* ПОЛЗУНОК ПРОГРЕССА (Выравниваем в линию) */
 #bp-progress-bar {
-    width: 100%;
-    accent-color: var(--accent, #a78bfa);
-    cursor: pointer;
-    background: rgba(200, 200, 200, 0.4); /* Очень светлая дорожка */
-    height: 4px;
-    border-radius: 2px;
-    outline: none;
-}
-
-/* Кнопка-сердечко в самом конце */
-.bp-heart-btn {
-    background: none !important;
-    border: none !important;
-    font-size: 1.3rem;
-    cursor: pointer;
-    transition: transform 0.15s ease, opacity 0.15s ease;
+    width: 100% !important;
+    accent-color: var(--accent) !important;
+    cursor: pointer !important;
+    background: rgba(150, 150, 150, 0.3) !important;
+    height: 4px !important;
+    border-radius: 2px !important;
+    outline: none !important;
+    margin: 0 !important;
     padding: 0 !important;
 }
 
+/* ЖЁСТКИЙ СБРОС ДЛЯ КНОПКИ СЕРДЦА В САМОМ КОНЦЕ СТРОКИ */
+.bp-heart-btn {
+    background: none !important; /* Убираем синий квадратный гроб */
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    
+    font-size: 1.3rem !important;
+    cursor: pointer !important;
+    transition: transform 0.15s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
 .bp-heart-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.15) !important;
+}
+
+/* Эффект прозрачности при зажатии любых кнопок */
+.bp-nav-btn:active, .bp-main-play:active, .bp-heart-btn:active {
+    opacity: 0.25 !important;
+    transform: scale(0.95) !important;
 }

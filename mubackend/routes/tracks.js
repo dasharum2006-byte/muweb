@@ -142,26 +142,42 @@ router.post('/like/:id', (req, res) => {
     const jwt = require('jsonwebtoken')
     const decoded = jwt.verify(token, process.env.SECRET)
     const userId = decoded.id
-    //Если юзер ставит лайк, мы автоматически удаляем трек из дизлайков!
-    db.prepare(
-        'DELETE FROM disliked_tracks WHERE user_id = ? AND track_id = ?'
-    ).run(userId, id)
+
+    // если ставим лайк — убираем дизлайк автоматически
+    db.prepare('DELETE FROM disliked_tracks WHERE user_id = ? AND track_id = ?').run(userId, id)
+
     // проверяем лайкал ли уже
     const existing = db.prepare(
         'SELECT * FROM track_likes WHERE user_id = ? AND track_id = ?'
     ).get(userId, id)
+
     if (existing) {
-        // уже лайкнул — просто возвращаем текущее количество
-        const track = db.prepare('SELECT likes FROM tracks WHERE id = ?').get(id)
-        return res.json({ likes: track.likes, alreadyLiked: true })
+        return res.json({ success: true, alreadyLiked: true })
     }
-    // ещё не лайкал — добавляем
+
+    // добавляем лайк
     db.prepare('INSERT INTO track_likes (user_id, track_id) VALUES (?,?)').run(userId, id)
     db.prepare('UPDATE tracks SET likes = likes + 1 WHERE id = ?').run(id)
-    const track = db.prepare('SELECT likes FROM tracks WHERE id = ?').get(id)
-    res.json({ likes: track.likes, alreadyLiked: false })
+    res.json({ success: true, alreadyLiked: false })
 })
 
+
+// GET: Получить все лайкнутые треки пользователя для страницы Любимое
+router.get('/liked', (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1]
+    if (!token) return res.status(401).json({ error: 'Нет токена' })
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const userId = decoded.id
+
+    const tracks = db.prepare(`
+        SELECT tracks.* FROM tracks
+        JOIN track_likes ON tracks.id = track_likes.track_id
+        WHERE track_likes.user_id = ?
+    `).all(userId)
+
+    res.json(tracks)
+})
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!1
  //удаляем трек - ДОПИСАТЬ ПОТОМУ ЧТО УДАЛЯЕТСЯ ТОЛЬКО ПЕСНЯ ИЗ БД А НА ДИСКЕ ОСТАЕТСЯ
@@ -307,8 +323,7 @@ router.get('/disliked', (req, res) => {
     `).all(userId)
     res.json(tracks)
 })
-//делаем доступный роутер для server.js
-module.exports = router
+
 
 
 //Снять лайк (когда жмешь на сердечко на странице Любимое)
@@ -331,3 +346,4 @@ router.delete('/unlike/:id', (req, res) => {
     }
     res.json({ success: true })
 })
+module.exports = router 
