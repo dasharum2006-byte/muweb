@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Моя Музыка</title>
-<link rel="icon" type="image/x-icon" href="images/favicon.ico">
+<link rel="icon" type="image/x-icon" href="images/ММ.ico">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -18,10 +18,11 @@
     <nav class="sidebar-nav">
         <button class="nav-btn" title="Поиск" onclick="showPage('search',this)">🔍</button>
         <button class="nav-btn active" title="Музыка" onclick="showPage('music', this)">🎵</button>
+        <button class="nav-btn" title="Моя Волна" onclick="showPage('wave', this)">🌊</button>
         <button class="nav-btn" title="Плейлисты" onclick="showPage('playlists', this)">📁</button>
         <button class="nav-btn" title="Артисты" onclick="showPage('artists', this)">🎤</button>
         <button class="nav-btn" title="Любимое" onclick="showPage('favorites', this)">❤️</button>
-        <button class="nav-btn" title="Настройки" onclick="showPage('settings', this)">⚙️</button>
+        <button class="nav-btn" title="" onclick="showPage('settings', this)">⚙️</button>
     </nav>
 </aside>
 <!--  в sidebar когда меню выдвигается подписи берутся из ::after в CSS через title. -->
@@ -71,7 +72,53 @@
 
         </div>
     </div>
+<div id="page-wave" class="page">
+    <div class="wave-container">
+        <div class="wave-player">
+            <!-- Пузырь -->
+            <div class="blob-wrapper">
+                <div class="blob">
+                </div>
+            </div>
 
+            <!-- Название трека -->
+            <div class="wave-track-info">
+                <h2 id="wave-title" class="wave-track-title">Нажми play</h2>
+                <p id="wave-artist" class="wave-track-artist">--</p>
+            </div>
+
+            <!-- Карусель треков -->
+            <div class="carousel-container">
+                <div class="carousel-track" id="carousel-track"></div>
+            </div>
+
+            <!-- Прогресс -->
+            <div class="wave-progress-container">
+                <span id="wave-current-time" class="wave-time">0:00</span>
+                <input type="range" id="wave-progress" class="wave-progress" min="0" max="100" value="0" oninput="waveSeek(this.value)">
+                <span id="wave-total-time" class="wave-time">0:00</span>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="wave-controls">
+                <button class="wave-action-btn" onclick="waveDislike()">💘</button>
+                <button class="wave-btn" onclick="wavePrev()">⏮</button>
+                <button class="wave-play-btn" id="wave-play-btn" onclick="waveTogglePlay()">▶</button>
+                <button class="wave-btn" onclick="waveNext()">⏭</button>
+                <button class="wave-action-btn" onclick="waveLike()">🤍</button>
+            </div>
+
+            <!-- Громкость -->
+            <div class="wave-volume-row">
+                <span>🔈</span>
+                <input type="range" id="wave-volume" class="wave-progress" min="0" max="100" value="80" oninput="waveSetVolume(this.value)">
+                <span>🔊</span>
+            </div>
+
+            <button class="wave-new-btn" onclick="loadWave()">🔄 Новая волна</button>
+        </div>
+    </div>
+</div>
     <!-- СТРАНИЦА ПОИСКА -->
    <div id="page-search" class="page">
     <div class="center-column">

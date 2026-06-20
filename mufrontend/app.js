@@ -335,7 +335,7 @@ function showPage(name, btn) {
     loadArtists()
     }
     // плеер прячем как в настройках
-    if (name === 'artists' || name === 'artist' || name === 'settings' || name === 'favorites') {
+    if (name === 'artists' || name === 'artist' || name === 'settings' || name === 'favorites' || name === 'wave') {
         rightColumn.style.display = 'none'
     } else {
         rightColumn.style.display = 'flex'
@@ -356,6 +356,8 @@ function showPage(name, btn) {
     }
     if (name === 'home') {
     loadHomePage()
+    }
+    if (name === 'wave') {
     }
 }
 //функция выхода 
@@ -1373,4 +1375,214 @@ function deleteTrack(trackId) {
         // loadHomePage()
     })
     .catch(err => console.error('Ошибка удаления трека:', err))
+}
+
+// Моя Волна - переменные
+let waveTracks = []
+let waveIndex = 0
+let waveAudio = null
+
+// Загрузка волны
+async function loadWave() {
+    const token = localStorage.getItem('token')
+    try {
+        const res = await fetch('http://localhost:3000/tracks/wave', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        waveTracks = await res.json()
+        waveIndex = 0
+        
+        if (waveTracks.length === 0) {
+            alert('Нет треков для волны. Загрузите хотя бы несколько треков')
+            return
+        }
+        
+        // Загружаем первый трек
+        loadWaveTrack(waveIndex)
+    } catch (err) {
+        console.error('Ошибка загрузки волны:', err)
+        alert('Ошибка загрузки волны')
+    }
+}
+
+// Загрузка трека из волны
+// Загрузка трека из волны
+function loadWaveTrack(index) {
+    if (index < 0 || index >= waveTracks.length) return
+    
+    waveIndex = index
+    const track = waveTracks[waveIndex]
+    
+    // Обновляем UI
+    document.getElementById('wave-title').textContent = track.title
+    document.getElementById('wave-artist').textContent = track.artist
+    
+    const cover = document.getElementById('wave-cover')
+    // ДОБАВИЛИ ПРОВЕРКУ: если элемент cover существует на странице, то обновляем его
+    if (cover) {
+        if (track.cover && track.cover !== 'null') {
+            cover.src = `http://localhost:3000/uploads/covers/${track.cover}`
+        } else {
+            cover.src = 'images/penguin-logo.png'
+        }
+    }
+    
+    // Создаём отдельный audio элемент для волны
+    if (!waveAudio) {
+        waveAudio = new Audio()
+        waveAudio.addEventListener('timeupdate', updateWaveProgress)
+        waveAudio.addEventListener('ended', waveNext)
+    }
+    
+    waveAudio.src = `http://localhost:3000/uploads/${track.filename}`
+    // не автозапускаем — пользователь сам нажмёт play
+    waveAudio.play()
+    .then(() => {
+        waveIsPlaying = true
+        document.getElementById('wave-play-btn').textContent = '⏸'
+    })
+    .catch(err => {
+        // браузер заблокировал автовоспроизведение
+        waveIsPlaying = false
+        document.getElementById('wave-play-btn').textContent = '▶'
+        console.log('Автовоспроизведение заблокировано:', err)
+    })
+    updateCarousel() 
+}
+
+// Play/Pause для волны
+let waveIsPlaying = false
+function waveTogglePlay() {
+    if (waveTracks.length === 0) {
+        // первый раз — загружаем треки и сразу играем
+        loadWave()
+        return
+    }
+    
+    const btn = document.getElementById('wave-play-btn')
+    if (waveIsPlaying) {
+        waveAudio.pause()
+        waveIsPlaying = false
+        btn.textContent = '▶'
+    } else {
+        waveAudio.play()
+        waveIsPlaying = true
+        btn.textContent = '⏸'
+    }
+}
+// Следующий трек
+function waveNext() {
+    if (waveTracks.length === 0) return
+    waveIndex = (waveIndex + 1) % waveTracks.length
+    loadWaveTrack(waveIndex)
+}
+
+// Предыдущий трек
+function wavePrev() {
+    if (waveTracks.length === 0) return
+    waveIndex = (waveIndex - 1 + waveTracks.length) % waveTracks.length
+    loadWaveTrack(waveIndex)
+}
+
+// Обновление прогресса
+function updateWaveProgress() {
+    if (!waveAudio) return
+    
+    const current = waveAudio.currentTime
+    const total = waveAudio.duration || 0
+    const percent = total ? (current / total) * 100 : 0
+    
+    document.getElementById('wave-progress').value = percent
+    document.getElementById('wave-current-time').textContent = formatTime(current)
+    document.getElementById('wave-total-time').textContent = formatTime(total)
+}
+
+// Перемотка
+function waveSeek(value) {
+    if (!waveAudio || !waveAudio.duration) return
+    waveAudio.currentTime = (value / 100) * waveAudio.duration
+}
+
+// Лайк текущего трека волны
+function waveLike() {
+    if (!waveTracks[waveIndex]) return
+    const trackId = waveTracks[waveIndex].id
+    const token = localStorage.getItem('token')
+    
+    fetch(`http://localhost:3000/tracks/like/${trackId}`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert('Добавлено в любимые ❤️')
+    })
+}
+
+// Дизлайк текущего трека волны
+function waveDislike() {
+    if (!waveTracks[waveIndex]) return
+    const trackId = waveTracks[waveIndex].id
+    const token = localStorage.getItem('token')
+    
+    fetch(`http://localhost:3000/tracks/dislike/${trackId}`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert('Трек добавлен в чёрный список')
+        waveNext() // Переходим к следующему треку
+    })
+}
+
+// При переходе на страницу волны - загружаем треки
+const originalShowPage = showPage
+showPage = function(name, btn) {
+    originalShowPage(name, btn)
+    if (name === 'wave') {
+        loadWave()
+    }
+}
+function waveSetVolume(value) {
+    if (waveAudio) waveAudio.volume = value / 100
+}
+
+// Колесико мыши для громкости
+document.addEventListener('wheel', (e) => {
+    const wavePage = document.getElementById('page-wave')
+    if (!wavePage || !wavePage.classList.contains('active-page')) return
+    if (!waveAudio) return
+    
+    e.preventDefault()
+    let vol = waveAudio.volume
+    vol += e.deltaY < 0 ? 0.05 : -0.05
+    vol = Math.max(0, Math.min(1, vol))
+    waveAudio.volume = vol
+    document.getElementById('wave-volume').value = vol * 100
+}, { passive: false })
+
+function updateCarousel() {
+    const carousel = document.getElementById('carousel-track')
+    if (!carousel || waveTracks.length === 0) return
+    
+    carousel.innerHTML = ''
+    const indexes = [
+        (waveIndex - 1 + waveTracks.length) % waveTracks.length,
+        waveIndex,
+        (waveIndex + 1) % waveTracks.length
+    ]
+    
+    indexes.forEach((i, pos) => {
+        const track = waveTracks[i]
+        const div = document.createElement('div')
+        div.className = 'carousel-card' + (pos === 1 ? ' active' : '')
+        div.innerHTML = `
+            <img src="${track.cover && track.cover !== 'null' 
+                ? 'http://localhost:3000/uploads/covers/' + track.cover 
+                : 'images/penguin-logo.png'}" class="cover-art">
+            <div class="track-title">${track.title}</div>
+        `
+        carousel.appendChild(div)
+    })
 }

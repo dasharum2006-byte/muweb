@@ -347,4 +347,94 @@ router.delete('/unlike/:id', (req, res) => {
     res.json({ success: true })
 })
 
+
+// Моя Волна - умный алгоритм рекомендаций
+router.get('/wave', (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1]
+    if (!token) return res.status(401).json({ error: 'Нет токена' })
+    
+    const jwt = require('jsonwebtoken')
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const userId = decoded.id
+    
+    // 1. Любимые треки (45%)
+    const likedTracks = db.prepare(`
+        SELECT tracks.* FROM tracks
+        JOIN track_likes ON tracks.id = track_likes.track_id
+        WHERE track_likes.user_id = ?
+    `).all(userId)
+    
+    // 2. Недавно добавленные (25%)
+    const recentTracks = db.prepare(`
+        SELECT * FROM tracks 
+        ORDER BY id DESC 
+        LIMIT 20
+    `).all()
+    
+    // 3. Топ 5 треков (15%)
+    const topTracks = db.prepare(`
+        SELECT tracks.*, 
+        AVG(ratings.rating) as avg_rating,
+        COUNT(ratings.id) as rating_count
+        FROM tracks
+        LEFT JOIN ratings ON tracks.id = ratings.track_id
+        GROUP BY tracks.id
+        HAVING rating_count > 0
+        ORDER BY avg_rating DESC
+        LIMIT 5
+    `).all()
+    
+    // 4. Все остальные треки (15%)
+    const allTracks = db.prepare(`
+        SELECT * FROM tracks
+        WHERE id NOT IN (
+            SELECT track_id FROM track_likes WHERE user_id = ?
+        )
+        AND id NOT IN (
+            SELECT id FROM tracks ORDER BY id DESC LIMIT 20
+        )
+        AND id NOT IN (
+            SELECT tracks.id FROM tracks
+            LEFT JOIN ratings ON tracks.id = ratings.track_id
+            GROUP BY tracks.id
+            HAVING COUNT(ratings.id) > 0
+            ORDER BY AVG(ratings.rating) DESC
+            LIMIT 5
+        )
+    `).all(userId)
+    
+    // Функция для перемешивания массива
+    function shuffle(array) {
+        const shuffled = [...array]
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+        return shuffled
+    }
+    
+    // Функция для получения случайных элементов
+    function getRandomItems(array, count) {
+        const shuffled = shuffle(array)
+        return shuffled.slice(0, Math.min(count, shuffled.length))
+    }
+    // Считаем сколько треков нужно из каждой категории
+    const totalTracks = 20 // всего треков в волне
+    const likedCount = Math.ceil(totalTracks * 0.45) // 45% = 9 треков
+    const recentCount = Math.ceil(totalTracks * 0.25) // 25% = 5 треков
+    const topCount = Math.ceil(totalTracks * 0.15) // 15% = 3 треков
+    const otherCount = totalTracks - likedCount - recentCount - topCount // 15% = 3 треков
+    // Берём случайные треки из каждой категории
+    const wave = [
+        ...getRandomItems(likedTracks, likedCount),
+        ...getRandomItems(recentTracks, recentCount),
+        ...getRandomItems(topTracks, topCount),
+        ...getRandomItems(allTracks, otherCount)
+    ]
+    
+    // Перемешиваем финальный список
+    const shuffledWave = shuffle(wave)
+    
+    res.json(shuffledWave)
+})
 module.exports = router 
