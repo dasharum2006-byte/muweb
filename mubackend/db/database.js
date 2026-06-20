@@ -17,6 +17,7 @@ db.exec(`
     login TEXT NOT null,
     name TEXT NOT null,
     password TEXT NOT null,
+    secret_word TEXT NOT null,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`)
 //таблица треков

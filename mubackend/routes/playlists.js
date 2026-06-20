@@ -52,5 +52,11 @@ router.get('/:id/tracks', (req, res) => {
         WHERE playlist_tracks.playlist_id = ?`).all(req.params.id)
         res.json(tracks)
 })
+// DELETE /playlists/:id/tracks/:trackId
+router.delete('/:id/tracks/:trackId', (req, res) => {
+    const { id, trackId } = req.params
+    db.prepare('DELETE FROM playlist_tracks WHERE playlist_id = ? AND track_id = ?').run(id, trackId)
+    res.json({ success: true })
+})
 
 module.exports = router

@@ -58,9 +58,10 @@ const token = localStorage.getItem('token')
                 <span class="track-artist">${track.artist}</span>
             </div>
             <div class="track-actions-row-block">
-                <button class="add-to-playlist-circle-btn" onclick="togglePlaylistMenu(${track.id}, this)">+</button>
-                <button class="play-icon-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
-        </div>
+    <button class="add-to-playlist-circle-btn" onclick="togglePlaylistMenu(${track.id}, this)">+</button>
+    <button class="play-icon-btn" data-track-id="${track.id}" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+    <button class="delete-track-btn" onclick="deleteTrack(${track.id})">🗑️</button>
+</div>
     </div>
 `
 
@@ -133,14 +134,16 @@ function playTrack(filename, title, artist, id, cover) {
         if (trackData.is_liked && likeBtn) likeBtn.classList.add('liked')
         if (trackData.is_disliked && dislikeBtn) dislikeBtn.classList.add('disliked')
     }
-    
-    // 3. ВЫНЕСЛИ СЮДА: Обновляем нижний плеер ВСЕГДА при запуске нового трека
     updateBottomPlayer(title, artist, isLiked)
-    
-    // Запускаем музыку асинхронно и безопасно
+    // Синхронизируем все play-кнопки — ставим "играет"
+    syncAllPlayButtons(!player.paused)
+    // Запускаем
+
     player.play().catch(err => {
-        console.log('Загрузка трека была прервана или отменена, всё в порядке:', err.message)
+        console.log('Загрузка прервана:', err.message)
+
     })
+
 }
 
 //Обновление кнопок плей и пауза
@@ -162,22 +165,26 @@ document.addEventListener('DOMContentLoaded', () => {
 // Функция, которая пробегается по сайту и меняет  играть на стоп у нужной песни
 function updatePlayButtons() {
     const player = document.getElementById('audio-player')
-    // Находим абсолютно все круглые кнопочки на странице
-    const allPlayButtons = document.querySelectorAll('.play-icon-btn')
-    allPlayButtons.forEach(btn => {
-        // Робот смотрит, какой ID зашит в атрибут onclick этой кнопки
-        const match = btn.getAttribute('onclick').match(/,\s*(\d+)\s*,/) || btn.getAttribute('onclick').match(/,\s*(\d+)\s*\)/)
-        const btnTrackId = match ? parseInt(match[1]) : null
+    const allPlayButtons = document.querySelectorAll('.play-icon-btn, .fav-play-btn, .search-play-btn')
 
-        // Если ID кнопки совпадает с играющим треком И плеер сейчас РАБОТАЕТ
+    allPlayButtons.forEach(btn => {
+        const btnTrackId = btn.dataset.trackId ? parseInt(btn.dataset.trackId) : null
+
         if (btnTrackId === currentTrackId && !player.paused) {
-            btn.innerHTML = '❚❚'// Рисуем паузу
+            btn.innerHTML = '⏸'
             btn.classList.add('is-playing')
         } else {
-            btn.innerHTML = '▶'// Возвращаем стрелочку
+            btn.innerHTML = '▶'
             btn.classList.remove('is-playing')
         }
-    });
+    })
+
+    // Нижний и главный плеер
+    const bpPlayBtn = document.getElementById('bp-play-btn')
+    const mainPlayBtn = document.getElementById('play-btn')
+    const icon = player.paused ? '▶' : '⏸'
+    if (bpPlayBtn) bpPlayBtn.textContent = icon
+    if (mainPlayBtn) mainPlayBtn.textContent = icon
 }
 
 
@@ -438,15 +445,14 @@ function openPlaylist(id, name) {
             } else {
                 tracks.forEach(track => {
                     container.innerHTML += `
-                        <div class="playlist-track-row" data-track-id="${track.id}">
+                        <div class="playlist-track-row" data-track-id="${track.id}" data-playlist-track="${track.id}">
                             <div class="track-info-block">
                                 <span class="track-title">${track.title}</span>
                                 <span class="track-artist">${track.artist}</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <button class="play-icon-btn" onclick="event.stopPropagation(); playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
-                            </div>
-                        </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+    <button class="play-icon-btn" data-track-id="${track.id}" onclick="event.stopPropagation(); playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+    <button class="remove-track-from-playlist-btn" onclick="event.stopPropagation(); removeFromPlaylist(${track.id}, ${id})">🗑️</button>
                     `;
                 });
             }
@@ -772,19 +778,16 @@ function formatTime(seconds) {
     return m + ':' + (s < 10 ? '0' + s : s)
 }
 function togglePlay() {
-    // Берём элемент по ID и записываем строго в переменную с именем player
     const player = document.getElementById('audio-player')
     const bpPlayBtn = document.getElementById('bp-play-btn')
-    const mainPlayBtn = document.getElementById('play-btn') // кнопка главного плеера
-    if (!player) return // защита на случай, если тег audio не найден
+    const mainPlayBtn = document.getElementById('play-btn')
+
+    if (!player.src || player.src === window.location.href) return
+
     if (player.paused) {
-        player.play().catch(err => console.log('Пауза нажата слишком быстро'))
-        if (bpPlayBtn) bpPlayBtn.textContent = '⏸'
-        if (mainPlayBtn) mainPlayBtn.textContent = '⏸'
+        player.play()
     } else {
         player.pause()
-        if (bpPlayBtn) bpPlayBtn.textContent = '▶'
-        if (mainPlayBtn) mainPlayBtn.textContent = '▶'
     }
 }
 function seekAudio(event) {
@@ -921,7 +924,7 @@ function searchTracks() {
             <span class="s-artist">${track.artist}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 12px;">
-            <button class="play-icon-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+            <button class="play-icon-btn" data-track-id="${track.id}" onclick="event.stopPropagation(); playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
         </div>
     </div>
 `
@@ -947,7 +950,7 @@ function loadHomePage() {
         </div>
         <div class="search-track-actions">
             <span style="color:#ffd700; font-size:0.85rem">${stars}</span>
-            <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+            <button class="search-play-btn" data-track-id="${track.id}" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
         </div>
     </div>`
     }) 
@@ -966,7 +969,7 @@ function loadHomePage() {
                         <span class="track-artist">${track.artist}</span>
                     </div>
                     <div class="search-track-actions">
-                        <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+                        <button class="search-play-btn" data-track-id="${track.id}" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
                     </div>
                 </div>`
             })
@@ -1046,10 +1049,9 @@ function openArtist(id, name) {
                         <span class="track-title">${track.title}</span>
                         <span class="track-artist">${track.artist}</span>
                     </div>
-                    <div class="search-track-actions">
-                        <button class="search-play-btn" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
-                        <button class="search-play-btn" onclick="togglePlay()">⏸</button>
-                    </div>
+                   <div class="search-track-actions">
+    <button class="search-play-btn" data-track-id="${track.id}" onclick="playTrack('${track.filename}', '${track.title}', '${track.artist}', ${track.id}, '${track.cover}')">▶</button>
+</div>
                 </div>`
             })
         })
@@ -1182,7 +1184,7 @@ function renderFavorites(tracks) {
                 <span class="fav-artist">${track.artist}</span>
             </div>
             <div class="fav-actions">
-                <button class="fav-play-btn" onclick="handleFavPlay(${track.id}, '${track.filename}', '${track.title}', '${track.artist}', '${track.cover}')">${playIcon}</button>
+                <button class="fav-play-btn" data-track-id="${track.id}" onclick="handleFavPlay(${track.id}, '${track.filename}', '${track.title}', '${track.artist}', '${track.cover}')">${playIcon}</button>
                 <button class="fav-heart-btn" onclick="removeLikeFromFavorites(${track.id})">❤️</button>
             </div>
         </div>`
@@ -1215,21 +1217,15 @@ function removeLikeFromFavorites(trackId) {
 function handleFavPlay(id, filename, title, artist,cover) {
     if (currentTrackId === id) {
         togglePlay()
-        // Меняем иконку только на текущей кнопке внутри этой строки, не трогая остальной HTML
-        const row = document.getElementById(`fav-row-${id}`)
-        const btn = row ? row.querySelector('.fav-play-btn') : null
-        if (btn) {
-            const audio = document.getElementById('audio-player')
-            btn.textContent = audio.paused ? '▶' : '⏸'
-        }
-    } else {
-        // Вызываем твою стандартную функцию запуска трека
+        
+     } else {
+
         playTrack(filename, title, artist, id, cover)
-        // Вместо вызова полной loadFavorites() просто перерисуем иконки локально
-        document.querySelectorAll('.fav-play-btn').forEach(b => b.textContent = '▶')
-        const row = document.getElementById(`fav-row-${id}`)
-        const btn = row ? row.querySelector('.fav-play-btn') : null
-        if (btn) btn.textContent = '⏸'
+
+        // Вместо ручного обновления — вызовем updatePlayButtons
+
+        updatePlayButtons()
+
     }
 }
 // Функция, которая заменяет старое название и артиста на новые при переключении треков
@@ -1241,7 +1237,7 @@ function updateBottomPlayer(title, artist, isLiked) {
     // Робот берет новые данные из посылки (title, artist) и вставляет их в HTML
     if (bpTitle) bpTitle.textContent = title
     if (bpArtist) bpArtist.textContent = artist
-    if (bpPlayBtn) bpPlayBtn.textContent = '||' // Ставим иконку паузы, так как трек пошел
+    if (bpPlayBtn) bpPlayBtn.textContent = '⏸' // Ставим иконку паузы, так как трек пошел
     // Обновляем состояние нижнего сердечка (красное или белое)
     if (bpLike) {
         bpLike.textContent = isLiked ? '❤️' : '🤍'
@@ -1285,4 +1281,96 @@ function toggleLikeCurrent() {
         }
     })
     .catch(err => console.error('Ошибка при снятии лайка из нижнего плеера:', err))
+}
+function toggleUploadForm() {
+    // Находим нашу секцию загрузки
+    const uploadSection = document.querySelector('.upload-section');
+    
+    // Переключаем класс 'open' (если его нет — добавит, если есть — уберет)
+    uploadSection.classList.toggle('open');
+}
+
+function syncAllPlayButtons(isPlaying) {
+    const icon = isPlaying ? '⏸' : '▶'
+    const allPlayBtns = document.querySelectorAll('.fav-play-btn, .play-icon-btn, .search-play-btn')
+
+    allPlayBtns.forEach(btn => {
+        // У каждой кнопки в data-id может лежать id трека
+        const btnTrackId = btn.dataset.trackId ? parseInt(btn.dataset.trackId) : null
+        if (btnTrackId === currentTrackId) {
+            btn.textContent = icon
+        } else {
+            btn.textContent = '▶'
+        }
+    })
+
+    // Нижний плеер — тоже
+    const bpPlayBtn = document.getElementById('bp-play-btn')
+    if (bpPlayBtn) bpPlayBtn.textContent = icon
+     const mainPlayBtn = document.getElementById('play-btn')
+
+    if (mainPlayBtn) mainPlayBtn.textContent = icon
+
+}
+// Удаление трека из плейлиста
+function removeFromPlaylist(trackId, playlistId) {
+    fetch(`http://localhost:3000/playlists/${playlistId}/tracks/${trackId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Удаляем строку трека из открытого плейлиста
+        const row = document.querySelector(`[data-playlist-track="${trackId}"]`)
+        if (row) row.remove()
+        // Если плейлист стал пустым — показываем надпись
+        const container = document.querySelector('.open-playlist-tracks')
+        if (container && container.querySelectorAll('.playlist-track-row').length === 0) {
+            container.innerHTML = '<p class="empty-playlist-text">Плейлист пока пустой</p>'
+        }
+    })
+    .catch(err => console.error('Ошибка удаления из плейлиста:', err))
+}
+// Удаление трека из базы данных
+function deleteTrack(trackId) {
+    if (!confirm('Удалить трек навсегда?')) return
+    
+    const token = localStorage.getItem('token')
+    fetch(`http://localhost:3000/tracks/${trackId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+        // СПОСОБ 1: Удаляем через data-track-id
+        const row = document.querySelector(`[data-track-id="${trackId}"]`)
+        if (row) {
+            row.remove()
+            console.log('Трек удалён')
+        }
+        
+        // СПОСОБ 2: Если не нашли через data-track-id, ищем через кнопку
+        if (!row) {
+            const btn = document.querySelector(`button[onclick*="deleteTrack(${trackId})"]`)
+            if (btn) {
+                const card = btn.closest('.playlist-track-row')
+                if (card) card.remove()
+            }
+        }
+        
+        // Если удалили играющий трек
+        if (currentTrackId === trackId) {
+            const player = document.getElementById('audio-player')
+            if (player) {
+                player.pause()
+                player.src = ''
+            }
+            currentTrackId = null
+            syncAllPlayButtons(false)
+        }
+        
+        // Обновляем главную страницу (если нужно)
+        // loadHomePage()
+    })
+    .catch(err => console.error('Ошибка удаления трека:', err))
 }

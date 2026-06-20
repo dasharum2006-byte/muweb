@@ -30,6 +30,8 @@
             <input type="password" id="login-password" placeholder="Пароль">
             <button class="auth-btn" onclick="login()">Войти</button>
             <p id="login-error" class="error-msg"></p>
+            <!-- кнопка забыл пароль -->
+            <a href="#" class="forgot-password-link" onclick="showTab('recover')">Забыли пароль?</a>
         </div>
 
         <!-- форма регистрации -->
@@ -37,9 +39,21 @@
             <input type="text" id="reg-login" placeholder="Логин">
             <input type="text" id="reg-name" placeholder="Имя">
             <input type="password" id="reg-password" placeholder="Пароль">
+            <input type="text" id="reg-secret-word" placeholder="Секретное слово (для восстановления)">
             <button class="auth-btn" onclick="register()">Зарегистрироваться</button>
             <p id="reg-error" class="error-msg"></p>
         </div>
+
+        <!-- форма восстановления пароля -->
+        <div id="tab-recover" class="auth-form">
+            <input type="text" id="recover-login" placeholder="Логин">
+            <input type="text" id="recover-secret-word" placeholder="Секретное слово">
+            <input type="password" id="recover-new-password" placeholder="Новый пароль">
+            <button class="auth-btn" onclick="recoverPassword()">Восстановить пароль</button>
+            <p id="recover-error" class="error-msg"></p>
+            <a href="#" class="forgot-password-link" onclick="showTab('login')">← Вернуться ко входу</a>
+        </div>
+
 
     </div>
 

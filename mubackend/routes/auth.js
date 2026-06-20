@@ -10,26 +10,24 @@ const bcrypt = require('bcrypt')
 // секретное слово для токена - фиг вы меня взломаете бебебе
 const SECRET = process.env.SECRET
 
-//регистрация для пользователя
+// регистрация с секретным словом
 router.post('/register', async (req, res) => {
-    const { login, name, password } = req.body
+    const { login, name, password, secretWord } = req.body
 
-    if (!login || !name || !password) {
+    if (!login || !name || !password || !secretWord) {
         return res.status(400).json({ error: 'Заполните все поля' })
     }
 
-    // проверяем что логин не занят
     const existing = db.prepare('SELECT * FROM users WHERE login = ?').get(login)
     if (existing) {
         return res.status(400).json({ error: 'Логин уже занят' })
     }
 
-    // шифруем пароль - 10 это сложность шифрования
     const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedSecret = await bcrypt.hash(secretWord, 10)
 
-    // сохраняем пользователя
-    db.prepare('INSERT INTO users (login, name, password) VALUES (?, ?, ?)')
-        .run(login, name, hashedPassword)
+    db.prepare('INSERT INTO users (login, name, password, secret_word) VALUES (?, ?, ?, ?)')
+        .run(login, name, hashedPassword, hashedSecret)
 
     res.json({ message: 'Регистрация прошла успешно' })
 })
@@ -60,6 +58,32 @@ router.post('/login', async (req, res) => {
     )
 
     res.json({ token, name: user.name, login: user.login })
+})
+
+// восстановление пароля через секретное слово
+router.post('/recover-password', async (req, res) => {
+    const { login, secretWord, newPassword } = req.body
+
+    if (!login || !secretWord || !newPassword) {
+        return res.status(400).json({ error: 'Заполните все поля' })
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE login = ?').get(login)
+    if (!user) {
+        return res.status(400).json({ error: 'Пользователь не найден' })
+    }
+
+    // проверяем секретное слово
+    const isSecretCorrect = await bcrypt.compare(secretWord, user.secret_word)
+    if (!isSecretCorrect) {
+        return res.status(400).json({ error: 'Неверное секретное слово' })
+    }
+
+    // обновляем пароль
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+    db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, user.id)
+
+    res.json({ message: 'Пароль успешно изменён' })
 })
 
 router.post('/change-password', async (req, res) => {

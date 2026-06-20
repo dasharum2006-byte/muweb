@@ -97,7 +97,7 @@ body {
 .auth-btn {
     width: 100%;
     padding: 12px;
-    background-color: #e07090;
+    background-color: #e07090bd;
     color: white;
     border: none;
     border-radius: 8px;
@@ -117,4 +117,17 @@ body {
     text-align: center;
     min-height: 20px;
 }
+.forgot-password-link {
+    color: #c2678a;
+    font-size: 0.85rem;
+    text-decoration: none;
+    text-align: center;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
 
+.forgot-password-link:hover {
+    color: #e07090;
+    text-decoration: underline;
+}

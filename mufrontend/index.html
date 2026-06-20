@@ -50,17 +50,25 @@
                 <div id="tracks-list"></div>
             </section>
             <section class="upload-section">
-                <h2>Загрузить трек</h2>
-                <input type="text" id="track-title" placeholder="Название трека">
-                <input type="text" id="track-artist" placeholder="Артист">
-                <input type="text" id="track-cover-name" placeholder="Имя файла обложки">
-                <!--кнопка для файла-->
-                 <label class="custom-audio-upload">
-                    <input type="file" id="track-file" accept="audio/*">
-                     <span>🎵 Выбрать аудиофайл</span>
-                    </label>
-                <button onclick="uploadTrack()">Загрузить</button>
-            </section>
+    <!-- Кнопка-заголовок для открытия/закрытия -->
+    <h2 class="upload-toggle" onclick="toggleUploadForm()">
+        Загрузить трек <span class="arrow">▼</span>
+    </h2>
+    
+    <!-- Контейнер с полями, который будет скрываться -->
+    <div id="upload-form-content" class="upload-content">
+        <input type="text" id="track-title" placeholder="Название трека">
+        <input type="text" id="track-artist" placeholder="Артист">
+        <input type="text" id="track-cover-name" placeholder="Имя файла обложки">
+        
+        <label class="custom-audio-upload">
+            <input type="file" id="track-file" accept="audio/*">
+            <span>🎵 Выбрать аудиофайл</span>
+        </label>
+        <button onclick="uploadTrack()">Загрузить</button>
+    </div>
+</section>
+
         </div>
     </div>
 
@@ -237,6 +245,7 @@
     <!-- ПРАВАЯ КОЛОНКА — плеер (всегда виден) -->
     <div class="right-column">
         <div class="player-card">
+            <div class="player-column">
             <img id="cover-image" src="images/penguin-logo.png" alt="Обложка">
             <!-- визуализация пятен -->
             <canvas id="blob-canvas" style="display:none; width:100%; aspect-ratio:1/1; border-radius:12px;"></canvas>
@@ -283,7 +292,7 @@
         <p class="avg-rating" id="avg-rating"></p>
         </div>
     </div>
-
+</div>
 </div>
 
 <script src="app.js"></script>
