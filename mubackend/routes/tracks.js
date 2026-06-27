@@ -16,17 +16,10 @@ const db = require('../db/database')
 //говорим multer куда сохранять файлы (uploads/) и как называть - берем текущее время чтобы имена не повторялись
 //короче как почтальон - он принимает данные от пользователя(песни),затем кладет их в нужную папку на сервере и дает им уникальное имя,
 //чтобы файлы не перезаписывали друг друга
-//mulet - human who get file, storage - instruction(where we had to put photos and how it named,
-// destination - folder, where we put photos,filename - how we named every photo, date.now - time on photo)
-
-//destination tells multer - мы кладем файлы в эту папку, destination - key
-//(req, file, cb) => { ... } — это функция
-//Multer вызовет эту функцию для каждого загруженного файла.
-
 //Параметр	Что в нём лежит	Пример
 //req	Объект запроса (все данные от пользователя)	Может содержать название песни, исполнителя и т.д.
 //file	Информация о файле	Имя файла, размер, тип
-//cb	Callback (функция, которую нужно вызвать, когда закончите)	Способ сказать Multer'у: "Я готов, вот тебе результат"
+
 const storage = multer.diskStorage({
     destination: (req, file, callBack) => {
         //ошибка если есть она высветиться и путь к файлу (куда сохранять файл) и затем строим путь к папке(тип мы ищем где находиться текущий файл и поднимаемся нв уровень выше в папкк uploads)
@@ -109,17 +102,12 @@ router.get('/', (req, res) => {
     if (!title || !artist || !filename) {
         return res.status(400).json({ error: 'Укажите название и артиста' })
     }
-    // 1. ПРОВЕРКА НА ДУБЛИКАТЫ В БАЗЕ ДАННЫХ
-    // Ищем трек, переводя буквы в нижний регистр LOWER()
     const existingTrack = db.prepare(
         'SELECT id FROM TRACKS WHERE LOWER(title) = LOWER(?) AND LOWER(artist) = LOWER(?)'
     ).get(title.trim(), artist.trim())
-    // Если робот НАШЕЛ такой трек (existingTrack не пустой), прерываем загрузку и шлем ошибку!
     if (existingTrack) {
         return res.status(400).json({ error: 'Этот трек уже есть в базе данных!' })
     }
-    //insert into tracks - add new row in table tracks добавляем трек
-    // 2. ЕСЛИ ДУБЛИКАТА НЕТ — добавляем трек в общую таблицу TRACKS
     const result = db.prepare(
         'INSERT INTO TRACKS (title, artist, filename, cover) VALUES (?,?,?,?)').run(title.trim(), artist.trim(), filename, cover || null)
         //достаем id пользователя из токена
@@ -142,19 +130,15 @@ router.post('/like/:id', (req, res) => {
     const jwt = require('jsonwebtoken')
     const decoded = jwt.verify(token, process.env.SECRET)
     const userId = decoded.id
-
     // если ставим лайк — убираем дизлайк автоматически
     db.prepare('DELETE FROM disliked_tracks WHERE user_id = ? AND track_id = ?').run(userId, id)
-
     // проверяем лайкал ли уже
     const existing = db.prepare(
         'SELECT * FROM track_likes WHERE user_id = ? AND track_id = ?'
     ).get(userId, id)
-
     if (existing) {
         return res.json({ success: true, alreadyLiked: true })
     }
-
     // добавляем лайк
     db.prepare('INSERT INTO track_likes (user_id, track_id) VALUES (?,?)').run(userId, id)
     db.prepare('UPDATE tracks SET likes = likes + 1 WHERE id = ?').run(id)
@@ -179,8 +163,8 @@ router.get('/liked', (req, res) => {
     res.json(tracks)
 })
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!1
- //удаляем трек - ДОПИСАТЬ ПОТОМУ ЧТО УДАЛЯЕТСЯ ТОЛЬКО ПЕСНЯ ИЗ БД А НА ДИСКЕ ОСТАЕТСЯ
+
+ //удаляем трек 
 router.delete('/:id', (req, res) => {
     db.prepare('DELETE FROM tracks WHERE id = ?').run(req.params.id)
     res.json({ message: 'Трек удалён' })
@@ -246,7 +230,7 @@ router.get('/search', (req, res) => {
 })
 
 //новые роутеры для топ 5 на главной странице
-// топ 5 популярных треков
+//топ 5 популярных треков
 router.get('/top', (req, res) => {
     const tracks = db.prepare(`
         SELECT tracks.*, 
@@ -278,16 +262,16 @@ router.post('/dislike/:id', (req,res) => {
     const jwt = require('jsonwebtoken')
     const decoded = jwt.verify(token, process.env.SECRET)
     const userId = decoded.id
-    // Сначала удаляем лайк из таблицы лайков 
+    //Сначала удаляем лайк из таблицы лайков 
     db.prepare(
         'DELETE FROM track_likes WHERE user_id = ? AND track_id = ?'
     ).run(userId, id)
-    //  Проверяем, стоит ли уже дизлайк
+    // Проверяем, стоит ли уже дизлайк
     const existing = db.prepare(
         'SELECT * FROM disliked_tracks WHERE user_id = ? AND track_id = ?'
     ).get(userId, id)
     if (existing) return res.json({ success: true, alreadyDisliked: true })
-    // Добавляем в дизлайки
+    //Добавляем в дизлайки
     db.prepare(
         'INSERT INTO disliked_tracks (user_id, track_id) VALUES (?,?)'
     ).run(userId, id)
@@ -326,7 +310,7 @@ router.get('/disliked', (req, res) => {
 
 
 
-//Снять лайк (когда жмешь на сердечко на странице Любимое)
+//Снять лайк 
 router.delete('/unlike/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const token = req.headers.authorization?.split(' ')[1]
@@ -334,7 +318,7 @@ router.delete('/unlike/:id', (req, res) => {
     const jwt = require('jsonwebtoken')
     const decoded = jwt.verify(token, process.env.SECRET)
     const userId = decoded.id
-    // Проверяем, стоял ли лайк, чтобы уменьшить счетчик в общей таблице
+    // Проверяем стоял ли лайк чтобы уменьшить счетчик в общей таблице
     const existing = db.prepare(
         'SELECT * FROM track_likes WHERE user_id = ? AND track_id = ?'
     ).get(userId, id)
@@ -348,93 +332,99 @@ router.delete('/unlike/:id', (req, res) => {
 })
 
 
-// Моя Волна - умный алгоритм рекомендаций
+// Моя Волна
 router.get('/wave', (req, res) => {
-    const token = req.headers.authorization?.split(' ')[1]
-    if (!token) return res.status(401).json({ error: 'Нет токена' })
-    
-    const jwt = require('jsonwebtoken')
-    const decoded = jwt.verify(token, process.env.SECRET)
-    const userId = decoded.id
-    
-    // 1. Любимые треки (45%)
-    const likedTracks = db.prepare(`
-        SELECT tracks.* FROM tracks
-        JOIN track_likes ON tracks.id = track_likes.track_id
-        WHERE track_likes.user_id = ?
-    `).all(userId)
-    
-    // 2. Недавно добавленные (25%)
-    const recentTracks = db.prepare(`
-        SELECT * FROM tracks 
-        ORDER BY id DESC 
-        LIMIT 20
-    `).all()
-    
-    // 3. Топ 5 треков (15%)
-    const topTracks = db.prepare(`
-        SELECT tracks.*, 
-        AVG(ratings.rating) as avg_rating,
-        COUNT(ratings.id) as rating_count
-        FROM tracks
-        LEFT JOIN ratings ON tracks.id = ratings.track_id
-        GROUP BY tracks.id
-        HAVING rating_count > 0
-        ORDER BY avg_rating DESC
-        LIMIT 5
-    `).all()
-    
-    // 4. Все остальные треки (15%)
-    const allTracks = db.prepare(`
-        SELECT * FROM tracks
-        WHERE id NOT IN (
-            SELECT track_id FROM track_likes WHERE user_id = ?
-        )
-        AND id NOT IN (
-            SELECT id FROM tracks ORDER BY id DESC LIMIT 20
-        )
-        AND id NOT IN (
-            SELECT tracks.id FROM tracks
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'Нет заголовка авторизации' });
+        const token = authHeader.split(' ')[1]; 
+        if (!token) return res.status(401).json({ error: 'Нет токена' });
+        const jwt = require('jsonwebtoken');
+        let userId;
+        try {
+            const decoded = jwt.verify(token, process.env.SECRET);
+            userId = decoded.id;
+        } catch (jwtErr) {
+            return res.status(403).json({ error: 'TokenExpired' });
+        }
+        // 1. Любимые треки
+        const likedTracks = db.prepare(`
+            SELECT tracks.* FROM tracks
+            JOIN track_likes ON tracks.id = track_likes.track_id
+            WHERE track_likes.user_id = ?
+        `).all(userId);
+
+        // 2. Новинки
+        const recentTracks = db.prepare(`
+            SELECT * FROM tracks 
+            ORDER BY id DESC 
+            LIMIT 20
+        `).all();
+
+        // 3. Топ треков
+        const topTracks = db.prepare(`
+            SELECT tracks.*, 
+            AVG(ratings.rating) as avg_rating,
+            COUNT(ratings.id) as rating_count
+            FROM tracks
             LEFT JOIN ratings ON tracks.id = ratings.track_id
             GROUP BY tracks.id
-            HAVING COUNT(ratings.id) > 0
-            ORDER BY AVG(ratings.rating) DESC
+            HAVING rating_count > 0
+            ORDER BY avg_rating DESC
             LIMIT 5
-        )
-    `).all(userId)
-    
-    // Функция для перемешивания массива
-    function shuffle(array) {
-        const shuffled = [...array]
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        `).all();
+        
+        // Получаем IDшники, чтобы безопасно исключить их в четвертом запросе без LIMIT
+        const recentIds = recentTracks.map(t => t.id).join(',') || '0';
+        const topIds = topTracks.map(t => t.id).join(',') || '0';
+
+        // 4. Все остальные треки (Исправленный безопасный запрос)
+        const allTracks = db.prepare(`
+            SELECT * FROM tracks
+            WHERE id NOT IN (
+                SELECT track_id FROM track_likes WHERE user_id = ?
+            )
+            AND id NOT IN (${recentIds})
+            AND id NOT IN (${topIds})
+        `).all(userId);
+        
+        // Функция для перемешивания массива
+        function shuffle(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
         }
-        return shuffled
+        
+        function getRandomItems(array, count) {
+            const shuffled = shuffle(array);
+            return shuffled.slice(0, Math.min(count, shuffled.length));
+        }
+
+        const totalTracks = 20;
+        const likedCount = Math.ceil(totalTracks * 0.45); 
+        const recentCount = Math.ceil(totalTracks * 0.25); 
+        const topCount = Math.ceil(totalTracks * 0.15); 
+        const otherCount = totalTracks - likedCount - recentCount - topCount; 
+
+        const wave = [
+            ...getRandomItems(likedTracks, likedCount),
+            ...getRandomItems(recentTracks, recentCount),
+            ...getRandomItems(topTracks, topCount),
+            ...getRandomItems(allTracks, otherCount)
+        ];
+
+        const shuffledWave = shuffle(wave);
+        
+        // Отправляем массив фронтенду
+        return res.json(shuffledWave);
+
+    } catch (error) {
+        // Если что-то пойдет не так, мы увидим ошибку в консоли терминала, а не просто 500
+        console.error('Критическая ошибка в /wave:', error);
+        return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
     }
-    
-    // Функция для получения случайных элементов
-    function getRandomItems(array, count) {
-        const shuffled = shuffle(array)
-        return shuffled.slice(0, Math.min(count, shuffled.length))
-    }
-    // Считаем сколько треков нужно из каждой категории
-    const totalTracks = 20 // всего треков в волне
-    const likedCount = Math.ceil(totalTracks * 0.45) // 45% = 9 треков
-    const recentCount = Math.ceil(totalTracks * 0.25) // 25% = 5 треков
-    const topCount = Math.ceil(totalTracks * 0.15) // 15% = 3 треков
-    const otherCount = totalTracks - likedCount - recentCount - topCount // 15% = 3 треков
-    // Берём случайные треки из каждой категории
-    const wave = [
-        ...getRandomItems(likedTracks, likedCount),
-        ...getRandomItems(recentTracks, recentCount),
-        ...getRandomItems(topTracks, topCount),
-        ...getRandomItems(allTracks, otherCount)
-    ]
-    
-    // Перемешиваем финальный список
-    const shuffledWave = shuffle(wave)
-    
-    res.json(shuffledWave)
-})
-module.exports = router 
+});
+module.exports = router;

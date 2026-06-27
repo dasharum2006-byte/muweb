@@ -1,3 +1,7 @@
+#mobile-player-bar {
+    display: none !important;
+}
+
 :root {
     --bg: #fdf0f5;
     --accent: #e07090;
@@ -25,9 +29,6 @@ body {
     overflow-x: hidden;
 }
 
-/* ========================
-   SIDEBAR — узкий экран (слева)
-======================== */
 .sidebar {
     width: 70px;
     height: 100vh;
@@ -135,9 +136,6 @@ body {
     border-radius: 0 4px 4px 0;
 }
 
-/* ========================
-   MAIN WRAPPER — узкий экран
-======================== */
 .main-wrapper {
     margin-left: 70px;
     display: flex;
@@ -164,9 +162,7 @@ body {
     overflow-y: auto;
 }
 
-/* ========================
-   ШИРОКИЙ ЭКРАН (>= 900px) — шапка сверху
-======================== */
+
 @media (min-width: 900px) {
     body {
         display: flex;
@@ -174,9 +170,9 @@ body {
         align-items: stretch;
     }
     .player-column {
-        flex: 1 1 460px;   /* Базовая ширина плеера станет около 460px (было ~380px) */
-        max-width: 500px;  /* Максимальный предел, чтобы плеер не становился слишком огромным */
-        min-width: 320px;  /* Порог, до которого плеер может безопасно сужаться */
+        flex: 1 1 460px;   
+        max-width: 500px;  
+        min-width: 320px;  
         width: 100%;
     }
     .sidebar {
@@ -241,25 +237,24 @@ body {
         display: none;
     }
 
-    /* контент по центру */
       .main-wrapper {
         margin-left: 0;
         width: 100%;
-        max-width: 1200px; /* Увеличили общий лимит, чтобы влезла широкая колонка */
+        max-width: 1200px; 
         min-height: calc(100vh - 62px);
         margin: 0 auto;
         display: flex;
-        justify-content: center; /* Центрируем всю группу */
+        justify-content: center;
         align-items: flex-start;
-        gap: 30px; /* Уменьшили расстояние между левой колонкой и плеером */
+        gap: 30px; 
         padding: 0 20px;
     }
 
     .page {
         display: none;
         width: 100%;
-        justify-content: center; /* Центрируем внутренности страницы */
-        gap: 30px; /* Расстояние между колонкой и плеером внутри Flex */
+        justify-content: center; 
+        gap: 30px; 
     }
 
     .page.active-page {
@@ -267,16 +262,13 @@ body {
     }
 
     .center-column {
-        flex: 1 1 500px; /* Колонка теперь занимает больше места (до 500px) и умеет сжиматься */
-        max-width: 550px; /* Ограничиваем максимальную ширину, чтобы не разносило */
-        min-width: 320px; /* Порог сжатия перед переходом на мобильный режим */
-        padding: 25px 0; /* Убрали боковые паддинги, чтобы эффективнее использовать ширину */
+        flex: 1 1 500px; 
+        max-width: 550px; 
+        min-width: 320px; 
+        padding: 25px 0; 
     }
 }
 
-/* ========================
-   УЗКИЙ ЭКРАН (< 900px) — явно фиксируем sidebar слева
-======================== */
 @media (max-width: 899px) {
     body {
         display: block;
@@ -331,9 +323,6 @@ body {
     }
 }
 
-/* ========================
-   СЕКЦИИ
-======================== */
 .tracks-section, .playlists-section, .upload-section {
     background-color: var(--card-bg);
     padding: 20px;
@@ -348,10 +337,8 @@ h2 {
     margin-bottom: 15px;
     color: var(--heading);
 }
-/*
-ФИКС ДЛЯ СТРАНИЦЫ ПЛЕЙЛИСТОВ (СТРОКА ТРЕКА В ОДНУ ЛИНИЮ)
- */
-/* Контейнер самой карточки плейлиста */
+
+
 .playlist-card {
     background-color: var(--card-inner);
     border: 1px solid var(--border);
@@ -360,7 +347,7 @@ h2 {
     margin-bottom: 10px;
     cursor: pointer;
     display: flex;
-    flex-direction: column; /* Меняем на колонку, чтобы треки ложились под название папки */
+    flex-direction: column; 
     align-items: flex-start;
     gap: 4px;
     transition: all 0.2s ease;
@@ -368,7 +355,6 @@ h2 {
     width: 100%;
 }
 
-/* Оформление верхней строчки плейлиста (иконка папки + имя) */
 .playlist-card-header {
     display: flex;
     align-items: center;
@@ -378,37 +364,35 @@ h2 {
     width: 100%;
 }
 
-/* Эффект при наведении на закрытый плейлист */
+
 .playlist-card:hover {
     background-color: var(--border);
     transform: translateY(-1px);
 }
 
-/* Если плейлист открыт, делаем его рамку чуть активнее */
 .playlist-card.is-open {
     border-color: var(--accent);
-    background-color: var(--card-inner) !important; /* Убираем ховер-эффект темного цвета, когда папка развернута */
+    background-color: var(--card-inner) !important; 
 }
 
-/* --- ВНУТРЕННИЙ СПИСОК ТРЕКОВ  --- */
+
 .open-playlist-tracks {
     width: 100%;
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px dashed var(--border); /* Аккуратная пунктирная линия отделения от названия */
+    border-top: 1px dashed var(--border); 
     display: flex;
     flex-direction: column;
     gap: 6px;
     cursor: default; 
 }
 
-/* Сама строчка трека: сделали её тоньше */
 .playlist-track-row {
     display: flex !important;
     flex-direction: row !important;
     justify-content: space-between !important; 
     align-items: center !important;
-    padding: 6px 10px !important; /* Уменьшили падинги */
+    padding: 6px 10px !important;
     background: #ffffff ; 
     border: 1px solid rgba(0, 0, 0, 0.04) !important; 
     border-radius: 8px !important;
@@ -431,7 +415,7 @@ html[style*="--bg: #1a1a2e"] .playlist-track-row .track-artist,
 html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     color: rgba(255, 255, 255, 0.6) !important;
 }
-/* Блок текста песни */
+
 .track-info-block {
     display: flex !important;
     flex-direction: row !important;
@@ -440,27 +424,21 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
 }
 
 .playlist-track-row .track-title {
-    /* font-weight: 600 !important;
-    font-size: 0.85rem !important;  Чуть уменьшили шрифт названия 
-    color: var(--text) !important; */
     font-weight: 700 !important;
     font-size: 0.95rem !important;
-    /* Вместо var(--text) пишем жёсткий тёмный цвет, чтобы он не становился белым в тёмной теме */
     color: #3a2a35 !important; 
     white-space: nowrap;
 }
 
 .playlist-track-row .track-artist {
     font-size: 0.8rem !important;
-    /* Красивый приглушённый тёмно-серый цвет для подписи */
     color: #7d6575 !important; 
     font-weight: 500 !important;
     white-space: nowrap;
 }
 
-/* Аккуратная кнопка Play */
 .play-icon-btn {
-    width: 28px !important; /* Сделали кнопку компактнее под размер трека */
+    width: 28px !important; 
     height: 28px !important;
     padding: 0 !important;
     display: flex !important;
@@ -479,7 +457,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     transform: scale(1.1);
 }
 
-/* Текст для пустого плейлиста */
+
 .empty-playlist-text {
     font-size: 0.8rem;
     color: var(--text-secondary);
@@ -489,40 +467,40 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
 /*Отступы от папок */
 #page-playlists .create-playlist {
     display: flex !important;
-    flex-direction: row !important; /* Строго выстраиваем инпут и кнопку в ОДИН ряд */
-    align-items: center !important;  /* Центрируем их по вертикали */
-    gap: 10px !important;            /* Расстояние между инпутом и кнопкой */
+    flex-direction: row !important; 
+    align-items: center !important;  
+    gap: 10px !important;           
     width: 100% !important;
     
-    /* Добавляем ОТСТУП СНИЗУ, чтобы папки отодвинулись от кнопки «Создать» */
+
     margin-bottom: 25px !important; 
 }
 
 #page-playlists .create-playlist input {
-    flex: 1 !important;             /* Инпут растягивается во всю ширину */
-    margin-bottom: 0 !important;    /* Убираем старый маргин, ломавший высоту */
-    height: 40px !important;        /* Фиксированная высота */
+    flex: 1 !important;            
+    margin-bottom: 0 !important;    
+    height: 40px !important;        
 }
 
 #page-playlists .create-playlist button {
-    height: 40px !important;        /* Кнопка одной высоты с инпутом */
-    white-space: nowrap !important; /* Запрещаем перенос текста кнопки */
-    margin: 0 !important;           /* Сбрасываем лишние отступы */
+    height: 40px !important;        
+    white-space: nowrap !important;
+    margin: 0 !important;          
 }
 
-/* Убираем сдвиг текста для иконки паузы, чтобы палочки не съезжали вправо */
+
 .play-icon-btn.is-playing {
     text-indent: 0px !important;
     font-size: 0.75rem !important; 
 }
 
-/* Место под сердечко в списке треков */
+
 .track-heart {
     font-size: 0.85rem !important;
     user-select: none !important;
     cursor: default !important;
     display: inline-block !important;
-    animation: heartPop 0.25s ease-out; /* Красивая анимация появления */
+    animation: heartPop 0.25s ease-out; 
 }
 
 @keyframes heartPop {
@@ -531,8 +509,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     100% { transform: scale(1); }
 }
 
-/*Настройки*/
-/* --- СОВРЕМЕННЫЙ UI ДЛЯ НАСТРОЕК --- */
+
 .settings-wrapper {
     width: 100%;
     max-width: 800px;
@@ -550,14 +527,14 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     margin-bottom: 5px;
 }
 
-/* Двухколоночный грид для Профиля и Пароля */
+
 .settings-grid-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-/* Общая  карточка */
+
 .settings-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
@@ -573,7 +550,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     font-weight: 700;
 }
 
-/* Карточка Профиля */
+
 .profile-main-card {
     display: flex;
     flex-direction: column;
@@ -597,7 +574,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     border: 2px solid var(--border);
 }
 
-/* Красивая розовая/сиреневая кнопка смены аватара */
+
 .custom-avatar-btn {
     background-color: var(--card-inner);
     border: 1px solid var(--border);
@@ -619,7 +596,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     color: var(--heading);
 }
 
-/* Инфо-строки логина и имени */
+
 .profile-info-details {
     width: 100%;
     display: flex;
@@ -649,7 +626,26 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     color: var(--text);
 }
 
-/* Блок Безопасности */
+
+#bp-play-btn .play-icon,
+.bp-main-play .play-icon {
+    display: inline-block !important;
+    color: #ffffff !important;      
+    font-size: 14px !important;     
+    line-height: 1 !important;
+    text-align: center !important;
+    margin-left: 2px !important;    
+}
+
+
+#bp-play-btn, .bp-main-play {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+}
+
 .password-form {
     display: flex;
     flex-direction: column;
@@ -661,13 +657,13 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     height: 40px;
 }
 
-/* Кнопка сохранения */
+
 .settings-action-btn {
     height: 40px;
     font-weight: 600;
 }
 
-/* Кнопка Выйти из аккаунта (Под паролем) */
+
 .logout-btn-danger {
     width: 100%;
     height: 40px;
@@ -686,7 +682,6 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     color: #ffffff !important;
 }
 
-/* ТЕМЫ */
 .themes-options-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -706,7 +701,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     color: var(--text);
 }
 
-/* ЧЕРНЫЙ СПИСОК  */
+
 .blacklist-subtitle {
     font-size: 0.8rem;
     color: var(--text-secondary);
@@ -720,7 +715,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     gap: 8px;
 }
 
-/*  трек в ЧС */
+
 .blacklist-item-row {
     display: flex;
     justify-content: space-between;
@@ -746,7 +741,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     color: var(--text-secondary);
 }
 
-/* Кнопка вернуть трек */
+
 .remove-from-blacklist-btn {
     background: none !important;
     border: none !important;
@@ -768,14 +763,12 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
 
 
 
-/*pingion logo*/
-/* Контейнер-кнопка для пингвина (круглая рамка) */
 .sidebar-logo-wrapper {
-    background: var(--card-bg) !important; /* Фон внутри ободка */
-    border: 3px solid var(--border) !important; /* Красивая круглая рамка */
-    width: 54px !important;  /* Сделали его стабильно большим */
+    background: var(--card-bg) !important; 
+    border: 3px solid var(--border) !important;
+    width: 54px !important; 
     height: 54px !important;
-    border-radius: 50% !important; /* Строго идеальный круг */
+    border-radius: 50% !important; 
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -783,33 +776,27 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     cursor: pointer !important;
     margin-bottom: 15px !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    overflow: hidden; /* Чтобы картинка не вылезала за круглую рамку */
-    flex-shrink: 0 !important; /* Запрещаем браузеру сжимать кнопку */
+    overflow: hidden; 
+    flex-shrink: 0 !important; 
 }
 
-/* Сам пингвинчик внутри рамки */
+
 .sidebar-logo {
-    width: 230% !important; /* Занимает почти всю площадь круга */
+    width: 230% !important; 
     height: 230% !important;
     object-fit: contain !important;
     border-radius: 50% !important;
-    margin-bottom: 0 !important; /* Сбросили старый маргин */
+    margin-bottom: 0 !important; 
     transition: transform 0.3s ease !important;
 }
-
-/* Эффект при наведении на кнопку-пингвина */
 .sidebar-logo-wrapper:hover {
-    border-color: var(--accent) !important; /* Рамка меняет цвет на акцентный из темы */
-    transform: scale(1.06) rotate(4deg) !important; /* Легкий интерактивный наклон */
+    border-color: var(--accent) !important;
+    transform: scale(1.06) rotate(4deg) !important; 
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-
-/* Эффект при клике */
 .sidebar-logo-wrapper:active {
     transform: scale(0.96);
 }
-
-/* Кнопка дизлайка (пронзенное сердце) */
 .dislike-btn {
     background: none !important;
     border: 2px solid var(--border) !important;
@@ -817,34 +804,30 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     padding: 10px 20px !important;
     border-radius: 50px !important;
     cursor: pointer !important;
-    /* Изначально делаем иконку блеклой (черно-белой), пока трек не задизлайкан */
     filter: grayscale(100%) !important; 
     opacity: 0.6;
     transition: all 0.2s ease !important;
 }
-/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1*/
 .dislike-btn:hover {
     background-color: var(--card-inner) !important;
     opacity: 1;
 }
 
-/* МАГИЯ: Когда трек задизлайкан, сердце загорается цветом темы и пульсирует */
 .dislike-btn.disliked {
-    filter: grayscale(0%) !important; /* Возвращаем сочный цвет эмодзи */
+    filter: grayscale(0%) !important;
     opacity: 1 !important;
-    border-color: var(--accent) !important; /* Рамка красится в цвет активной темы */
-    animation: heartCrack 0.3s ease-out; /* Эффектный микровзрыв при клике */
+    border-color: var(--accent) !important; 
+    animation: heartCrack 0.3s ease-out; 
 }
 
-/* Анимация "удара" кнопки при клике */
+
 @keyframes heartCrack {
     0% { transform: scale(1); }
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
 }
 
-/*Searching*/
-/* Контейнер, куда складываются результаты поиска */
+
 #search-results-grid, 
 #tracks-list {
     display: flex !important;
@@ -854,20 +837,19 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     margin-top: 15px;
 }
 
-/* Карточка найденного трека в поиске — теперь ровная, широкая и аккуратная */
 .search-result-row {
     display: flex !important;
     flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
     padding: 10px 14px !important;
-    background: var(--card-bg) !important; /* В тон карточки поиска */
+    background: var(--card-bg) !important;
     border: 1px solid var(--border) !important; 
     border-radius: 10px !important;
     width: 100% !important;
 }
 
-/* Блок текста песни и артиста рядышком */
+
 .search-result-info {
     display: flex !important;
     flex-direction: row !important;
@@ -887,8 +869,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     font-weight: 500 !important;
 }
 
-/*Все треки*/
-/* Контейнер списка треков "Все треки" */
+
 #tracks-list {
     display: flex !important;
     flex-direction: column !important;
@@ -897,14 +878,14 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     margin-top: 10px;
 }
 
-/* Обертка для кнопок справа от названия */
+
 .track-actions-row-block {
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important; /* Расстояние между сердечком, плюсиком и плером */
+    gap: 12px !important; 
 }
 
-/* Кастомная кнопка Плюсик (+) — круглая и нежная */
+
 .add-to-playlist-circle-btn {
     width: 30px !important;
     height: 30px !important;
@@ -912,7 +893,7 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    border-radius: 50% !important; /* Идеальный круг */
+    border-radius: 50% !important; 
     background-color: var(--card-inner) !important;
     border: 1px solid var(--border) !important;
     color: var(--heading) !important;
@@ -927,7 +908,6 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     transform: scale(1.08);
 }
 
-/* Делаем иконку лайка-сердечка кликабельной прямо в списке */
 .track-heart {
     font-size: 1.1rem !important;
     cursor: pointer !important;
@@ -939,21 +919,18 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     transform: scale(1.15);
 }
 
-/*красивый квадратик при поиске*/
-/* Тот самый выпадающий квадратик со списком плейлистов */
 .playlist-menu {
     position: absolute !important;
     background: var(--card-bg) !important;
     border: 1px solid var(--border) !important;
     border-radius: 10px !important;
     padding: 6px 0 !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important; /* Красивая объемная тень */
-    z-index: 999 !important; /* Чтобы квадратик всплывал ПОВЕРХ всех остальных треков */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important; 
+    z-index: 999 !important; 
     min-width: 160px !important;
-    margin-top: 35px; /* Сдвигаем квадратик чуть ниже кнопки плюсика */
+    margin-top: 35px; 
 }
 
-/* Строчка с названием плейлиста внутри квадратика */
 .playlist-menu-item {
     padding: 8px 14px !important;
     cursor: pointer !important;
@@ -964,13 +941,13 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     text-align: left !important;
 }
 
-/* Эффект наведения на название плейлиста в списке */
+
 .playlist-menu-item:hover {
     background-color: var(--card-inner) !important;
     color: var(--heading) !important;
 }
 
-/* Текст, если плейлистов еще нет */
+
 .playlist-menu p {
     padding: 10px 14px !important;
     color: var(--text-secondary) !important;
@@ -979,11 +956,10 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     margin: 0 !important;
 }
 
-/* Контейнер страницы Любимое */
-/* Контейнер страницы Любимое */
+
 .favorites-container {
-    max-width: 90%; /* Увеличиваем на всю доступную ширину */
-    width: 80%;      /* Делаем треки длиннее */
+    max-width: 90%; 
+    width: 80%;      
     margin: 0 auto;
     padding: 30px 20px;
     padding-left: 5px;
@@ -994,44 +970,38 @@ html[style*="--bg:#1a1a2e"] .playlist-track-row .track-artist {
     color: var(--accent);
 }
 
-/* ========================================================
-   КАРТОЧКИ ТРЕКОВ НА СТРАНИЦЕ ЛЮБИМОЕ (Полный сброс глыб)
-   ======================================================== */
 
-/* Прямоугольник карточки: по умолчанию белый для светлой темы */
+
+
 .fav-track-row {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    
-    background: #ffffff !important; /* Чисто белый прямоугольник */
-    border: 2px solid rgba(0, 0, 0, 0.06) !important; /* Аккуратная рамка */
-    padding: 10px 24px !important; /* Компактная высота, как ты просил */
+    background: #ffffff !important; 
+    border: 2px solid rgba(0, 0, 0, 0.06) !important; 
+    padding: 10px 24px !important; 
     border-radius: 12px !important;
     margin-bottom: 12px !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
-    color: #1a1a1a !important; /* Чёрный текст по умолчанию, чтобы не сливался на белом */
+    color: #1a1a1a !important; 
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
-/* АВТО-ПЕРЕКРАСКА В ТЁМНУЮ ТЕМУ: привязываемся к переменной на html */
 html[style*="--bg: #1a1a2e"] .fav-track-row,
 html[style*="--bg:#1a1a2e"] .fav-track-row {
-    background: rgba(24, 24, 28, 0.9) !important; /* Красивый тёмный фон карточки */
+    background: rgba(24, 24, 28, 0.9) !important; 
     border-color: rgba(255, 255, 255, 0.06) !important;
-    color: #ffffff !important; /* Текст становится идеально белым */
+    color: #ffffff !important; 
 }
-
 .fav-track-row:hover {
     transform: translateY(-1px) !important;
-    border-color: var(--accent) !important; /* Подсветка рамки цветом темы */
+    border-color: var(--accent) !important; 
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Блок текста (Название + Исполнитель) */
+
 .fav-meta {
     display: flex !important;
     align-items: baseline !important;
@@ -1044,16 +1014,16 @@ html[style*="--bg:#1a1a2e"] .fav-track-row {
 .fav-title {
     font-weight: 700 !important;
     font-size: 1.05rem !important;
-    color: inherit !important; /* Автоматом чёрный на светлой, белый на тёмной */
+    color: inherit !important;
 }
 
 .fav-artist {
     font-size: 0.85rem !important;
     color: inherit !important;
-    opacity: 0.5 !important; /* Исполнитель чуть приглушён */
+    opacity: 0.5 !important; 
 }
 
-/* Блок кнопок справа */
+
 .fav-actions {
     display: flex !important;
     align-items: center !important;
@@ -1063,7 +1033,7 @@ html[style*="--bg:#1a1a2e"] .fav-track-row {
     height: auto !important;
 }
 
-/* Кнопка Плюс (если используется) */
+
 .fav-plus-btn {
     background: none !important;
     border: none !important;
@@ -1080,11 +1050,10 @@ html[style*="--bg:#1a1a2e"] .fav-track-row {
 }
 .fav-plus-btn:hover { opacity: 1 !important; }
 
-/* Круглая кнопка Play под цвет темы */
+
 .fav-play-btn {
-    background: var(--accent, #a78bfa) !important; /* Цвет темы сайта */
-    color: #ffffff !important; /* Белая стрелочка внутри */
-    
+    background: var(--accent, #a78bfa) !important;
+    color: #ffffff !important; 
     width: 36px !important;
     height: 36px !important;
     min-width: 36px !important;
@@ -1095,7 +1064,6 @@ html[style*="--bg:#1a1a2e"] .fav-track-row {
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1106,9 +1074,9 @@ html[style*="--bg:#1a1a2e"] .fav-track-row {
 }
 .fav-play-btn:hover { transform: scale(1.06) !important; }
 
-/* ТВОЙ ЗАПРОС: Убираем глыбу на заднем фоне сердечка */
+
 .fav-heart-btn {
-    background: none !important; /* Намертво стираем серую коробку */
+    background: none !important; 
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -1125,18 +1093,11 @@ html[style*="--bg:#1a1a2e"] .fav-track-row {
     transition: transform 0.15s ease, opacity 0.15s ease !important;
 }
 .fav-heart-btn:hover { transform: scale(1.15) !important; }
-
-/* Прозрачность при нажатии (клике) на кнопки */
 .fav-plus-btn:active, .fav-play-btn:active, .fav-heart-btn:active {
-    opacity: 0.2 !important; /* Делает цвет прозрачным в момент клика */
+    opacity: 0.2 !important; 
     transform: scale(0.92) !important;
 }
 
-
-
-/* ========================================================
-   1. СВЕТЛАЯ ТЕМА: Чистый белый глянцевый островок
-   ======================================================== */
 .bottom-player {
     position: fixed !important;
     bottom: 20px !important;
@@ -1145,16 +1106,13 @@ html[style*="--bg:#1a1a2e"] .fav-track-row {
     width: 90% !important;
     max-width: 1000px !important;
     height: 70px !important;
-    
     background: rgba(255, 255, 255, 0.85) !important; 
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
     backdrop-filter: blur(25px) !important;
     -webkit-backdrop-filter: blur(25px) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05) !important;
-    
     color: #1a1a1a !important;
-    
-    display: none; /* Переключается через JS в showPage */
+    display: none; 
     align-items: center !important;
     justify-content: space-between !important;
     padding: 0 30px !important;
@@ -1164,15 +1122,10 @@ html[style*="--bg:#1a1a2e"] .fav-track-row {
     transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease !important;
 }
 
-/* Исполнитель в светлой теме */
 .bottom-player .bp-artist {
     color: #1a1a1a !important;
     opacity: 0.55 !important;
 }
-
-/* ========================================================
-   2. ТЁМНАЯ ТЕМА: Твой крутой тёмно-голубой стеклянный стиль
-   ======================================================== */
 html[style*="--bg: #1a1a2e"] #bottom-player-bar,
 html[style*="--bg:#1a1a2e"] #bottom-player-bar {
     background: rgba(10, 20, 35, 0.8) !important; 
@@ -1187,11 +1140,6 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     opacity: 0.65 !important;
 }
 
-/* ========================================================
-   3. ВНУТРЕННЯЯ СТРУКТУРА И ЭЛЕМЕНТЫ (Защита от синих кубов)
-   ======================================================== */
-
-/* Левая часть: информация о треке */
 .bp-left-block {
     display: flex !important;
     align-items: center !important;
@@ -1219,7 +1167,7 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     transition: color 0.3s ease !important;
 }
 
-/* Центральный блок кнопок управления */
+
 .bp-controls {
     display: flex !important;
     align-items: center !important;
@@ -1229,9 +1177,9 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     height: auto !important;
 }
 
-/* ЖЁСТКИЙ СБРОС СТИЛЕЙ ДЛЯ СТРЕЛОЧЕК ⏮ и ⏭ */
+
 .bp-nav-btn {
-    background: none !important; /* Намертво стираем синий фон */
+    background: none !important; 
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -1242,7 +1190,7 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     
     font-size: 1.3rem !important;
     cursor: pointer !important;
-    color: inherit !important; /* Берут цвет темы (черный или белый автоматически) */
+    color: inherit !important; 
     opacity: 0.6 !important;
     transition: opacity 0.15s ease, transform 0.15s ease !important;
 }
@@ -1251,12 +1199,10 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     opacity: 1 !important;
 }
 
-/* ЖЁСТКИЙ СБРОС И ПЕРЕКРАСКА КНОПКИ PLAY (Идеальный круглый кружок) */
+
 .bp-main-play {
-    background: var(--accent, #a78bfa) !important; /* Цвет твоей текущей темы сайта */
-    color: #ffffff !important; /* Иконка ▶ внутри становится белой */
-    
-    /* Сбрасываем синие размеры и ставим идеальный круг */
+    background: var(--accent, #a78bfa) !important; 
+    color: #ffffff !important;
     width: 40px !important;
     height: 40px !important;
     min-width: 40px !important;
@@ -1267,7 +1213,6 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1279,9 +1224,14 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
 
 .bp-main-play:hover {
     transform: scale(1.08) !important;
-}
 
-/* Правая часть: Таймлайн и Сердце ровно в один ряд */
+}
+#bottom-player-bar .play-icon {
+    color: #ffffff !important;
+    font-size: 1.1rem !important;
+    line-height: 1 !important;
+    margin-left: 2px !important;
+}
 .bp-right-block {
     display: flex !important;
     align-items: center !important;
@@ -1303,7 +1253,6 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     height: auto !important;
 }
 
-/* ПОЛЗУНОК ПРОГРЕССА (Выравниваем в линию) */
 #bp-progress-bar {
     width: 100% !important;
     accent-color: var(--accent) !important;
@@ -1316,9 +1265,8 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     padding: 0 !important;
 }
 
-/* ЖЁСТКИЙ СБРОС ДЛЯ КНОПКИ СЕРДЦА В САМОМ КОНЦЕ СТРОКИ */
 .bp-heart-btn {
-    background: none !important; /* Убираем синий квадратный гроб */
+    background: none !important; 
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -1326,11 +1274,8 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     height: auto !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    
-    /* ТВОЙ ЗАПРОС: Возвращаем эмодзи родной красный цвет */
-    color: red !important; /* Намертво заставляем браузер убрать белый перекрас */
-    filter: grayscale(0%) !important; /* Защита от черно-белых фильтров */
-    
+    color: red !important; 
+    filter: grayscale(0%) !important; 
     font-size: 1.3rem !important;
     cursor: pointer !important;
     transition: transform 0.15s ease !important;
@@ -1342,8 +1287,6 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
 .bp-heart-btn:hover {
     transform: scale(1.15) !important;
 }
-
-/* КАРТОЧКА ТРЕКА */
 .track-card {
     display: flex;
     flex-direction: column;
@@ -1377,8 +1320,6 @@ html[style*="--bg:#1a1a2e"] #bottom-player-bar .bp-artist {
     display: flex;
     gap: 8px;
 }
-
-/* КНОПКИ */
 button {
     background-color: var(--accent);
     color: #ffffff;
@@ -1405,11 +1346,6 @@ button:hover {
     text-align: center;
     padding: 8px 0;
 }
-
-
-
-
-/* ИНПУТЫ */
 input[type="text"], input[type="file"], input[type="password"] {
     width: 100%;
     padding: 10px 14px;
@@ -1422,7 +1358,6 @@ input[type="text"], input[type="file"], input[type="password"] {
     font-size: 0.9rem;
 }
 
-/* ПРАВАЯ КОЛОНКА — ПЛЕЕР */
 .right-column {
     width: 470px;
     min-width: 450px;
@@ -1507,14 +1442,11 @@ audio {
     background-color: var(--card-inner);
 }
 
-
 .pink-theme { background: linear-gradient(135deg, #fdf0f5, #f4c2d8); }
 .purple-theme { background: linear-gradient(135deg, #f0e6ff, #d4c5f9); }
 .blue-theme { background: linear-gradient(135deg, #e6f4ff, #b8d8f4); }
 .dark-theme { background: linear-gradient(135deg, #2c2c2c, #1a1a2e); }
 
-/**!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1/
-/*Для ромба меняем цвет который в плеере*/
 .view-btn {
     background: color-mix(in srgb, var(--accent) 15%, transparent) !important; 
     border: 2px solid  color-mix(in srgb, var(--accent) 30%, transparent) !important;;
@@ -1530,7 +1462,7 @@ audio {
     background: color-mix(in srgb, var(--accent) 30%, transparent) !important;
     box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 20%, transparent) !important;
 }
-/*Для кастомного плеера*/
+
 .custom-player {
     width: 100%;
     display: flex;
@@ -1579,7 +1511,7 @@ audio {
     justify-content: center;
     align-items: center;
     gap: 20px;
-    height: 50px;  /* ← фиксированная высота строки */
+    height: 50px;  
 }
 
 .control-btn {
@@ -1602,11 +1534,9 @@ audio {
     line-height: 1 !important;
     vertical-align: middle !important;
     position: relative !important;
-    top: -3px !important;  /* двигай это значение - плюс вниз, минус вверх */
+    top: -3px !important;  
 }
 
-
-/*для звездочек в плеере*/
 .star-btn {
     background: none !important;
     border: none !important;
@@ -1656,7 +1586,7 @@ audio {
     min-height: 20px;
 }
 
-/*чтобы кнопка не выбивалась из ряда*/
+
 .repeat-btn {
     font-size: 1.2rem !important;
     line-height: 1 !important;
@@ -1665,19 +1595,16 @@ audio {
 }
 
 #repeat-btn {
-    /* margin-left: 5px; */
     margin-right: 20px;
 }
 
 #star-btn {
-    /* margin-right: 5px; */
     margin-left: 26px;
 }
-/*для страницы поиск*/
+
 #search-input {
     margin-bottom: 20px;
 }
-
 .search-track-card {
     display: flex;
     align-items: center;
@@ -1695,7 +1622,6 @@ audio {
     gap: 4px;
     flex: 1;
 }
-
 .search-track-actions {
     display: flex;
     align-items: center;
@@ -1724,16 +1650,13 @@ audio {
     text-align: center;
 }
 
-/*для артистов*/
-/* ========================
-   ФОРМА ДОБАВЛЕНИЯ АРТИСТА (Красивый ровный ряд)
-======================== */
+
 #page-artists .create-playlist {
     display: flex;         
     align-items: center;   
-    gap: 12px;            /* Одинаковые аккуратные отступы между всеми элементами */
+    gap: 12px;           
     width: 100%;
-    margin-bottom: 25px !important; /* Увеличили отступ снизу, чтобы сетка не липла */
+    margin-bottom: 25px !important; 
 }
 
 #page-artists .create-playlist input[type="text"] {
@@ -1764,9 +1687,7 @@ audio {
 #page-artists .create-playlist button:hover {
     background-color: var(--accent-hover);
 }
-/* ========================
-   ИСПРАВЛЕННАЯ СЕТКА АРТИСТОВ
-======================== */
+
 .artists-grid, #artists-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr); 
@@ -1791,7 +1712,7 @@ audio {
 
 .artist-card:hover {
     background: var(--border);
-    transform: translateY(-2px); /* Легкий красивый интерактив при наведении */
+    transform: translateY(-2px);
 }
 
 .artist-card img, 
@@ -1800,7 +1721,7 @@ audio {
     height: 60px !important; 
     aspect-ratio: 1/1;
     object-fit: cover;
-    border-radius: 50%; /* Сделаем аватарки круглыми — в таком дизайне это смотрится в 10 раз дороже */
+    border-radius: 50%; 
     margin-bottom: 0 !important; 
     flex-shrink: 0; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -1852,77 +1773,70 @@ audio {
     flex: 1;
 }
 
-/*змейка для испольнителей*/
-/* Контейнер для полоски — белый фон, без теней */
-/* ========================================================
-   КОНТЕЙНЕР ДЛЯ ПОЛОСКИ (Автоматическое переключение темы)
-   ======================================================== */
-
-/* 1. По умолчанию: Светлая тема — белый фон, без теней */
 .gradient-strip {
   position: relative !important;
   width: 100% !important;
   height: 130px !important; 
   border-radius: 20px !important;
   overflow: hidden !important; 
-  background: #ffffff !important; /* Чисто белый фон */
-  border: 1px solid rgba(0, 0, 0, 0.08) !important; /* Тонкая темная рамка */
+  background: #ffffff !important; 
+  border: 1px solid rgba(0, 0, 0, 0.08) !important; 
   margin-bottom: 25px !important;
   box-shadow: none !important; /* Без теней */
-  transition: background 0.3s ease, border-color 0.3s ease !important; /* Плавный переход цвета */
+  transition: background 0.3s ease, border-color 0.3s ease !important; 
 }
 
-/* 2. ТВОЙ ЗАПРОС: Для тёмной темы делаем фон темнее */
+
 html[style*="--bg: #1a1a2e"] .gradient-strip,
 html[style*="--bg:#1a1a2e"] .gradient-strip {
-  background: #cdd6e7 !important; /* Глубокий тёмный фон (темнее, чем общий фон сайта) */
-  border: 1px solid rgba(255, 255, 255, 0.06) !important; /* Тонкая светлая рамка для стекла */
+  background: #cdd6e7 !important; 
+  border: 1px solid rgba(255, 255, 255, 0.06) !important; 
 }
 
 
-/* Базовые свойства для фигур */
+
 .snake-blob {
   position: absolute;
-  filter: blur(12px); /* Размытие наполовину */
+  filter: blur(12px);
   mix-blend-mode: multiply; 
   opacity: 0.8;
   will-change: transform;
 }
 
-/* 1. РОЗОВЫЙ КРУГ — летает в левой части (вверх-вниз и по углам) */
+
 .blob-1 {
   width: 80px;
   height: 80px;
-  border-radius: 50%; /* Идеальный кружок */
+  border-radius: 50%;
   background: radial-gradient(circle, #ff4da6 0%, #ff007f 100%);
   top: 15px;
   left: 5%;
-  animation: bounceLeft 7s infinite ease-in-out; /* Живая скорость */
+  animation: bounceLeft 7s infinite ease-in-out; 
 }
 
-/* 2. СИРЕНЕВЫЙ КВАДРАТ — плавает в центре (меняет наклон) */
+
 .blob-2 {
   width: 90px;
   height: 90px;
-  border-radius: 30% 30% 30% 30%; /* Мягкая квадратная форма */
+  border-radius: 30% 30% 30% 30%; 
   background: radial-gradient(circle, #b366ff 0%, #7f00ff 100%);
   top: 20px;
   left: 32%;
   animation: bounceCenter 8s infinite ease-in-out;
 }
 
-/* 3. ГОЛУБОЙ ОВАЛ — бегает в правой части по диагоналям */
+
 .blob-3 {
-  width: 120px; /* Вытянутый */
-  height: 70px; /* Узкий */
-  border-radius: 50%; /* Получается четкий овал */
+  width: 120px; 
+  height: 70px;
+  border-radius: 50%; 
   background: radial-gradient(circle, #00f0ff 0%, #00bfff 100%);
   top: 30px;
   left: 75%;
   animation: bounceRight 6s infinite ease-in-out;
 }
 
-/* 4. СИНИЙ НЕОПРЕДЕЛЕННЫЙ — курсирует снизу между центром и левым углом */
+
 .blob-4 {
   width: 95px;
   height: 85px;
@@ -1934,9 +1848,8 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
   animation: bounceBetween 9s infinite ease-in-out;
 }
 
-/* --- ТРАЕКТОРИИ ДВИЖЕНИЯ БЕЗ СТОЛКНОВЕНИЙ --- */
 
-/* Розовый круг: ходит строго по левым углам */
+
 @keyframes bounceLeft {
   0% { transform: translate(0px, 0px); }
   25% { transform: translate(30px, 25px); }
@@ -1945,35 +1858,29 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
   100% { transform: translate(0px, 0px); }
 }
 
-/* Сиреневый квадрат: колеблется в центре вверх-вниз и крутится */
 @keyframes bounceCenter {
   0% { transform: translate(0px, 0px) rotate(0deg); }
   33% { transform: translate(15px, -20px) rotate(30deg); }
   66% { transform: translate(-20px, 20px) rotate(-25deg); }
   100% { transform: translate(0px, 0px) rotate(0deg); }
 }
-
-/* Голубой овал: активно летает по правым углам */
 @keyframes bounceRight {
   0% { transform: translate(0px, 0px); }
   30% { transform: translate(-40px, -25px); }
   70% { transform: translate(-15px, 30px); }
   100% { transform: translate(0px, 0px); }
 }
-
-/* Синий неопределенный: держит дистанцию между центром и овалом */
 @keyframes bounceBetween {
   0% { transform: translate(0px, 0px) scale(1); }
   50% { transform: translate(-45px, 15px) scale(0.9); }
   100% { transform: translate(0px, 0px) scale(1); }
 }
-/* Настройка строки трека для страницы артиста */
-/* Стили для строки трека на странице артиста */
+
 #artist-tracks .track-item,
 .track-item {
     display: flex;
-    align-items: center;       /* Все элементы строго по центру вертикали */
-    justify-content: space-between; /* Название улетает влево, блок кнопок — вправо */
+    align-items: center;     
+    justify-content: space-between; 
     padding: 12px 20px;
     margin-bottom: 10px;
     background: var(--card-bg);
@@ -1989,25 +1896,22 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     background: var(--card-inner);
 }
 
-/* Название трека и инфо */
+
 .track-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-/* КОНТЕЙНЕР ДЛЯ КНОПОК PLAY, STOP, ЛАЙК — встает намертво в конец справа */
 #artist-tracks .track-actions,
 #artist-tracks .actions,
 .track-actions {
     display: flex;
     align-items: center;  
-    gap: 10px;            /* Фиксированный аккуратный отступ между кнопками */
-    margin-left: auto;    /* Магия флексбокса: толкает кнопки максимально вправо */
-    padding-left: 20px;   /* Чтобы текст трека не прилипал к кнопкам */
+    gap: 10px;          
+    margin-left: auto;   
+    padding-left: 20px;  
 }
-
-/* Стилизация самих кнопок управления */
 #artist-tracks .track-actions button,
 .track-actions button {
     display: flex;
@@ -2033,8 +1937,6 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     transform: scale(1.05);
 }
 
-/*для кнопки выбрать фото для артиста*/
-/* Контейнер для нашей новой кнопки */
 .custom-file-upload {
     flex: 2;
     height: 40px;
@@ -2052,32 +1954,23 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     user-select: none;
 }
 
-/* Полностью скрываем оригинальный страшный инпут внутри лейбла */
+
 .custom-file-upload input[type="file"] {
     display: none !important;
 }
 
-/* Эффект при наведении на кнопку загрузки */
 .custom-file-upload:hover {
     background-color: var(--border);
     border-color: var(--accent);
     color: var(--heading);
 }
-
-/* Эффект при клике (активное состояние) */
 .custom-file-upload:active {
     transform: scale(0.98);
 }
-
-
-/*
-ФИКС ДЛЯ СТРАНИЦЫ ЗАГРУЗКИ (СТРОГО ДЛЯ ФОРМЫ ЗАГРУЗКИ ТРЕКА)
- */
-
 .upload-section {
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important; /* Ровные отступы только в блоке загрузки */
+    gap: 12px !important; 
     width: 100%;
 }
 
@@ -2086,7 +1979,6 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     height: 40px !important;
 }
 
-/* Красивая кнопка выбора аудиофайла */
 .custom-audio-upload {
     width: 100% !important;
     height: 40px !important;
@@ -2114,7 +2006,7 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     color: var(--heading) !important;
 }
 
-/* Кнопка "Загрузить" на странице загрузки */
+
 .upload-section button {
     width: 100% !important;
     height: 40px !important;
@@ -2122,40 +2014,40 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     display: block !important;
 }
 
-/* Делаем заголовок похожим на кнопку */
+
 .upload-toggle {
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
     user-select: none;
-    margin-bottom: 0 !important; /* Убираем нижний отступ, когда форма закрыта */
+    margin-bottom: 0 !important; 
 }
 
-/* Иконка стрелочки с плавной анимацией поворота */
+
 .upload-toggle .arrow {
     font-size: 0.8rem;
     transition: transform 0.3s ease;
 }
 
-/* Элемент скрыт по умолчанию */
+
 .upload-content {
     display: none;
-    margin-top: 15px; /* Возвращаем отступ полям, когда форма открывается */
+    margin-top: 15px; 
     flex-direction: column; 
     gap: 12px;
 }
 
-/* Класс, который JS будет добавлять для отображения формы */
+
 .upload-section.open .upload-content {
     display: flex;
 }
 
-/* Поворачиваем стрелочку вверх, когда форма открыта */
+
 .upload-section.open .arrow {
     transform: rotate(180deg);
 }
-/* Кнопка удаления трека */
+
 .delete-track-btn {
     width: 28px !important;
     height: 28px !important;
@@ -2180,40 +2072,28 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     background: color-mix(in srgb, var(--accent) 30%, transparent) !important;
     transform: scale(1.1) !important;
 }
-
-
-
-
-
-
-
-/* Моя Волна - стили */
 .wave-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    align-items: flex-start;  /* ← меняем */
-    padding-top: 30px;        /* ← добавляем */
+    align-items: flex-start;  
+    padding-top: 30px;        
     width: 100%;
     min-height: 100vh;
     background: linear-gradient(135deg, var(--bg) 0%, var(--card-inner) 100%);
     padding: 30px 20px;
 }
 
-/* 2. Ограничиваем плеер и центрируем внутренности */
-/* 1. Ограничиваем обертку пузыря, чтобы он не рос бесконечно */
 .blob-wrapper {
     position: relative;
-    width: 260px;         /* Строго задаем ширину */
-    height: 260px;        /* Строго задаем высоту */
+    width: 260px;        
+    height: 260px;      
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 10px 0;       /* Компактные отступы сверху и снизу */
-    flex-shrink: 0;       /* Запрещаем flexbox сжимать или растягивать этот блок */
+    margin: 10px 0;       
+    flex-shrink: 0;       
 }
-
-/* 2. Сам пузырь */
 .blob {
     width: 100%;
     height: 100%;
@@ -2228,13 +2108,9 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     align-items: center;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    
-    /* Обрезаем картинку строго по форме пузыря */
     mask-image: radial-gradient(white, black); 
     -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
-
-/* 3. Ограничиваем высоту самого плеера */
 .wave-player {
     background: rgba(255,255,255,0.25);
     backdrop-filter: blur(20px);
@@ -2250,10 +2126,6 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     align-items: center;
     gap: 10px;
 }
-
-
-
-/* 2. Сам пузырь */
 .blob {
     width: 100%;
     height: 100%;
@@ -2270,13 +2142,11 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
                wave-gradient-move 4s ease infinite,
                wave-glow-pulse 3s ease-in-out infinite;
 }
-
 @keyframes wave-gradient-move {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
-
 @keyframes wave-glow-pulse {
     0% { 
         box-shadow: 0 0 20px rgba(224,112,144,0.3), 0 0 40px rgba(0,240,255,0.1);
@@ -2291,17 +2161,15 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
         box-shadow: 0 0 20px rgba(224,112,144,0.3), 0 0 40px rgba(0,240,255,0.1);
     }
 }
-
-
 .blob-cover {
-    width: 100%;               /* Растягиваем на всю ширину пузыря */
-    height: 100%;              /* Растягиваем на всю высоту пузыря */
-    object-fit: cover;         /* Обрезаем картинку по форме, чтобы не было пустых краев */
-    position: absolute;        /* Жестко фиксируем внутри родителя */
+    width: 100%;             
+    height: 100%;             
+    object-fit: cover;        
+    position: absolute;       
     top: 0;
     left: 0;
     z-index: 3;
-    border-radius: inherit;    /* Наследует меняющуюся форму пузыря! */
+    border-radius: inherit;  
 }
 
 .blob::after {
@@ -2314,16 +2182,16 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     z-index: 1;
     animation: wave-pulse-glow 8s ease-in-out infinite;
 }
-/* 1. Ограничиваем обертку пузыря, чтобы он не рос бесконечно */
+
 .blob-wrapper {
     position: relative;
-    width: 260px;         /* Строго задаем ширину */
-    height: 260px;        /* Строго задаем высоту */
+    width: 260px;        
+    height: 260px;       
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 10px 0;       /* Компактные отступы сверху и снизу */
-    flex-shrink: 0;       /* Запрещаем flexbox сжимать или растягивать этот блок */
+    margin: 10px 0;       
+    flex-shrink: 0;    
 }
 @keyframes wave-morphing {
     0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
@@ -2342,8 +2210,6 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     50% { transform: scale(1.4); opacity: 0.9; filter: blur(25px); }
     60% { transform: scale(1.6); opacity: 0; filter: blur(40px); }
 }
-
-/* 2. Информация о треке */
 .wave-track-info {
     text-align: center;
     width: 100%;
@@ -2361,9 +2227,6 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     color: var(--text-secondary);
     margin: 0;
 }
-
-/* 3. Стеклянная карусель треков */
-/* Карусель */
 .carousel-container {
     width: 100%;
     overflow: hidden;
@@ -2448,7 +2311,6 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     transform: scale(1.2);
 }
 
-/* 5. Органы управления */
 .wave-controls {
     display: flex;
     align-items: center;
@@ -2500,7 +2362,6 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     transform: scale(1.05);
 }
 
-/* 6. Кнопка новой волны */
 .wave-new-btn {
     background: var(--card-inner);
     border: 2px solid var(--border);
@@ -2521,7 +2382,7 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     transform: translateY(-2px);
 }
 
-/* Всплывашка громкости */
+
 .volume-indicator {
     position: fixed;
     bottom: 100px;
@@ -2541,7 +2402,7 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
 .volume-indicator.show {
     opacity: 1;
 }
-/* Громкость */
+
 .wave-volume-row {
     display: flex;
     align-items: center;
@@ -2549,8 +2410,6 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     width: 100%;
     font-size: 1.1rem;
 }
-
-/* Кнопки лайк/дизлайк в волне */
 .wave-action-btn {
     background: rgba(255,255,255,0.3) !important;
     backdrop-filter: blur(8px) !important;
@@ -2566,8 +2425,782 @@ html[style*="--bg:#1a1a2e"] .gradient-strip {
     transition: all 0.2s !important;
     padding: 0 !important;
 }
-
 .wave-action-btn:hover {
     transform: scale(1.1) !important;
     background: rgba(255,255,255,0.5) !important;
+}
+
+  .mobile-header {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 46px !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    z-index: 9999999 !important; /* Еще выше */
+    align-items: center !important;
+    justify-content: space-around !important; 
+    overflow: visible !important;
+    white-space: normal !important;
+    padding: 0 6px !important;
+    box-sizing: border-box !important;
+  }
+
+.mobile-header {
+  display: none !important;
+}
+@media screen and (max-width: 479px) {
+    html, body {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .sidebar, aside, .player-sidebar, .right-player-panel, 
+    .player-container, .right-panel, #desktop-player, .right-column, #right-column {
+        display: none !important;
+    }
+
+    .mobile-header {
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 46px !important;
+        background: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+        z-index: 9999999 !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        padding: 0 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mobile-header .nav-btn {
+        display: flex !important;
+        background: none !important;
+        border: none !important;
+        font-size: 1.1rem !important;
+        padding: 6px !important;
+        cursor: pointer !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    .main-wrapper, main, .center-column {
+        display: block !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-top: 30px !important; 
+        padding-bottom: 90px !important; 
+        box-sizing: border-box !important;
+    }
+
+    .page, [id^="page-"] {
+        padding: 10px !important;
+        box-sizing: border-box !important;
+    }
+    .tracks-section, .upload-section, .search-section, [class*="section"] {
+        width: calc(100% - 20px) !important;
+        max-width: calc(100% - 20px) !important;
+        margin: 10px auto !important;
+        padding: 12px 10px !important;
+        background: #ffffff !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+        box-sizing: border-box !important;
+    }
+
+    .track-card, #tracks-list > div, [class*="track-item"] {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 4px 2px !important;
+        background: #ffffff !important;
+        margin-bottom: 6px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: 4px !important;
+    }
+
+    .track-card > div:first-child, .track-info-block {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+        gap: 2px !important;
+    }
+
+    .track-title {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100% !important;
+        display: block;
+    }
+
+    .upload-content input {
+        width: 100% !important;
+        font-size: 0.8rem !important;
+        padding: 6px 10px !important;
+        margin-bottom: 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    #page-wave .wave-container {
+        width: 100% !important;
+        padding: 10px !important;
+        box-sizing: border-box !important;
+        min-height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+    }
+    #page-wave .wave-player {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: calc(100% - 20px) !important;
+        margin: 0 auto !important;
+        background: #ffffff !important;
+        border-radius: 20px !important;
+        padding: 12px !important;
+        box-sizing: border-box !important;
+        gap: 8px !important;
+
+    }
+    #page-wave .blob-wrapper {
+        display: flex !important;
+        width: 140px !important; 
+        height: 140px !important;
+        margin: 0 auto 8px auto !important;
+        flex-shrink: 0 !important;
+    }
+    #page-wave .blob {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    #page-wave .wave-track-info {
+        text-align: center !important;
+        margin-bottom: 4px !important;
+        width: 100% !important;
+    }
+    #page-wave .wave-track-title {
+        font-size: 1rem !important;
+        font-weight: bold !important;
+        margin: 0 !important;
+    }
+
+
+    #page-wave .wave-track-artist {
+        font-size: 0.8rem !important;
+        color: #888 !important;
+        margin: 0 !important;
+    }
+    #page-wave .wave-progress-container {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 8px !important;
+    }
+    #page-wave .wave-time {
+        font-size: 0.7rem !important;
+        min-width: 35px !important;
+    }
+    #page-wave .wave-progress {
+        flex: 1 !important;
+        height: 4px !important;
+    }
+
+    #page-wave .wave-controls {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 12px !important;
+        margin: 8px 0 !important;
+    }
+    #page-wave .wave-btn {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 1rem !important;
+        padding: 0 !important;
+    }
+
+
+    #page-wave .wave-play-btn {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 1.3rem !important;
+    }
+
+    #page-wave .carousel-container {
+        width: 100% !important;
+        padding: 8px 0 !important;
+    }
+
+
+    #page-wave .carousel-card .cover-art {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    #page-wave .carousel-card .track-title {
+        font-size: 0.65rem !important;
+
+    }
+    #page-wave .wave-new-btn {
+        padding: 8px 16px !important;
+        font-size: 0.85rem !important;
+        margin-top: 8px !important;
+    }
+    #page-wave .wave-volume-row {
+        font-size: 0.9rem !important;
+    }
+    #page-wave .wave-action-btn {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 1rem !important;
+    }
+    #page-wave .bottom-player,
+    #page-wave #bottom-player-bar,
+    #page-wave .player-bar,
+    #page-wave .player-controls,
+    #page-wave [class*="player"]:not([class*="wave"]) {
+        display: none !important;
+    }
+
+@media screen and (max-width: 479px) {
+    html, body {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .sidebar, aside, .player-sidebar, .right-player-panel, 
+    .player-container, .right-panel, #desktop-player, .right-column, #right-column {
+        display: none !important;
+    }
+
+    .mobile-header {
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 46px !important;
+        background: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+        z-index: 9999999 !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        padding: 0 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mobile-header .nav-btn {
+        display: flex !important;
+        background: none !important;
+        border: none !important;
+        font-size: 1.1rem !important;
+        padding: 6px !important;
+        cursor: pointer !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    .main-wrapper, main, .center-column {
+        display: block !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-top: 30px !important; 
+        padding-bottom: 90px !important; 
+        box-sizing: border-box !important;
+    }
+
+    .page, [id^="page-"] {
+        padding: 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    .tracks-section, .upload-section, .search-section, [class*="section"] {
+        width: calc(100% - 20px) !important;
+        max-width: calc(100% - 20px) !important;
+        margin: 10px auto !important;
+        padding: 12px 10px !important;
+        background: #ffffff !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+        box-sizing: border-box !important;
+    }
+
+    .track-card, #tracks-list > div, [class*="track-item"] {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 4px 2px !important;
+        background: #ffffff !important;
+        margin-bottom: 6px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: 4px !important;
+    }
+
+    .track-card > div:first-child, .track-info-block {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+        gap: 2px !important;
+    }
+
+    .track-title {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100% !important;
+        display: block;
+    }
+        
+@media screen and (max-width: 479px) {
+  @media screen and (max-width: 479px) {
+    #bottom-player-bar, 
+    .bottom-player {
+        display: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+}
+
+
+    #mobile-player-bar {
+        display: flex !important; 
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 200px !important; 
+        height: 54px !important; 
+        background: #ffffff !important;
+        border-radius: 27px !important; 
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15) !important;
+        z-index: 9999999 !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        padding: 0 15px !important;
+        box-sizing: border-box !important;
+    }
+    .mp-btn {
+        display: inline-flex !important;
+        width: 36px !important;
+        height: 36px !important;
+        background: transparent !important;
+        border: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.4rem !important;
+        cursor: pointer !important;
+        color: #333333 !important;
+    }
+    .mp-play-btn {
+        display: inline-flex !important;
+        width: 42px !important;
+        height: 42px !important;
+        background: #4a90e2 !important; 
+        border-radius: 50% !important;
+        border: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        box-shadow: 0 3px 8px rgba(74, 144, 226, 0.3) !important;
+    }
+
+
+    .mp-play-icon {
+        color: #ffffff !important;
+        font-size: 1.1rem !important;
+        display: block !important;
+        line-height: 1 !important;
+        margin-left: 3px !important; 
+    }
+}
+    #bottom-player-bar .bp-left-block,
+    #bottom-player-bar .bp-right-block {
+        display: none !important;
+    }
+    #bottom-player-bar .bp-controls {
+        display: flex !important;
+        gap: 30px !important;
+    }
+    #bottom-player-bar .bp-main-play {
+        background: var(--accent, #e07090) !important;
+        color: #ffffff !important;
+        border-radius: 50% !important;
+        width: 36px !important;
+        height: 36px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+   
+    #bottom-player-bar.bottom-player,
+    #bottom-player-bar {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 15px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: calc(100% - 30px) !important;
+        max-width: 320px !important;
+        height: 52px !important;
+        background: #ffffff !important;
+        border-radius: 26px !important;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15) !important;
+        z-index: 9999999 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    #bottom-player-bar .bp-left-block,
+    #bottom-player-bar .bp-right-block,
+    #bottom-player-bar input,
+    #bottom-player-bar span:not(.play-icon) {
+        display: none !important;
+    }
+
+
+    #bottom-player-bar .bp-controls {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 35px !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+   
+    #bottom-player-bar button {
+        display: inline-flex !important;
+        width: 36px !important;
+        height: 36px !important;
+        background: transparent !important;
+        border: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.3rem !important;
+        color: #000000 !important;
+        cursor: pointer !important;
+    }
+
+
+    #bottom-player-bar .bp-main-play,
+    #bottom-player-bar #bp-play-btn {
+        background: #4a90e2 !important;
+        border-radius: 50% !important;
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    #bottom-player-bar .play-icon {
+        display: inline-block !important;
+        color: #ffffff !important;
+        font-size: 1.1rem !important;
+        line-height: 1 !important;
+        margin-left: 2px !important;
+    }
+
+
+}
+    [class*="player"]:not([class*="wave"]) button {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 0.75rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    [class*="player"]:not([class*="wave"]) .play-btn {
+        width: 34px !important;
+        height: 34px !important;
+        border-radius: 50% !important;
+        background-color: var(--accent, #e07090) !important;
+        color: #ffffff !important;
+    }
+    #page-settings .settings-wrapper {
+        padding: 10px !important;
+        width: calc(100% - 20px) !important;
+    }
+    #page-settings .settings-main-title {
+        font-size: 1.1rem !important;
+    }
+    #page-settings .settings-grid-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    #page-settings .settings-card {
+        padding: 12px !important;
+
+    }
+    #page-settings .themes-options-row {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+
+    }
+    #page-favorites .favorites-container {
+        padding: 10px !important;
+        width: calc(100% - 20px) !important;
+    }
+    #page-favorites .favorites-header {
+        font-size: 1.3rem !important;
+        margin-bottom: 12px !important;
+    }
+    #page-favorites .fav-track-row {
+        padding: 8px 10px !important;
+        margin-bottom: 6px !important;
+    }
+    #page-favorites .fav-title {
+        font-size: 0.85rem !important;
+    }
+    #page-favorites .fav-artist {
+        font-size: 0.7rem !important;
+    }
+    #page-playlists .playlist-card {
+        padding: 10px !important;
+    }
+    #page-playlists .playlist-card-header {
+        font-size: 0.85rem !important;
+    }
+    #page-playlists .create-playlist {
+        gap: 8px !important;
+        margin-bottom: 12px !important;
+    }
+    #page-artists .artists-grid,
+    #page-artists #artists-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+
+    }
+    #page-artists .artist-card {
+        padding: 10px !important;
+    }
+    #page-artists .artist-card img,
+    #page-artists .artist-card .artist-no-photo {
+        width: 45px !important;
+        height: 45px !important;
+
+    }
+    .track-card,
+    .search-result-row,
+    .playlist-track-row,
+    .fav-track-row,
+    .blacklist-item-row {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+    .track-info-block,
+    .fav-meta,
+    .search-result-info {
+        overflow: hidden !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+
+    }
+    .right-column, 
+    .right-column *, 
+    .player-controls,
+    .player-duration,
+    .track-info,
+    #desktop-player-bar,
+    #bottom-player-bar > :not(.play-btn):not(.prev-btn):not(.next-btn):not(.track-info-block):not(.wave-controls) {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+    #bottom-player-bar .track-title, 
+    #bottom-player-bar span {
+        font-size: 0.8rem !important;
+        white-space: nowrap !important;
+    }
+
+
+
+}
+@media screen and (max-width: 479px) {
+    #mobile-player-bar {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 220px !important; 
+        height: 85px !important; 
+        background: #ffffff !important;
+        border-radius: 20px !important; 
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15) !important;
+        z-index: 9999999 !important;
+        flex-direction: column !important; 
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 8px 15px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mp-controls-row {
+        display: flex !important;
+        width: 100% !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+    }
+
+    .mp-stars {
+        display: flex !important;
+        gap: 5px !important;
+        justify-content: center !important;
+    }
+
+    .mp-star {
+        font-size: 1.2rem !important;
+        color: #cccccc !important; 
+        cursor: pointer !important;
+        transition: color 0.2s !important;
+    }
+    .mp-star.active {
+        color: #f39c12 !important; 
+    }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+    #page-wave .blob-wrapper {
+        width: 180px !important;
+        height: 180px !important;
+    }
+
+    #page-wave .wave-player {
+        width: calc(100% - 40px) !important;
+    }
+
+}
+
+@media (min-width: 768px) and (max-width: 899px) {
+    #page-wave .blob-wrapper {
+        width: 200px !important;
+        height: 200px !important;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .nav-btn:active,
+    .playlist-card:active,
+    .artist-card:active,
+    .track-card:active {
+        background-color: rgba(244, 194, 216, 0.4) !important;
+    }
+}
+
+
+@media (max-width: 899px) {
+    .center-column,
+    .right-column {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+
+@supports (padding: max(0px)) {
+    @media (max-width: 899px) {
+        .bottom-player {
+            padding-left: max(12px, env(safe-area-inset-left)) !important;
+            padding-right: max(12px, env(safe-area-inset-right)) !important;
+            padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+        }
+
+    }
+
+}
+
+
+
+@media screen and (max-width: 479px) {
+    #mobile-player-bar {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 7px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 240px !important; 
+        height: 54px !important;
+        background: #ffffff !important;
+        border-radius: 27px !important;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15) !important;
+        z-index: 9999999 !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        padding: 0 12px !important;
+        box-sizing: border-box !important;
+    }
+    .mp-star-btn {
+        font-size: 1.1rem !important;
+        filter: grayscale(0.2);
+    }
+
+    .bottom-player,
+    #bottom-player-bar,
+    div[class*="player-bar"],
+    div[class*="bottom-player"] {
+        display: none !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        -webkit-box-shadow: none !important;
+        border: none !important;
+        outline: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
 }

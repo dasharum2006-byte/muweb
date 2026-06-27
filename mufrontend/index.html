@@ -9,13 +9,12 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- БОКОВОЕ МЕНЮ -->
 <aside class="sidebar">
     <button class="sidebar-logo-wrapper" onclick="showPage('home', null)" title="На главную">
         <img src="images/penguin-logo.png" alt="логотип" class="sidebar-logo">
     </button>
     <nav class="sidebar-nav">
+        
         <button class="nav-btn" title="Поиск" onclick="showPage('search',this)">🔍</button>
         <button class="nav-btn active" title="Музыка" onclick="showPage('music', this)">🎵</button>
         <button class="nav-btn" title="Моя Волна" onclick="showPage('wave', this)">🌊</button>
@@ -25,11 +24,20 @@
         <button class="nav-btn" title="" onclick="showPage('settings', this)">⚙️</button>
     </nav>
 </aside>
-<!--  в sidebar когда меню выдвигается подписи берутся из ::after в CSS через title. -->
-<!-- ОСНОВНОЙ КОНТЕНТ -->
-<div class="main-wrapper">
+<header class="mobile-header">
+     <button class="sidebar-logo-wrapper" onclick="showPage('home', null)" title="На главную">
+        <img src="images/penguin-logo.png" alt="логотип" class="sidebar-logo">
+    </button>
+    <button class="nav-btn" onclick="showPage('search', this)">🔍</button>
+    <button class="nav-btn active" onclick="showPage('music', this)">🎵</button>
+    <button class="nav-btn" onclick="showPage('wave', this)">🌊</button>
+    <button class="nav-btn" onclick="showPage('playlists', this)">📁</button>
+    <button class="nav-btn" onclick="showPage('artists', this)">🎤</button>
+    <button class="nav-btn" onclick="showPage('favorites', this)">❤️</button>
+    <button class="nav-btn" onclick="showPage('settings', this)">⚙️</button>
+</header>
 
-    <!-- ГЛАВНАЯ СТРАНИЦА (по умолчанию) -->
+<div class="main-wrapper">
     <div id="page-home" class="page active-page">
     <div class="center-column">
         <section class="tracks-section">
@@ -51,12 +59,9 @@
                 <div id="tracks-list"></div>
             </section>
             <section class="upload-section">
-    <!-- Кнопка-заголовок для открытия/закрытия -->
     <h2 class="upload-toggle" onclick="toggleUploadForm()">
         Загрузить трек <span class="arrow">▼</span>
     </h2>
-    
-    <!-- Контейнер с полями, который будет скрываться -->
     <div id="upload-form-content" class="upload-content">
         <input type="text" id="track-title" placeholder="Название трека">
         <input type="text" id="track-artist" placeholder="Артист">
@@ -81,25 +86,18 @@
                 </div>
             </div>
 
-            <!-- Название трека -->
             <div class="wave-track-info">
                 <h2 id="wave-title" class="wave-track-title">Нажми play</h2>
                 <p id="wave-artist" class="wave-track-artist">--</p>
             </div>
-
-            <!-- Карусель треков -->
             <div class="carousel-container">
                 <div class="carousel-track" id="carousel-track"></div>
             </div>
-
-            <!-- Прогресс -->
             <div class="wave-progress-container">
                 <span id="wave-current-time" class="wave-time">0:00</span>
                 <input type="range" id="wave-progress" class="wave-progress" min="0" max="100" value="0" oninput="waveSeek(this.value)">
                 <span id="wave-total-time" class="wave-time">0:00</span>
             </div>
-
-            <!-- Кнопки -->
             <div class="wave-controls">
                 <button class="wave-action-btn" onclick="waveDislike()">💘</button>
                 <button class="wave-btn" onclick="wavePrev()">⏮</button>
@@ -107,8 +105,6 @@
                 <button class="wave-btn" onclick="waveNext()">⏭</button>
                 <button class="wave-action-btn" onclick="waveLike()">🤍</button>
             </div>
-
-            <!-- Громкость -->
             <div class="wave-volume-row">
                 <span>🔈</span>
                 <input type="range" id="wave-volume" class="wave-progress" min="0" max="100" value="80" oninput="waveSetVolume(this.value)">
@@ -119,7 +115,6 @@
         </div>
     </div>
 </div>
-    <!-- СТРАНИЦА ПОИСКА -->
    <div id="page-search" class="page">
     <div class="center-column">
         <section class="tracks-section">
@@ -131,7 +126,6 @@
     </div>
 </div>
 
-   <!-- СТРАНИЦА ПЛЕЙЛИСТОВ -->
 <div id="page-playlists" class="page">
     <div class="center-column">
         <section class="playlists-section">
@@ -146,33 +140,27 @@
 </div>
 
 
-    <!-- СТРАНИЦА ЛЮБИМОЕ -->
+
+
+
 <div id="page-favorites" class="page">
     <div class="favorites-container">
         <h2 class="favorites-header">Любимое</h2>
-        <div id="favorites-tracks-list">
-            <!-- Сюда JS будет рендерить прямоугольные карточки треков -->
-        </div>
+        <div id="favorites-tracks-list"></div>
     </div>
 </div>
-<!-- НИЖНИЙ КОМПАКТНЫЙ ОСТРОВНОЙ ПЛЕЕР -->
 <div id="bottom-player-bar" class="bottom-player">
-    <!-- Левая часть: Статус  + Информация о треке -->
     <div class="bp-left-block">
         <div class="bp-track-info">
             <span id="bp-title" class="bp-title">Название трека</span>
             <span id="bp-artist" class="bp-artist">Исполнитель</span>
         </div>
     </div>
-    
-    <!-- Центральная часть: Кнопки управления (Переключение треков и Play) -->
     <div class="bp-controls">
-        <button class="bp-nav-btn" onclick="prevTrack()">⏮</button>
-        <button id="bp-play-btn" class="bp-main-play" onclick="togglePlay()">▶</button>
-        <button class="bp-nav-btn" onclick="nextTrack()">⏭</button>
+        <button class="bp-nav-btn prev-btn" onclick="prevTrack()">⏮</button>
+<button id="bp-play-btn" class="bp-main-play play-btn" onclick="togglePlay()"><span class="play-icon">▶</span></button>
+        <button class="bp-nav-btn next-btn" onclick="nextTrack()">⏭</button>
     </div>
-    
-    <!-- Правая часть: Светлый ползунок + Кнопка-Сердечко в самом конце -->
     <div class="bp-right-block">
         <div class="bp-progress-container">
             <span id="bp-current-time">0:00</span>
@@ -185,11 +173,9 @@
 
 
 
-    <!-- СТРАНИЦА АРТИСТОВ -->
 <div id="page-artists" class="page">
     <div class="center-column" style="width:100%">
         <section class="tracks-section">
-            <!--  новая анимированная полоска -->
             <div class="gradient-strip">
                 <div class="snake-blob blob-1"></div>
                 <div class="snake-blob blob-2"></div>
@@ -197,24 +183,20 @@
                 <div class="snake-blob blob-4"></div>
             </div>
             <h2>Артисты</h2>
-            <!-- форма добавления артиста -->
             <div class="create-playlist" style="margin-bottom:20px">
                 <input type="text" id="artist-name" placeholder="Имя артиста">
-                <!-- Красивая кастомная кнопка загрузки файла -->
                 <label class="custom-file-upload">
                     <input type="file" id="artist-photo" accept="image/*">
-                <span>📎 Выбрать фото</span>
+                <span>📎</span>
             </label>
         <button onclick="addArtist()">Добавить</button>
 </div>
 
-            <!-- карточки артистов -->
             <div id="artists-grid"></div>
         </section>
     </div>
 </div>
 
-<!-- СТРАНИЦА КОНКРЕТНОГО АРТИСТА -->
 <div id="page-artist" class="page">
     <div class="center-column" style="width:100%">
         <button onclick="showPage('artists')" 
@@ -228,13 +210,10 @@
         </section>
     </div>
 </div>
-
-<!-- СТРАНИЦА НАСТРОЕК -->
 <div id="page-settings" class="page">
     <div class="settings-wrapper">
         <h2 class="settings-main-title">Настройки</h2>
         <div class="settings-grid-layout">
-            <!-- Левая колонка: Профиль пользователя -->
             <div class="settings-card profile-main-card">
                 <div class="avatar-container">
                     <img id="avatar-img" src="images/penguin-logo.png" alt="Аватар">
@@ -255,7 +234,7 @@
                     </div>
                 </div>
             </div>
-                <!-- Правая колонка Безопасность и Выход -->
+
             <div class="settings-card security-card">
                 <h3>Безопасность</h3>
                 <div class="password-form">
@@ -268,7 +247,6 @@
                 </button>
             </div>
         </div>
-        <!-- Блок Выбора Тем -->
         <div class="settings-card themes-card">
             <h3>Темы</h3>
             <div class="themes-options-row">
@@ -289,20 +267,17 @@
 </div>
  
 
-    <!-- ПРАВАЯ КОЛОНКА — плеер (всегда виден) -->
     <div class="right-column">
         <div class="player-card">
             <div class="player-column">
             <img id="cover-image" src="images/penguin-logo.png" alt="Обложка">
-            <!-- визуализация пятен -->
+            <!--пятна-->
             <canvas id="blob-canvas" style="display:none; width:100%; aspect-ratio:1/1; border-radius:12px;"></canvas>
             <div class="player-info">
                 <span id="current-title">Выбери трек</span>
                 <span id="current-artist">—</span>
             </div>
-            <!--меняем на другой плеер, controls убрали-->
             <audio id="audio-player"></audio>
-            <!-- новый кастомный плеер -->
         <div class="custom-player">
             <div class="player-time">
                 <span id="current-time">0:00</span>
@@ -320,15 +295,11 @@
                 <button class="star-btn" id="star-btn" onclick="toggleStars()">★</button>
             </div>
         </div>
-        <!-- дизлайк, ромб, лайк -->
         <div class="like-buttons">
             <button class="dislike-btn" onclick="dislikeTrack()">💘</button>
             <button class="view-btn" onclick="togglePlayerView()">◆</button>
             <button class="like-btn" onclick="likeTrack(currentTrackId, this)">❤️</button>
         </div>
-
-        <!-- 5 звёздочек снизу - скрыты по умолчанию -->
-         <!-- звёздочки — появляются под like-buttons -->
         <div class="stars-popup" id="stars-popup" style="display:none">
             <span class="star" onclick="rateTrack(1)">☆</span>
             <span class="star" onclick="rateTrack(2)">☆</span>
@@ -341,7 +312,15 @@
     </div>
 </div>
 </div>
-
+<div id="mobile-player-bar">
+    <button type="button" class="mp-btn" onclick="prevTrack()">⏮</button>
+    <button type="button" id="mp-play-btn" class="mp-play-btn" onclick="togglePlay()">
+        <span class="mp-play-icon">▶</span>
+    </button>
+    <button type="button" class="mp-btn" onclick="nextTrack()">⏭</button>
+</div>
+</body>
+</html>
 <script src="app.js"></script>
 </body>
 </html>

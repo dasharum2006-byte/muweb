@@ -42,10 +42,6 @@ router.post('/:id/tracks', (req, res) => {
 
 //get all tracks from playlist
 router.get('/:id/tracks', (req, res) => {
-    //выбери данные,дай мне все колонки из таблицы с треками
-    //склеиваем две таблицы - соединим с таблицей playlist_tracks ON(по какому правилу будем соединять
-    //где id песни из таблицы tracks равен track_id из таблицы playlist_tracks
-    //where - оставь только строки где...,значение playlist_id равно ?" (вместо ? подставится номер плейлиста
     const tracks = db.prepare(`
         SELECT tracks. * FROM tracks
         JOIN playlist_tracks ON tracks.id = playlist_tracks.track_id

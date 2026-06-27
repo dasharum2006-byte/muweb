@@ -16,14 +16,12 @@ const playlistsRouter = require('./routes/playlists')
 const artistsRouter = require('./routes/artists')
 //создаем сервак
 const muweb = express()
-
 //чтобы сервак понимал jsonn и обычные файлы
 //мы пускаем посетителей с разных адресов
 muweb.use(cors())
 //учит сервер понимать json формат
 muweb.use(express.json())
 muweb.use('/auth', authRouter)
-
 //отдаем музыкальные файлы по адресу /uploads/имя_файла.mp3
 //сначала идет адрес по которому будут доступны файлы,команда - отдать файл какой он есть,где физически лежат наши файлы на компе
 muweb.use('/uploads', express.static(path.join(__dirname, 'uploads')))
@@ -45,3 +43,5 @@ muweb.get('/', (req, res) => {
 muweb.listen(3000, () => {
     console.log('Сервер запущен http://localhost:3000')
 })
+// Эта строчка открывает доступ к папке uploads для фронтенда
+muweb.use('/uploads', express.static(path.join(__dirname, 'uploads')));

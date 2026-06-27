@@ -119,8 +119,6 @@ function playTrack(filename, title, artist, id, cover) {
       // меняем текст на текущую песню
     if (currentTitle) currentTitle.textContent = title
     if (currentArtist) currentArtist.textContent = artist
-    
-    // Сбрасываем старые подсветки кнопок в плеере
     const track = tracksList.find(t => t.id === id)
     const likeBtn = document.querySelector('.like-btn')
     const dislikeBtn = document.querySelector('.dislike-btn')
@@ -128,21 +126,20 @@ function playTrack(filename, title, artist, id, cover) {
     if (dislikeBtn) dislikeBtn.classList.toggle('disliked', !!track?.is_disliked)
     if (likeBtn) likeBtn.classList.remove('liked')
     if (dislikeBtn) dislikeBtn.classList.remove('disliked')
-    
-    // 2. Убрали повторное const, просто проверяем уже созданную переменную trackData
     if (trackData) {
         if (trackData.is_liked && likeBtn) likeBtn.classList.add('liked')
         if (trackData.is_disliked && dislikeBtn) dislikeBtn.classList.add('disliked')
     }
     updateBottomPlayer(title, artist, isLiked)
-    // Синхронизируем все play-кнопки — ставим "играет"
     syncAllPlayButtons(!player.paused)
-    // Запускаем
+    player.play()
+        .then(() => {
+            if (typeof updatePlayButtons === 'function') updatePlayButtons()
+        })
+        .catch(err => {
+            console.log('Загрузка прервана:', err.message)
+        })
 
-    player.play().catch(err => {
-        console.log('Загрузка прервана:', err.message)
-
-    })
 
 }
 
@@ -162,14 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Функция, которая пробегается по сайту и меняет  играть на стоп у нужной песни
 function updatePlayButtons() {
     const player = document.getElementById('audio-player')
     const allPlayButtons = document.querySelectorAll('.play-icon-btn, .fav-play-btn, .search-play-btn')
-
     allPlayButtons.forEach(btn => {
         const btnTrackId = btn.dataset.trackId ? parseInt(btn.dataset.trackId) : null
-
         if (btnTrackId === currentTrackId && !player.paused) {
             btn.innerHTML = '⏸'
             btn.classList.add('is-playing')
@@ -178,14 +172,18 @@ function updatePlayButtons() {
             btn.classList.remove('is-playing')
         }
     })
-
-    // Нижний и главный плеер
     const bpPlayBtn = document.getElementById('bp-play-btn')
     const mainPlayBtn = document.getElementById('play-btn')
     const icon = player.paused ? '▶' : '⏸'
-    if (bpPlayBtn) bpPlayBtn.textContent = icon
+    if (bpPlayBtn) bpPlayBtn.innerHTML = `<span class="play-icon">${icon}</span>`
     if (mainPlayBtn) mainPlayBtn.textContent = icon
+    const mpPlayIcon = document.querySelector('.mp-play-icon')
+    if (mpPlayIcon) {
+        mpPlayIcon.textContent = icon;
+        mpPlayIcon.style.marginLeft = player.paused ? '3px' : '0px';
+    }
 }
+
 
 
 function likeTrack() {
@@ -193,7 +191,6 @@ function likeTrack() {
     const token = localStorage.getItem('token')
     const likeBtn = document.querySelector('.like-btn')
     const dislikeBtn = document.querySelector('.dislike-btn')
-
     fetch(`http://localhost:3000/tracks/like/${currentTrackId}`, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token }
@@ -290,76 +287,69 @@ function createPlaylist() {
         })
 }
 function showPage(name, btn) {
-    // прячем все страницы
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'))
-    // БЕЗОПАСНЫЙ ПОКАЗ: Проверяем, существует ли страница в HTML
-    const targetPage = document.getElementById('page-' + name)
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+    const targetPage = document.getElementById('page-' + name);
     if (targetPage) {
-        targetPage.classList.add('active-page')
+        targetPage.classList.add('active-page');
     } else {
-        console.error(`Ошибка: Страница с id="page-${name}" не найдена в HTML!`)
+        console.error(`Ошибка: Страница с id="page-${name}" не найдена в HTML!`);
+        return;
     }
-    // показываем нужную
-    document.getElementById('page-' + name).classList.add('active-page')
-    // убираем active со всех кнопок меню
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
-    // ставим active на нажатую кнопку
-    if (btn) btn.classList.add('active')
-    //добавили текущую страницу
-    localStorage.setItem('currentPage', name)
-    // загружаем данные для нужной страницы
-    // прячем плеер на странице настроек
-    const rightColumn = document.querySelector('.right-column')
-    const bottomPlayer = document.getElementById('bottom-player-bar')
-    // УПРАВЛЕНИЕ НИЖНИМ ПЛЕЕРОМ 
-    // Показываем нижний плеер ТОЛЬКО на странице favorites, на остальных — скрываем
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    localStorage.setItem('currentPage', name);
+    const rightColumn = document.querySelector('.right-column');
+    const bottomPlayer = document.getElementById('bottom-player-bar');
     if (bottomPlayer) {
-        if (name === 'favorites') {
-            bottomPlayer.style.display = 'flex'
+        const isMobile = window.innerWidth <= 479;
+
+        if (isMobile) {
+            if (name === 'settings' || name === 'wave') {
+                bottomPlayer.style.display = 'none';
+            } else {
+                bottomPlayer.style.display = 'flex';
+            }
         } else {
-            bottomPlayer.style.display = 'none'
+            if (name === 'favorites') {
+                bottomPlayer.style.display = 'flex';
+            } else {
+                bottomPlayer.style.display = 'none';
+            }
         }
     }
-    if (name === 'settings') {
-        rightColumn.style.display = 'none'
-    } else {
-        rightColumn.style.display = 'flex'
+    if (rightColumn) {
+        if (name === 'artists' || name === 'artist' || name === 'settings' || name === 'favorites' || name === 'wave') {
+            rightColumn.style.display = 'none';
+        } else {
+            rightColumn.style.display = 'flex';
+        }
     }
-    if (name === 'music') {
-        loadTracks()
-    }
-    if (name === 'playlists') {
-        loadPlaylists()
-    }
-    if (name === 'artists') {
-    loadArtists()
-    }
-    // плеер прячем как в настройках
-    if (name === 'artists' || name === 'artist' || name === 'settings' || name === 'favorites' || name === 'wave') {
-        rightColumn.style.display = 'none'
-    } else {
-        rightColumn.style.display = 'flex'
-    }
-    if (name === 'favorites') {
-    loadFavorites()
-    }
-    if (name === 'settings') {
-        loadProfile()
-    }
+    if (name === 'music') loadTracks();
+    if (name === 'playlists') loadPlaylists();
+    if (name === 'artists') loadArtists();
+    if (name === 'favorites') loadFavorites();
+    if (name === 'settings') loadProfile();
+    if (name === 'home') loadHomePage();
     if (name === 'search') {
-    const token = localStorage.getItem('token')
-    fetch('http://localhost:3000/tracks/search', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    })
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:3000/tracks/search', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
         .then(res => res.json())
-        .then(tracks => { tracksList = tracks })
+        .then(tracks => { tracksList = tracks; });
+    }  
+    const mobilePlayer = document.getElementById('mobile-player-bar');
+    if (mobilePlayer && window.innerWidth <= 479) {
+        if (name === 'settings' || name === 'wave') {
+            mobilePlayer.style.display = 'none !important';
+        } else {
+            mobilePlayer.style.display = 'flex !important';
+        }
     }
-    if (name === 'home') {
-    loadHomePage()
-    }
-    if (name === 'wave') {
-    }
+
 }
+
+
 //функция выхода 
 function logout() {
     localStorage.removeItem('token')
@@ -682,6 +672,10 @@ function startBlobs(canvas) {
 
     let time = 0
     function draw() {
+          if (!dataArray || dataArray.length === 0 || typeof dataArray[0] === 'undefined') {
+        requestAnimationFrame(draw);
+        return;
+    }
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         // белый фон
         ctx.fillStyle = '#ffffff'
@@ -799,24 +793,45 @@ function seekAudio(event) {
     const percent = (event.clientX - rect.left) / rect.width
     audio.currentTime = percent * audio.duration
 }
-//Мы объявили вверху уже
-// // список треков для переключения
-// let tracksList = []
-// let currentTrackIndex = 0
 
+function nextTrack() {
+    if (typeof tracksList === 'undefined' || !tracksList || tracksList.length === 0) {
+        console.error('Список треков tracksList пуст!');
+        return;
+    }
+    const player = document.getElementById('audio-player');
+    if (player) {
+        player.pause();
+        player.currentTime = 0;
+    }
+    if (typeof currentTrackIndex === 'undefined' || currentTrackIndex === -1) currentTrackIndex = 0;
+    currentTrackIndex = (currentTrackIndex + 1) % tracksList.length;
+    const track = tracksList[currentTrackIndex];
+    if (track) {
+        playTrack(track.filename, track.title, track.artist, track.id, track.cover);
+        if (typeof updatePlayButtons === 'function') updatePlayButtons();
+    }
+}
 
 function prevTrack() {
-    if (tracksList.length === 0) return
-    currentTrackIndex = (currentTrackIndex - 1 + tracksList.length) % tracksList.length
-    const track = tracksList[currentTrackIndex]
-    playTrack(track.filename, track.title, track.artist, track.id, track.cover)
+    if (typeof tracksList === 'undefined' || !tracksList || tracksList.length === 0) return;
+    const player = document.getElementById('audio-player');
+    if (player) {
+        player.pause();
+        player.currentTime = 0;
+    }
+    if (typeof currentTrackIndex === 'undefined' || currentTrackIndex === -1) currentTrackIndex = 0;
+    currentTrackIndex = (currentTrackIndex - 1 + tracksList.length) % tracksList.length;
+    const track = tracksList[currentTrackIndex];
+    if (track) {
+        playTrack(track.filename, track.title, track.artist, track.id, track.cover);
+        
+        if (typeof updatePlayButtons === 'function') updatePlayButtons();
+    }
 }
-function nextTrack() {
-    if (tracksList.length === 0) return
-    currentTrackIndex = (currentTrackIndex + 1) % tracksList.length
-    const track = tracksList[currentTrackIndex]
-    playTrack(track.filename, track.title, track.artist, track.id, track.cover)
-}
+
+
+
 //Для звездочек в плеере(rating)
 let currentRating = 0
 function toggleStars() {
@@ -1389,6 +1404,13 @@ async function loadWave() {
         const res = await fetch('http://localhost:3000/tracks/wave', {
             headers: { 'Authorization': 'Bearer ' + token }
         })
+        if (res.status === 401 || res.status === 403) {
+            alert('Ваша сессия истекла. Пожалуйста, войдите в аккаунт заново!')
+            return
+        }
+        if (!res.ok) {
+            throw new Error('Ошибка сервера')
+        }
         waveTracks = await res.json()
         waveIndex = 0
         
@@ -1396,29 +1418,20 @@ async function loadWave() {
             alert('Нет треков для волны. Загрузите хотя бы несколько треков')
             return
         }
-        
-        // Загружаем первый трек
         loadWaveTrack(waveIndex)
     } catch (err) {
         console.error('Ошибка загрузки волны:', err)
-        alert('Ошибка загрузки волны')
+        alert('Не удалось загрузить Мою Волну. Проверьте соединение с сервером.')
     }
 }
 
-// Загрузка трека из волны
-// Загрузка трека из волны
 function loadWaveTrack(index) {
     if (index < 0 || index >= waveTracks.length) return
-    
     waveIndex = index
     const track = waveTracks[waveIndex]
-    
-    // Обновляем UI
     document.getElementById('wave-title').textContent = track.title
     document.getElementById('wave-artist').textContent = track.artist
-    
     const cover = document.getElementById('wave-cover')
-    // ДОБАВИЛИ ПРОВЕРКУ: если элемент cover существует на странице, то обновляем его
     if (cover) {
         if (track.cover && track.cover !== 'null') {
             cover.src = `http://localhost:3000/uploads/covers/${track.cover}`
@@ -1426,23 +1439,18 @@ function loadWaveTrack(index) {
             cover.src = 'images/penguin-logo.png'
         }
     }
-    
-    // Создаём отдельный audio элемент для волны
     if (!waveAudio) {
         waveAudio = new Audio()
         waveAudio.addEventListener('timeupdate', updateWaveProgress)
         waveAudio.addEventListener('ended', waveNext)
     }
-    
     waveAudio.src = `http://localhost:3000/uploads/${track.filename}`
-    // не автозапускаем — пользователь сам нажмёт play
     waveAudio.play()
     .then(() => {
         waveIsPlaying = true
         document.getElementById('wave-play-btn').textContent = '⏸'
     })
     .catch(err => {
-        // браузер заблокировал автовоспроизведение
         waveIsPlaying = false
         document.getElementById('wave-play-btn').textContent = '▶'
         console.log('Автовоспроизведение заблокировано:', err)
@@ -1454,11 +1462,9 @@ function loadWaveTrack(index) {
 let waveIsPlaying = false
 function waveTogglePlay() {
     if (waveTracks.length === 0) {
-        // первый раз — загружаем треки и сразу играем
         loadWave()
         return
     }
-    
     const btn = document.getElementById('wave-play-btn')
     if (waveIsPlaying) {
         waveAudio.pause()
@@ -1476,22 +1482,16 @@ function waveNext() {
     waveIndex = (waveIndex + 1) % waveTracks.length
     loadWaveTrack(waveIndex)
 }
-
-// Предыдущий трек
 function wavePrev() {
     if (waveTracks.length === 0) return
     waveIndex = (waveIndex - 1 + waveTracks.length) % waveTracks.length
     loadWaveTrack(waveIndex)
 }
-
-// Обновление прогресса
 function updateWaveProgress() {
     if (!waveAudio) return
-    
     const current = waveAudio.currentTime
     const total = waveAudio.duration || 0
     const percent = total ? (current / total) * 100 : 0
-    
     document.getElementById('wave-progress').value = percent
     document.getElementById('wave-current-time').textContent = formatTime(current)
     document.getElementById('wave-total-time').textContent = formatTime(total)
@@ -1536,14 +1536,7 @@ function waveDislike() {
     })
 }
 
-// При переходе на страницу волны - загружаем треки
-const originalShowPage = showPage
-showPage = function(name, btn) {
-    originalShowPage(name, btn)
-    if (name === 'wave') {
-        loadWave()
-    }
-}
+
 function waveSetVolume(value) {
     if (waveAudio) waveAudio.volume = value / 100
 }
@@ -1586,3 +1579,87 @@ function updateCarousel() {
         carousel.appendChild(div)
     })
 }
+
+const originalShowPage = showPage;
+showPage = function(name, btn) {
+    originalShowPage(name, btn);
+    if (name === 'wave') {
+        loadWave();
+    }
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+  const toggleBtn = document.getElementById("mobile-menu-toggle");
+  const sidebar = document.querySelector(".sidebar");
+
+  if (toggleBtn && sidebar) {
+    toggleBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      sidebar.classList.toggle("active");
+      // Меняем плюс на крестик при открытии
+      toggleBtn.textContent = sidebar.classList.contains("active") ? "×" : "+";
+    });
+
+    // Закрываем меню, если кликнули в любое другое место экрана
+    document.addEventListener("click", function(e) {
+      if (!sidebar.contains(e.target) && e.target !== toggleBtn) {
+        sidebar.classList.remove("active");
+        toggleBtn.textContent = "+";
+      }
+    });
+  }
+});
+
+
+function resetPageScroll() {
+    const pages = document.querySelectorAll('.page');
+    const centerColumn = document.querySelector('.center-column');
+    const mainWrapper = document.querySelector('.main-wrapper');
+    if (pages.length > 0) {
+        pages.forEach(page => {
+            if (page.classList.contains('active-page')) {
+                page.scrollTop = 0;
+            }
+        });
+    }
+    if (centerColumn) {
+        centerColumn.scrollTop = 0;
+    }
+    if (mainWrapper) {
+        mainWrapper.scrollTop = 0;
+    }
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+}
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(resetPageScroll, 50);
+});
+document.addEventListener('click', function(e) {
+    const navBtn = e.target.closest('.nav-btn, .mobile-header .nav-btn');
+    if (navBtn) {
+        setTimeout(resetPageScroll, 100);
+    }
+});
+window.addEventListener('hashchange', function() {
+    setTimeout(resetPageScroll, 100);
+});
+(function() {
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const target = mutation.target;
+                if (target.classList && target.classList.contains('active-page')) {
+                    setTimeout(resetPageScroll, 50);
+                }
+            }
+        });
+    });
+    document.querySelectorAll('.page').forEach(page => {
+        observer.observe(page, { attributes: true });
+    });
+})();
+
+
+

@@ -94,7 +94,6 @@ router.post('/change-password', async (req, res) => {
 
     const jwt = require('jsonwebtoken')
     const SECRET = process.env.SECRET
-
     try {
         const decoded = jwt.verify(token, SECRET)
         const user = db.prepare('SELECT * FROM users WHERE id = ?').get(decoded.id)
