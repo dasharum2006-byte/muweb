@@ -17,7 +17,7 @@
  Адаптивная вёрстка (десктоп / планшет / телефон).
  Технологии
 Frontend
-HTML, CSS, Vanilla JavaScript (без фреймворков)
+HTML, CSS, Vanilla JavaScript 
 Fetch API для запросов к бэкенду
 Backend
 Node.js (https://nodejs.org/) + Express 5 (https://expressjs.com/)
@@ -105,9 +105,5 @@ GET	/artists/:id/tracks	Треки артиста
 Защищённые маршруты ожидают заголовок Authorization: Bearer <токен>.
  База данных
 SQLite, основные таблицы: users, tracks, playlists, playlist_tracks, ratings, user_library, artists, track_likes, disliked_tracks. Создаются автоматически в mubackend/db/database.js.
-Заметки
-node_modules/, uploads/ и db/music.db не попадают в репозиторий (см. .gitignore).
-Файл .env с секретом не коммить — добавь его в .gitignore, если ещё не добавлен.
-Адрес бэкенда http://localhost:3000 сейчас прописан в коде фронтенда напрямую — при деплое его нужно будет заменить.
 Статус
 Проект в активной разработке 
